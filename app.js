@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   carregarTurmasCadastro();
   verificarSessao();
 
+  // Formulário de Login
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Formulário de Cadastro
   const registerForm = document.getElementById('register-form');
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
@@ -73,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
 
+      // 1. Cadastra o usuário no Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -84,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (authData.user) {
+        // 2. Insere na tabela profiles como 'pendente'
         const { error: profileError } = await supabase.from('profiles').insert([
           {
             id: authData.user.id,
@@ -97,7 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (profileError) {
           alert('Erro ao guardar perfil: ' + profileError.message);
         } else {
-          alert('Registo efetuado com sucesso! Aguarda a aprovação do teu professor.');
+          alert('Registo efetuado com sucesso! Aguarda a aprovação do teu professor para acederes.');
+          
+          // Desconecta sessão temporária do cadastro
+          await supabase.auth.signOut();
+
           if (typeof toggleAuthMode === 'function') {
             toggleAuthMode('login');
           }
