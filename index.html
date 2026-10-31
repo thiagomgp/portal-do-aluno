@@ -76,12 +76,12 @@
     <!-- PAINEL PRINCIPAL DO ALUNO (SÓ APARECE APÓS LOGIN APROVADO) -->
     <div id="app-content" class="hidden space-y-6">
       
-      <!-- Navegação das Abas -->
+      <!-- Navegação das Abas (COM IDs PARA O DESTAQUE EM VERDE FUNCIONAR) -->
       <nav class="flex gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
-        <button onclick="navigate('inicio')" class="px-5 py-2 bg-emerald-600 text-slate-950 font-bold rounded-lg transition">Início (Mural)</button>
-        <button onclick="navigate('disciplinas')" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg transition">Disciplinas</button>
-        <button onclick="navigate('jogos')" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg transition">Jogos</button>
-        <button onclick="navigate('perfil')" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg transition">Perfil</button>
+        <button id="nav-btn-inicio" onclick="navigate('inicio')" class="px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-slate-950 shadow-md transition">Início (Mural)</button>
+        <button id="nav-btn-disciplinas" onclick="navigate('disciplinas')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Disciplinas</button>
+        <button id="nav-btn-jogos" onclick="navigate('jogos')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Jogos</button>
+        <button id="nav-btn-perfil" onclick="navigate('perfil')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Perfil</button>
       </nav>
 
       <!-- Conteúdo das Abas -->
