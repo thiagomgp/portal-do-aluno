@@ -152,12 +152,15 @@ async function verificarEstadoEEntrar(user) {
   const userInfo = document.getElementById('user-info');
   if (userInfo) {
     const nomeTurma = profile.turmas ? profile.turmas.nome : 'Sem Turma';
-    userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${profile.apelido \vert{}\vert{} profile.nome_completo}</strong> (${nomeTurma})`;
+    userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${profile.apelido || profile.nome_completo}</strong> (${nomeTurma})`;
   }
 
   carregarAvisos();
 }
 
+// ==========================================
+// 4. LÓGICA DO MURAL DE AVISOS (INÍCIO)
+// ==========================================
 async function carregarAvisos() {
   if (!alunoAtual) return;
 
@@ -186,6 +189,9 @@ async function carregarAvisos() {
   `).join('');
 }
 
+// ==========================================
+// 5. LÓGICA DAS DISCIPLINAS (BNCC)
+// ==========================================
 async function carregarDisciplinas() {
   if (!alunoAtual) return;
 
@@ -225,6 +231,9 @@ function abrirConteudo(disciplinaId, tipo) {
   alert(`A abrir os conteúdos do tipo [${tipo.toUpperCase()}] para a disciplina.`);
 }
 
+// ==========================================
+// 6. LÓGICA DOS JOGOS PEDAGÓGICOS
+// ==========================================
 async function carregarJogos() {
   const { data: jogos, error } = await supabase.from('jogos').select('*');
   const container = document.getElementById('lista-jogos');
@@ -246,6 +255,9 @@ async function carregarJogos() {
   `).join('');
 }
 
+// ==========================================
+// 7. LÓGICA DO PERFIL DO ALUNO
+// ==========================================
 async function renderizarPerfil() {
   if (!alunoAtual) return;
 
@@ -274,4 +286,31 @@ async function renderizarPerfil() {
     </div>
 
     <div class="border-t border-slate-800 pt-4">
-      <h4 class="font-semibold text-emerald-40
+      <h4 class="font-semibold text-emerald-400 text-sm mb-2">Os Meus Méritos e Conquistas</h4>
+      <div class="flex flex-wrap gap-2">
+        ${meritos && meritos.length > 0 
+          ? meritos.map(m => `<span class="bg-emerald-950 border border-emerald-800 text-emerald-300 text-xs px-3 py-1.5 rounded-full font-medium">🏅 ${m.titulo}</span>`).join('')
+          : '<p class="text-xs text-slate-500">Ainda não tens méritos atribuídos pelo teu professor.</p>'
+        }
+      </div>
+    </div>
+  `;
+}
+
+async function atualizarApelido() {
+  const novoApelido = document.getElementById('novo-apelido').value;
+  if (!novoApelido || !alunoAtual) return;
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ apelido: novoApelido })
+    .eq('id', alunoAtual.id);
+
+  if (error) {
+    alert('Erro ao atualizar apelido: ' + error.message);
+  } else {
+    alert('Apelido atualizado com sucesso!');
+    alunoAtual.apelido = novoApelido;
+    renderizarPerfil();
+  }
+}
