@@ -21,7 +21,7 @@
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased">
 
     <script>
-        // Supabase do Portal Principal
+        // Configuração do Supabase Principal
         const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -30,7 +30,7 @@
         const MODULE_ID = "intro_hw_sw";
         const TOTAL_STEPS = 4;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const urlId = urlParams.get('id');
             const urlNome = urlParams.get('nome');
@@ -54,6 +54,10 @@
 
             document.getElementById('student-name-display').innerText = currentStudent.nome;
             document.getElementById('student-class-display').innerText = currentStudent.turma;
+
+            // CARREGA O PROGRESSO ANTERIOR DO ALUNO SE EXISTIR
+            await carregarProgressoExistente();
+            startTimer();
         });
     </script>
 
@@ -232,12 +236,38 @@
         let timerInterval = null;
         let currentItemIndex = 0;
 
-        window.onload = function() {
-            startTimer();
-            renderStep(0);
-        };
+        async function carregarProgressoExistente() {
+            if (!currentStudent || !currentStudent.id) {
+                renderStep(0);
+                return;
+            }
+
+            try {
+                const { data: progresso, error } = await _supabase
+                    .from('se_progresso')
+                    .select('*')
+                    .eq('aluno_id', currentStudent.id)
+                    .eq('modulo_id', MODULE_ID)
+                    .maybeSingle();
+
+                if (progresso && progresso.etapa_atual > 0) {
+                    currentStepIndex = Math.min(progresso.etapa_atual, TOTAL_STEPS - 1);
+                    secondsElapsed = progresso.tempo_segundos || 0;
+                    totalXP = currentStepIndex * 25;
+
+                    document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+                    renderStep(currentStepIndex);
+                } else {
+                    renderStep(0);
+                }
+            } catch (err) {
+                console.error("Erro ao verificar progresso:", err);
+                renderStep(0);
+            }
+        }
 
         function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 secondsElapsed++;
                 const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
@@ -262,7 +292,7 @@
             document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-info"></i> Responda aos itens ao lado.`;
 
             loadCurrentItem();
-            saveProgressToSupabase(index); // GRAVA INÍCIO DA ETAPA
+            saveProgressToSupabase(index); // SALVA AUTOMATICAMENTE NO BANCO
         }
 
         function loadCurrentItem() {
@@ -319,7 +349,7 @@
             document.getElementById('step-feedback').className = "text-xs font-medium flex items-center gap-1.5 text-emerald-400";
             document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-check"></i> Desafio concluído! Clique ao lado para avançar.`;
             
-            saveProgressToSupabase(currentStepIndex + 1); // GRAVA CONCLUSÃO DO PASSO
+            saveProgressToSupabase(currentStepIndex + 1);
         }
 
         async function nextStep() {
@@ -330,11 +360,10 @@
                 clearInterval(timerInterval);
                 document.getElementById('top-progress-bar').style.width = '100%';
                 document.getElementById('completion-modal').classList.remove('hidden');
-                await saveProgressToSupabase(TOTAL_STEPS); // GRAVA CONCLUSÃO DO MÓDULO
+                await saveProgressToSupabase(TOTAL_STEPS);
             }
         }
 
-        // FUNÇÃO DE GRAVAÇÃO DIRETA NO SUPABASE
         async function saveProgressToSupabase(stepNumber) {
             if (!currentStudent || !currentStudent.id) return;
             try {
