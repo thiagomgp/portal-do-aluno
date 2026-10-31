@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Professor - Portal do Aluno</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+
+  <nav class="p-4 bg-slate-800 flex justify-between items-center border-b border-indigo-500/30">
+    <h1 class="text-xl font-bold text-indigo-400">Painel do Professor</h1>
+    <span class="text-sm text-slate-400">Gestão e Acompanhamento</span>
+  </nav>
+
+  <main class="container mx-auto p-6 space-y-6">
+    <!-- Secção de Gestão de Alunos -->
+    <section class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+      <h2 class="text-lg font-bold text-indigo-400 mb-4">Lista de Alunos</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-700 text-slate-400 text-sm">
+              <th class="p-2">Nome</th>
+              <th class="p-2">Turma</th>
+              <th class="p-2">Status</th>
+              <th class="p-2 text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-alunos" class="divide-y divide-slate-700">
+            <!-- Preenchido via JS com alunos registados -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Secção de Envio de Avisos -->
+    <section class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+      <h2 class="text-lg font-bold text-indigo-400 mb-4">Enviar Novo Aviso</h2>
+      <form id="form-aviso" class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">Título do Aviso</label>
+          <input type="text" id="aviso-titulo" class="w-full p-2 bg-slate-900 rounded border border-slate-700 text-white" required>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Mensagem</label>
+          <textarea id="aviso-mensagem" class="w-full p-2 bg-slate-900 rounded border border-slate-700 text-white" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded font-bold transition">Publicar Aviso</button>
+      </form>
+    </section>
+  </main>
+
+</body>
+</html>
