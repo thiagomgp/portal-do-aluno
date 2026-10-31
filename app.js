@@ -28,91 +28,8 @@ const AVATARES_PREDEFINIDOS = [
 ];
 
 // ==========================================
-// 2. NAVEGAÇÃO ENTRE ABAS
+// 2. FUNÇÕES DE AUTENTICAÇÃO E SESSÃO
 // ==========================================
-function navigate(tabName) {
-  const tabs = ['inicio', 'disciplinas', 'jogos', 'perfil'];
-  
-  tabs.forEach(tab => {
-    const elContent = document.getElementById(`tab-${tab}`);
-    const elBtn = document.getElementById(`nav-btn-${tab}`);
-
-    if (elContent) {
-      if (tab === tabName) {
-        elContent.classList.remove('hidden');
-      } else {
-        elContent.classList.add('hidden');
-      }
-    }
-
-    if (elBtn) {
-      if (tab === tabName) {
-        elBtn.className = 'px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-slate-950 shadow-md transition';
-      } else {
-        elBtn.className = 'px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition';
-      }
-    }
-  });
-
-  if (tabName === 'disciplinas') carregarDisciplinas();
-  if (tabName === 'jogos') carregarJogos();
-  if (tabName === 'perfil') renderizarPerfil();
-}
-
-// ==========================================
-// 3. INICIALIZAÇÃO & AUTENTICAÇÃO
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-  carregarTurmasCadastro();
-  verificarSessao();
-
-  const registerForm = document.getElementById('register-form');
-  if (registerForm) {
-    registerForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const nome = document.getElementById('reg-nome').value;
-      const turmaId = document.getElementById('reg-turma').value;
-      const email = document.getElementById('reg-email').value;
-      const password = document.getElementById('reg-password').value;
-
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-      });
-
-      if (authError) {
-        alert('Erro ao criar conta: ' + authError.message);
-        return;
-      }
-
-      if (authData.user) {
-        const { error: profileError } = await supabase.from('profiles').insert([
-          {
-            id: authData.user.id,
-            nome_completo: nome,
-            turma_id: turmaId,
-            role: 'aluno',
-            status: 'pendente'
-          }
-        ]);
-
-        if (profileError) {
-          alert('Erro ao guardar perfil: ' + profileError.message);
-        } else {
-          alert('Registo efetuado com sucesso! Aguarda a aprovação do teu professor para acederes.');
-          await supabase.auth.signOut();
-
-          if (typeof toggleAuthMode === 'function') {
-            toggleAuthMode('login');
-          }
-          registerForm.reset();
-        }
-      }
-    });
-  }
-});
-
 async function realizarLogin(e) {
   if (e) {
     e.preventDefault();
@@ -229,6 +146,38 @@ function atualizarCabecalhoUsuario(nomeTurma = 'Sem Turma') {
   if (userInfo && alunoAtual) {
     userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${alunoAtual.apelido || alunoAtual.nome_completo}</strong> (${nomeTurma})`;
   }
+}
+
+// ==========================================
+// 3. NAVEGAÇÃO ENTRE ABAS
+// ==========================================
+function navigate(tabName) {
+  const tabs = ['inicio', 'disciplinas', 'jogos', 'perfil'];
+  
+  tabs.forEach(tab => {
+    const elContent = document.getElementById(`tab-${tab}`);
+    const elBtn = document.getElementById(`nav-btn-${tab}`);
+
+    if (elContent) {
+      if (tab === tabName) {
+        elContent.classList.remove('hidden');
+      } else {
+        elContent.classList.add('hidden');
+      }
+    }
+
+    if (elBtn) {
+      if (tab === tabName) {
+        elBtn.className = 'px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-slate-950 shadow-md transition';
+      } else {
+        elBtn.className = 'px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition';
+      }
+    }
+  });
+
+  if (tabName === 'disciplinas') carregarDisciplinas();
+  if (tabName === 'jogos') carregarJogos();
+  if (tabName === 'perfil') renderizarPerfil();
 }
 
 // ==========================================
@@ -493,3 +442,57 @@ async function alterarSenha() {
     document.getElementById('nova-senha').value = '';
   }
 }
+
+// ==========================================
+// 8. INICIALIZAÇÃO APÓS CARREGAR O DOM
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  carregarTurmasCadastro();
+  verificarSessao();
+
+  const registerForm = document.getElementById('register-form');
+  if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nome = document.getElementById('reg-nome').value;
+      const turmaId = document.getElementById('reg-turma').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+      });
+
+      if (authError) {
+        alert('Erro ao criar conta: ' + authError.message);
+        return;
+      }
+
+      if (authData.user) {
+        const { error: profileError } = await supabase.from('profiles').insert([
+          {
+            id: authData.user.id,
+            nome_completo: nome,
+            turma_id: turmaId,
+            role: 'aluno',
+            status: 'pendente'
+          }
+        ]);
+
+        if (profileError) {
+          alert('Erro ao guardar perfil: ' + profileError.message);
+        } else {
+          alert('Registo efetuado com sucesso! Aguarda a aprovação do teu professor para acederes.');
+          await supabase.auth.signOut();
+
+          if (typeof toggleAuthMode === 'function') {
+            toggleAuthMode('login');
+          }
+          registerForm.reset();
+        }
+      }
+    });
+  }
+});
