@@ -30,12 +30,12 @@
       
       <!-- Abas para alternar entre Login e Cadastro -->
       <div class="flex border-b border-slate-800 mb-6">
-        <button id="btn-tab-login" onclick="toggleAuthMode('login')" class="flex-1 py-2 font-semibold text-emerald-400 border-b-2 border-emerald-500 transition">Entrar</button>
-        <button id="btn-tab-register" onclick="toggleAuthMode('register')" class="flex-1 py-2 font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition">Criar Conta</button>
+        <button id="btn-tab-login" type="button" onclick="toggleAuthMode('login')" class="flex-1 py-2 font-semibold text-emerald-400 border-b-2 border-emerald-500 transition">Entrar</button>
+        <button id="btn-tab-register" type="button" onclick="toggleAuthMode('register')" class="flex-1 py-2 font-semibold text-slate-400 border-b-2 border-transparent hover:text-slate-200 transition">Criar Conta</button>
       </div>
 
       <!-- FORMULÁRIO DE LOGIN -->
-      <form id="login-form" class="space-y-4">
+      <form id="login-form" onsubmit="realizarLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">E-mail</label>
           <input type="email" id="login-email" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-emerald-500 transition" required>
@@ -76,12 +76,12 @@
     <!-- PAINEL PRINCIPAL DO ALUNO (SÓ APARECE APÓS LOGIN APROVADO) -->
     <div id="app-content" class="hidden space-y-6">
       
-      <!-- Navegação das Abas (COM IDs PARA O DESTAQUE EM VERDE FUNCIONAR) -->
+      <!-- Navegação das Abas -->
       <nav class="flex gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
-        <button id="nav-btn-inicio" onclick="navigate('inicio')" class="px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-slate-950 shadow-md transition">Início (Mural)</button>
-        <button id="nav-btn-disciplinas" onclick="navigate('disciplinas')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Disciplinas</button>
-        <button id="nav-btn-jogos" onclick="navigate('jogos')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Jogos</button>
-        <button id="nav-btn-perfil" onclick="navigate('perfil')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Perfil</button>
+        <button id="nav-btn-inicio" type="button" onclick="navigate('inicio')" class="px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-slate-950 shadow-md transition">Início (Mural)</button>
+        <button id="nav-btn-disciplinas" type="button" onclick="navigate('disciplinas')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Disciplinas</button>
+        <button id="nav-btn-jogos" type="button" onclick="navigate('jogos')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Jogos</button>
+        <button id="nav-btn-perfil" type="button" onclick="navigate('perfil')" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition">Perfil</button>
       </nav>
 
       <!-- Conteúdo das Abas -->
