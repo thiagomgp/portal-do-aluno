@@ -20,25 +20,23 @@
 
   <main class="container mx-auto p-6 space-y-8">
 
-    <!-- SECÇÃO 1: GESTÃO DE TURMAS (CRIAR E EXCLUIR) -->
+    <!-- SECÇÃO 1: GESTÃO DE TURMAS -->
     <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
       <h2 class="text-lg font-bold text-indigo-400 mb-4 flex items-center gap-2">
         🏫 Gerenciar Turmas
       </h2>
       
-      <!-- Formulário para Criar Turma -->
       <form id="form-criar-turma" class="flex gap-3 mb-6">
         <input type="text" id="nome-turma" class="flex-1 p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500" placeholder="Ex: Turma 81, 101, 201..." required>
         <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-lg transition">Criar Turma</button>
       </form>
 
-      <!-- Lista de Turmas Existentes -->
       <div id="lista-turmas" class="flex flex-wrap gap-3">
-        <!-- Turmas serão carregadas aqui -->
+        <!-- Turmas aqui -->
       </div>
     </section>
 
-    <!-- SECÇÃO 2: GESTÃO E APROVAÇÃO DE ALUNOS -->
+    <!-- SECÇÃO 2: GESTÃO, TURMAS E SENHAS DE ALUNOS -->
     <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-bold text-indigo-400">🎓 Alunos Registrados</h2>
@@ -52,7 +50,7 @@
               <th class="p-3">Nome Completo</th>
               <th class="p-3">Turma</th>
               <th class="p-3">Status</th>
-              <th class="p-3 text-right">Ações</th>
+              <th class="p-3 text-right">Ações & Gestão</th>
             </tr>
           </thead>
           <tbody id="tabela-alunos" class="divide-y divide-slate-800 text-sm">
@@ -103,6 +101,8 @@
     }
     var supabase = window.supabaseClient;
 
+    let listaTurmasGlobal = [];
+
     document.addEventListener('DOMContentLoaded', () => {
       carregarTurmas();
       carregarAlunos();
@@ -145,7 +145,7 @@
       });
     });
 
-    // Carregar Turmas e exibir botões de exclusão
+    // Carregar Turmas
     async function carregarTurmas() {
       const { data: turmas, error } = await supabase.from('turmas').select('*').order('nome');
       const container = document.getElementById('lista-turmas');
@@ -154,8 +154,11 @@
       if (error || !turmas || turmas.length === 0) {
         container.innerHTML = '<p class="text-xs text-slate-500">Nenhuma turma cadastrada ainda.</p>';
         selectAviso.innerHTML = '<option value="">Crie uma turma primeiro...</option>';
+        listaTurmasGlobal = [];
         return;
       }
+
+      listaTurmasGlobal = turmas;
 
       container.innerHTML = turmas.map(t => `
         <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg">
@@ -165,6 +168,9 @@
       `).join('');
 
       selectAviso.innerHTML = turmas.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+      
+      // Recarrega lista de alunos para atualizar selects de turma
+      carregarAlunos();
     }
 
     // Excluir Turma
@@ -179,11 +185,10 @@
       }
     }
 
-    // Carregar Lista de Alunos para Aprovação / Gestão
+    // Carregar Lista de Alunos com opção de Alterar Turma e Redefinir Senha
     async function carregarAlunos() {
       const tabela = document.getElementById('tabela-alunos');
       
-      // 1. Busca os alunos sem JOIN complexo
       const { data: alunos, error: errorAlunos } = await supabase
         .from('profiles')
         .select('*')
@@ -195,29 +200,48 @@
         return;
       }
 
-      // 2. Busca turmas para mapeamento visual de nomes
-      const { data: turmas } = await supabase.from('turmas').select('id, nome');
-      const mapaTurmas = {};
-      if (turmas) {
-        turmas.forEach(t => mapaTurmas[t.id] = t.nome);
-      }
+      tabela.innerHTML = alunos.map(a => {
+        // Opções de Turma
+        const opcoesTurma = listaTurmasGlobal.map(t => `
+          <option value="${t.id}" ${t.id === a.turma_id ? 'selected' : ''}>${t.nome}</option>
+        `).join('');
 
-      // 3. Renderiza os alunos registrados
-      tabela.innerHTML = alunos.map(a => `
-        <tr>
-          <td class="p-3 font-medium text-slate-200">${a.nome_completo}</td>
-          <td class="p-3 text-slate-400">${mapaTurmas[a.turma_id] || 'Sem Turma'}</td>
-          <td class="p-3">
-            <span class="px-2 py-1 rounded text-xs font-bold ${a.status === 'aprovado' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
-              ${a.status || 'pendente'}
-            </span>
-          </td>
-          <td class="p-3 text-right space-x-2">
-            ${a.status !== 'aprovado' ? `<button onclick="alterarStatusAluno('${a.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded transition">Aprovar</button>` : ''}
-            <button onclick="excluirAluno('${a.id}')" class="bg-rose-950 hover:bg-rose-900 text-rose-400 border border-rose-800 text-xs px-2.5 py-1 rounded transition">Excluir</button>
-          </td>
-        </tr>
-      `).join('');
+        return `
+          <tr>
+            <td class="p-3 font-medium text-slate-200">${a.nome_completo}</td>
+            <td class="p-3">
+              <select onchange="alterarTurmaAluno('${a.id}', this.value)" class="bg-slate-950 border border-slate-800 text-xs rounded p-1 text-slate-300 focus:outline-none focus:border-indigo-500">
+                <option value="">Sem Turma</option>
+                ${opcoesTurma}
+              </select>
+            </td>
+            <td class="p-3">
+              <span class="px-2 py-1 rounded text-xs font-bold ${a.status === 'aprovado' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
+                ${a.status || 'pendente'}
+              </span>
+            </td>
+            <td class="p-3 text-right space-x-2">
+              ${a.status !== 'aprovado' ? `<button onclick="alterarStatusAluno('${a.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded transition">Aprovar</button>` : ''}
+              <button onclick="redefinirSenhaAluno('${a.id}')" class="bg-indigo-950 hover:bg-indigo-900 text-indigo-300 border border-indigo-800 text-xs px-2.5 py-1 rounded transition">Redefinir Senha</button>
+              <button onclick="excluirAluno('${a.id}')" class="bg-rose-950 hover:bg-rose-900 text-rose-400 border border-rose-800 text-xs px-2.5 py-1 rounded transition">Excluir</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Mudar Turma do Aluno
+    async function alterarTurmaAluno(alunoId, novaTurmaId) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ turma_id: novaTurmaId || null })
+        .eq('id', alunoId);
+
+      if (error) {
+        alert('Erro ao alterar turma: ' + error.message);
+      } else {
+        alert('Turma alterada com sucesso!');
+      }
     }
 
     // Aprovar Aluno
@@ -230,14 +254,40 @@
       }
     }
 
-    // Excluir Conta do Aluno
+    // Redefinir Senha do Aluno
+    async function redefinirSenhaAluno(id) {
+      const novaSenha = prompt('Digite a nova senha para este aluno (mínimo 6 caracteres):');
+      if (!novaSenha) return;
+
+      if (novaSenha.length < 6) {
+        alert('A senha deve ter no mínimo 6 caracteres.');
+        return;
+      }
+
+      // Atualiza via requisição à API
+      const { error } = await supabase.rpc('redefinir_senha_aluno', {
+        aluno_id: id,
+        nova_senha: novaSenha
+      });
+
+      if (error) {
+        // Caso a função RPC não esteja criada, usa alert explicativo
+        alert('Para redefinir a senha do aluno, execute a função no SQL Editor do Supabase primeiro.');
+      } else {
+        alert('Senha redefinida com sucesso!');
+      }
+    }
+
+    // Excluir Conta do Aluno (Remoção total)
     async function excluirAluno(id) {
-      if (!confirm('Deseja realmente excluir a conta deste aluno?')) return;
+      if (!confirm('Deseja realmente excluir permanentemente este aluno?')) return;
+
       const { error } = await supabase.from('profiles').delete().eq('id', id);
       if (error) {
         alert('Erro ao excluir aluno: ' + error.message);
       } else {
-        carregarAlunos();
+        alert('Aluno excluído com sucesso!');
+        await carregarAlunos();
       }
     }
   </script>
