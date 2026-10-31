@@ -73,7 +73,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Destino</label>
-            <select id="aviso-tipo" onchange="alternarDestinoAviso()" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white">
+            <select id="aviso-tipo" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white">
               <option value="turma">Toda a Turma</option>
             </select>
           </div>
@@ -98,7 +98,10 @@
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (!window.supabaseClient) {
+      window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    var supabase = window.supabaseClient;
 
     document.addEventListener('DOMContentLoaded', () => {
       carregarTurmas();
