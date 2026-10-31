@@ -15,12 +15,47 @@
       <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></div>
       <h1 class="text-xl font-bold text-indigo-400">Painel do Professor</h1>
     </div>
-    <span class="text-sm text-slate-400">Gestão & Acompanhamento</span>
+    <span class="text-sm text-slate-400">Gestão & Acompanhamento Pedagógico</span>
   </nav>
 
   <main class="container mx-auto p-6 space-y-8">
 
-    <!-- SECÇÃO 1: GESTÃO DE TURMAS -->
+    <!-- SECÇÃO 1: PAINEL DE DESEMPENHO E DESENVOLVIMENTO DOS ALUNOS -->
+    <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+            📊 Acompanhamento de Leituras, Atividades e Provas
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Veja em tempo real a evolução de cada aluno nos módulos interativos e lições.</p>
+        </div>
+        
+        <button onclick="carregarRelatorioProgresso()" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg text-slate-200 transition">
+          🔄 Atualizar Dados
+        </button>
+      </div>
+
+      <!-- Tabela de Relatório de Atividades -->
+      <div class="overflow-x-auto pt-2">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
+              <th class="p-3">Aluno</th>
+              <th class="p-3">Módulo / Lição</th>
+              <th class="p-3">Progresso Teórico</th>
+              <th class="p-3">Tempo Dedicado</th>
+              <th class="p-3">Status do Exercício</th>
+              <th class="p-3 text-right">Último Acesso</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-relatorio-progresso" class="divide-y divide-slate-800 text-sm">
+            <!-- Dados do progresso aqui -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECÇÃO 2: GESTÃO DE TURMAS -->
     <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
       <h2 class="text-lg font-bold text-indigo-400 mb-4 flex items-center gap-2">
         🏫 Gerenciar Turmas
@@ -36,17 +71,16 @@
       </div>
     </section>
 
-    <!-- SECÇÃO 2: GESTÃO E ATRIBUIÇÃO DE DISCIPLINAS (BNCC) -->
+    <!-- SECÇÃO 3: GESTÃO E ATRIBUIÇÃO DE DISCIPLINAS -->
     <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
       <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
         📚 Gestão de Disciplinas & Atribuição a Turmas
       </h2>
 
-      <!-- Criar Disciplina -->
       <form id="form-criar-disciplina" class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
         <div>
           <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Nome da Disciplina</label>
-          <input type="text" id="disc-nome" class="w-full p-2.5 bg-slate-900 rounded border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" placeholder="Ex: Matemática" required>
+          <input type="text" id="disc-nome" class="w-full p-2.5 bg-slate-900 rounded border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" placeholder="Ex: Cultura Digital" required>
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Código BNCC</label>
@@ -58,23 +92,19 @@
         </div>
       </form>
 
-      <!-- Atribuir Disciplina a uma Turma -->
       <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-        <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Vinculação: Atribuir Disciplina à Turma</h3>
+        <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Atribuir Disciplina à Turma</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <select id="select-vincular-turma" class="p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white focus:outline-none">
             <option value="">Selecione a Turma...</option>
           </select>
-
           <select id="select-vincular-disciplina" class="p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white focus:outline-none">
             <option value="">Selecione a Disciplina...</option>
           </select>
-
           <button onclick="vincularDisciplinaATurma()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold p-2.5 rounded text-sm transition">Vincular Disciplina</button>
         </div>
       </div>
 
-      <!-- Resumo de Disciplinas Atribuídas -->
       <div>
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Disciplinas Ativas por Turma</h3>
         <div id="container-turmas-disciplinas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,7 +113,7 @@
       </div>
     </section>
 
-    <!-- SECÇÃO 3: GESTÃO DE ALUNOS -->
+    <!-- SECÇÃO 4: GESTÃO DE ALUNOS -->
     <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-bold text-indigo-400">🎓 Alunos Registrados</h2>
@@ -107,7 +137,7 @@
       </div>
     </section>
 
-    <!-- SECÇÃO 4: ENVIAR AVISO -->
+    <!-- SECÇÃO 5: ENVIAR AVISO -->
     <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
       <h2 class="text-lg font-bold text-indigo-400">📢 Publicar Aviso no Mural</h2>
       <form id="form-aviso" class="space-y-4">
@@ -211,9 +241,57 @@
       await carregarDisciplinas();
       await carregarTurmasEDisciplinas();
       await carregarAlunos();
+      await carregarRelatorioProgresso();
     }
 
-    // Carregar Turmas
+    // RELATÓRIO COMPLETO DE PROGRESSO DO ALUNO
+    async function carregarRelatorioProgresso() {
+      const tabela = document.getElementById('tabela-relatorio-progresso');
+      if (!tabela) return;
+
+      const { data: progressos, error } = await supabase
+        .from('se_progresso')
+        .select('*, profiles(nome_completo, id)')
+        .order('updated_at', { ascending: false });
+
+      if (error || !progressos || progressos.length === 0) {
+        tabela.innerHTML = '<tr><td colspan="6" class="p-4 text-slate-500 text-center">Nenhum progresso de leitura ou atividade registrado até o momento.</td></tr>';
+        return;
+      }
+
+      tabela.innerHTML = progressos.map(p => {
+        const nomeAluno = p.profiles ? p.profiles.nome_completo : 'Aluno Não Identificado';
+        const porcentagem = Math.round((p.etapa_atual / p.total_etapas) * 100);
+        
+        // Formatar tempo em mm:ss
+        const min = Math.floor((p.tempo_segundos || 0) / 60);
+        const seg = (p.tempo_segundos || 0) % 60;
+        const tempoFormatado = `${min}m ${seg < 10 ? '0' : ''}${seg}s`;
+
+        return `
+          <tr class="hover:bg-slate-950/40 transition">
+            <td class="p-3 font-semibold text-slate-200">${nomeAluno}</td>
+            <td class="p-3 text-indigo-300 font-medium">${p.modulo_id || 'Módulo 1'}</td>
+            <td class="p-3">
+              <div class="flex items-center gap-2">
+                <div class="w-24 bg-slate-800 rounded-full h-2 overflow-hidden">
+                  <div class="bg-emerald-500 h-2 rounded-full" style="width: ${porcentagem}%"></div>
+                </div>
+                <span class="text-xs text-slate-300 font-bold">${p.etapa_atual}/${p.total_etapas} (${porcentagem}%)</span>
+              </div>
+            </td>
+            <td class="p-3 text-slate-300">${tempoFormatado}</td>
+            <td class="p-3">
+              <span class="px-2 py-1 rounded text-xs font-bold ${p.status === 'concluido' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
+                ${p.status === 'concluido' ? '✓ Concluído' : '⏳ Em Andamento'}
+              </span>
+            </td>
+            <td class="p-3 text-right text-xs text-slate-400">${new Date(p.updated_at).toLocaleString('pt-PT')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
     async function carregarTurmas() {
       const { data: turmas } = await supabase.from('turmas').select('*').order('nome');
       const container = document.getElementById('lista-turmas');
@@ -241,7 +319,6 @@
       selectVincular.innerHTML = '<option value="">Selecione a Turma...</option>' + opcoes;
     }
 
-    // Carregar Disciplinas na caixa de seleção
     async function carregarDisciplinas() {
       const { data: disciplinas } = await supabase.from('disciplinas').select('*').order('nome');
       const selectVincular = document.getElementById('select-vincular-disciplina');
@@ -256,7 +333,6 @@
         disciplinas.map(d => `<option value="${d.id}">${d.nome} (${d.codigo_bncc || 'BNCC'})</option>`).join('');
     }
 
-    // Vincular Disciplina à Turma
     async function vincularDisciplinaATurma() {
       const turmaId = document.getElementById('select-vincular-turma').value;
       const disciplinaId = document.getElementById('select-vincular-disciplina').value;
@@ -274,7 +350,6 @@
       }
     }
 
-    // Renderizar painel de turmas x disciplinas
     async function carregarTurmasEDisciplinas() {
       const container = document.getElementById('container-turmas-disciplinas');
       if (!listaTurmasGlobal.length) {
