@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans pb-12">
 
   <!-- Navegação Superior -->
   <nav class="p-4 bg-slate-900 border-b border-indigo-500/30 flex justify-between items-center sticky top-0 z-50">
@@ -36,7 +36,54 @@
       </div>
     </section>
 
-    <!-- SECÇÃO 2: GESTÃO, TURMAS E SENHAS DE ALUNOS -->
+    <!-- SECÇÃO 2: GESTÃO E ATRIBUIÇÃO DE DISCIPLINAS (BNCC) -->
+    <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+      <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+        📚 Gestão de Disciplinas & Atribuição a Turmas
+      </h2>
+
+      <!-- Criar Disciplina -->
+      <form id="form-criar-disciplina" class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Nome da Disciplina</label>
+          <input type="text" id="disc-nome" class="w-full p-2.5 bg-slate-900 rounded border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" placeholder="Ex: Matemática" required>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Código BNCC</label>
+          <input type="text" id="disc-bncc" class="w-full p-2.5 bg-slate-900 rounded border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" placeholder="Ex: EF08MA01">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Ação</label>
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold p-2.5 rounded text-sm transition">Cadastrar Disciplina</button>
+        </div>
+      </form>
+
+      <!-- Atribuir Disciplina a uma Turma -->
+      <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+        <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Vinculação: Atribuir Disciplina à Turma</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select id="select-vincular-turma" class="p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white focus:outline-none">
+            <option value="">Selecione a Turma...</option>
+          </select>
+
+          <select id="select-vincular-disciplina" class="p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white focus:outline-none">
+            <option value="">Selecione a Disciplina...</option>
+          </select>
+
+          <button onclick="vincularDisciplinaATurma()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold p-2.5 rounded text-sm transition">Vincular Disciplina</button>
+        </div>
+      </div>
+
+      <!-- Resumo de Disciplinas Atribuídas -->
+      <div>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Disciplinas Ativas por Turma</h3>
+        <div id="container-turmas-disciplinas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Cards de turmas e suas disciplinas -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECÇÃO 3: GESTÃO DE ALUNOS -->
     <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-bold text-indigo-400">🎓 Alunos Registrados</h2>
@@ -60,7 +107,7 @@
       </div>
     </section>
 
-    <!-- SECÇÃO 3: ENVIAR AVISO -->
+    <!-- SECÇÃO 4: ENVIAR AVISO -->
     <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
       <h2 class="text-lg font-bold text-indigo-400">📢 Publicar Aviso no Mural</h2>
       <form id="form-aviso" class="space-y-4">
@@ -102,10 +149,10 @@
     var supabase = window.supabaseClient;
 
     let listaTurmasGlobal = [];
+    let listaDisciplinasGlobal = [];
 
     document.addEventListener('DOMContentLoaded', () => {
-      carregarTurmas();
-      carregarAlunos();
+      inicializarDados();
 
       // Criar Turma
       document.getElementById('form-criar-turma').addEventListener('submit', async (e) => {
@@ -114,11 +161,26 @@
         if (!nome) return;
 
         const { error } = await supabase.from('turmas').insert([{ nome: nome }]);
-        if (error) {
-          alert('Erro ao criar turma: ' + error.message);
-        } else {
+        if (error) alert('Erro ao criar turma: ' + error.message);
+        else {
           document.getElementById('nome-turma').value = '';
-          carregarTurmas();
+          inicializarDados();
+        }
+      });
+
+      // Criar Disciplina
+      document.getElementById('form-criar-disciplina').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('disc-nome').value.trim();
+        const bncc = document.getElementById('disc-bncc').value.trim();
+
+        const { error } = await supabase.from('disciplinas').insert([{ nome: nome, codigo_bncc: bncc }]);
+        if (error) alert('Erro ao cadastrar disciplina: ' + error.message);
+        else {
+          alert('Disciplina cadastrada!');
+          document.getElementById('disc-nome').value = '';
+          document.getElementById('disc-bncc').value = '';
+          inicializarDados();
         }
       });
 
@@ -136,29 +198,36 @@
           turma_id: turmaId
         }]);
 
-        if (error) {
-          alert('Erro ao publicar aviso: ' + error.message);
-        } else {
+        if (error) alert('Erro ao publicar aviso: ' + error.message);
+        else {
           alert('Aviso publicado com sucesso!');
           document.getElementById('form-aviso').reset();
         }
       });
     });
 
+    async function inicializarDados() {
+      await carregarTurmas();
+      await carregarDisciplinas();
+      await carregarTurmasEDisciplinas();
+      await carregarAlunos();
+    }
+
     // Carregar Turmas
     async function carregarTurmas() {
-      const { data: turmas, error } = await supabase.from('turmas').select('*').order('nome');
+      const { data: turmas } = await supabase.from('turmas').select('*').order('nome');
       const container = document.getElementById('lista-turmas');
       const selectAviso = document.getElementById('aviso-turma');
+      const selectVincular = document.getElementById('select-vincular-turma');
 
-      if (error || !turmas || turmas.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-500">Nenhuma turma cadastrada ainda.</p>';
-        selectAviso.innerHTML = '<option value="">Crie uma turma primeiro...</option>';
-        listaTurmasGlobal = [];
+      listaTurmasGlobal = turmas || [];
+
+      if (!turmas || turmas.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500">Nenhuma turma cadastrada.</p>';
+        selectAviso.innerHTML = '<option value="">Crie uma turma...</option>';
+        selectVincular.innerHTML = '<option value="">Crie uma turma...</option>';
         return;
       }
-
-      listaTurmasGlobal = turmas;
 
       container.innerHTML = turmas.map(t => `
         <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg">
@@ -167,128 +236,132 @@
         </div>
       `).join('');
 
-      selectAviso.innerHTML = turmas.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
-      
-      // Recarrega lista de alunos para atualizar selects de turma
-      carregarAlunos();
+      const opcoes = turmas.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+      selectAviso.innerHTML = opcoes;
+      selectVincular.innerHTML = '<option value="">Selecione a Turma...</option>' + opcoes;
     }
 
-    // Excluir Turma
-    async function excluirTurma(id, nome) {
-      if (!confirm(`Tem certeza que deseja excluir a turma "${nome}"?`)) return;
+    // Carregar Disciplinas na caixa de seleção
+    async function carregarDisciplinas() {
+      const { data: disciplinas } = await supabase.from('disciplinas').select('*').order('nome');
+      const selectVincular = document.getElementById('select-vincular-disciplina');
+      listaDisciplinasGlobal = disciplinas || [];
 
-      const { error } = await supabase.from('turmas').delete().eq('id', id);
-      if (error) {
-        alert('Erro ao excluir turma: ' + error.message);
-      } else {
-        carregarTurmas();
-      }
-    }
-
-    // Carregar Lista de Alunos com opção de Alterar Turma e Redefinir Senha
-    async function carregarAlunos() {
-      const tabela = document.getElementById('tabela-alunos');
-      
-      const { data: alunos, error: errorAlunos } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'aluno')
-        .order('created_at', { ascending: false });
-
-      if (errorAlunos || !alunos || alunos.length === 0) {
-        tabela.innerHTML = '<tr><td colspan="4" class="p-4 text-slate-500 text-center">Nenhum aluno registrado.</td></tr>';
+      if (!disciplinas || disciplinas.length === 0) {
+        selectVincular.innerHTML = '<option value="">Cadastre uma disciplina primeiro...</option>';
         return;
       }
 
-      tabela.innerHTML = alunos.map(a => {
-        // Opções de Turma
-        const opcoesTurma = listaTurmasGlobal.map(t => `
-          <option value="${t.id}" ${t.id === a.turma_id ? 'selected' : ''}>${t.nome}</option>
-        `).join('');
+      selectVincular.innerHTML = '<option value="">Selecione a Disciplina...</option>' + 
+        disciplinas.map(d => `<option value="${d.id}">${d.nome} (${d.codigo_bncc || 'BNCC'})</option>`).join('');
+    }
+
+    // Vincular Disciplina à Turma
+    async function vincularDisciplinaATurma() {
+      const turmaId = document.getElementById('select-vincular-turma').value;
+      const disciplinaId = document.getElementById('select-vincular-disciplina').value;
+
+      if (!turmaId || !disciplinaId) {
+        alert('Selecione uma turma e uma disciplina para vincular.');
+        return;
+      }
+
+      const { error } = await supabase.from('turma_disciplinas').insert([{ turma_id: turmaId, disciplina_id: disciplinaId }]);
+      if (error) alert('Erro ao vincular (ou disciplina já vinculada): ' + error.message);
+      else {
+        alert('Disciplina atribuída com sucesso!');
+        carregarTurmasEDisciplinas();
+      }
+    }
+
+    // Renderizar painel de turmas x disciplinas
+    async function carregarTurmasEDisciplinas() {
+      const container = document.getElementById('container-turmas-disciplinas');
+      if (!listaTurmasGlobal.length) {
+        container.innerHTML = '<p class="text-xs text-slate-500 col-span-full">Nenhuma turma cadastrada.</p>';
+        return;
+      }
+
+      const { data: vínculos } = await supabase.from('turma_disciplinas').select('id, turma_id, disciplinas(id, nome, codigo_bncc)');
+
+      container.innerHTML = listaTurmasGlobal.map(t => {
+        const discDaTurma = vínculos ? vínculos.filter(v => v.turma_id === t.id) : [];
 
         return `
-          <tr>
-            <td class="p-3 font-medium text-slate-200">${a.nome_completo}</td>
-            <td class="p-3">
-              <select onchange="alterarTurmaAluno('${a.id}', this.value)" class="bg-slate-950 border border-slate-800 text-xs rounded p-1 text-slate-300 focus:outline-none focus:border-indigo-500">
-                <option value="">Sem Turma</option>
-                ${opcoesTurma}
-              </select>
-            </td>
-            <td class="p-3">
-              <span class="px-2 py-1 rounded text-xs font-bold ${a.status === 'aprovado' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
-                ${a.status || 'pendente'}
-              </span>
-            </td>
-            <td class="p-3 text-right space-x-2">
-              ${a.status !== 'aprovado' ? `<button onclick="alterarStatusAluno('${a.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded transition">Aprovar</button>` : ''}
-              <button onclick="redefinirSenhaAluno('${a.id}')" class="bg-indigo-950 hover:bg-indigo-900 text-indigo-300 border border-indigo-800 text-xs px-2.5 py-1 rounded transition">Redefinir Senha</button>
-              <button onclick="excluirAluno('${a.id}')" class="bg-rose-950 hover:bg-rose-900 text-rose-400 border border-rose-800 text-xs px-2.5 py-1 rounded transition">Excluir</button>
-            </td>
-          </tr>
+          <div class="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-2">
+            <h4 class="font-bold text-indigo-400 border-b border-slate-800 pb-2">${t.nome}</h4>
+            <div class="flex flex-wrap gap-2 pt-1">
+              ${discDaTurma.length > 0 
+                ? discDaTurma.map(v => `
+                    <span class="inline-flex items-center gap-1 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded text-xs text-slate-300">
+                      ${v.disciplinas.nome} (${v.disciplinas.codigo_bncc || 'BNCC'})
+                      <button onclick="desvincularDisciplina('${v.id}')" class="text-rose-500 hover:text-rose-400 font-bold ml-1">✕</button>
+                    </span>
+                  `).join('')
+                : '<p class="text-xs text-slate-500">Nenhuma disciplina atribuída.</p>'
+              }
+            </div>
+          </div>
         `;
       }).join('');
     }
 
-    // Mudar Turma do Aluno
-    async function alterarTurmaAluno(alunoId, novaTurmaId) {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ turma_id: novaTurmaId || null })
-        .eq('id', alunoId);
-
-      if (error) {
-        alert('Erro ao alterar turma: ' + error.message);
-      } else {
-        alert('Turma alterada com sucesso!');
-      }
+    async function desvincularDisciplina(vinculoId) {
+      await supabase.from('turma_disciplinas').delete().eq('id', vinculoId);
+      carregarTurmasEDisciplinas();
     }
 
-    // Aprovar Aluno
-    async function alterarStatusAluno(id, novoStatus) {
-      const { error } = await supabase.from('profiles').update({ status: novoStatus }).eq('id', id);
-      if (error) {
-        alert('Erro ao atualizar aluno: ' + error.message);
-      } else {
-        carregarAlunos();
-      }
+    async function excluirTurma(id, nome) {
+      if (!confirm(`Excluir a turma "${nome}"?`)) return;
+      await supabase.from('turmas').delete().eq('id', id);
+      inicializarDados();
     }
 
-    // Redefinir Senha do Aluno
-    async function redefinirSenhaAluno(id) {
-      const novaSenha = prompt('Digite a nova senha para este aluno (mínimo 6 caracteres):');
-      if (!novaSenha) return;
+    async function carregarAlunos() {
+      const tabela = document.getElementById('tabela-alunos');
+      const { data: alunos } = await supabase.from('profiles').select('*').eq('role', 'aluno').order('created_at', { ascending: false });
 
-      if (novaSenha.length < 6) {
-        alert('A senha deve ter no mínimo 6 caracteres.');
+      if (!alunos || alunos.length === 0) {
+        tabela.innerHTML = '<tr><td colspan="4" class="p-4 text-slate-500 text-center">Nenhum aluno registrado.</td></tr>';
         return;
       }
 
-      // Atualiza via requisição à API
-      const { error } = await supabase.rpc('redefinir_senha_aluno', {
-        aluno_id: id,
-        nova_senha: novaSenha
-      });
-
-      if (error) {
-        // Caso a função RPC não esteja criada, usa alert explicativo
-        alert('Para redefinir a senha do aluno, execute a função no SQL Editor do Supabase primeiro.');
-      } else {
-        alert('Senha redefinida com sucesso!');
-      }
+      tabela.innerHTML = alunos.map(a => `
+        <tr>
+          <td class="p-3 font-medium text-slate-200">${a.nome_completo}</td>
+          <td class="p-3">
+            <select onchange="alterarTurmaAluno('${a.id}', this.value)" class="bg-slate-950 border border-slate-800 text-xs rounded p-1 text-slate-300 focus:outline-none">
+              <option value="">Sem Turma</option>
+              ${listaTurmasGlobal.map(t => `<option value="${t.id}" ${t.id === a.turma_id ? 'selected' : ''}>${t.nome}</option>`).join('')}
+            </select>
+          </td>
+          <td class="p-3">
+            <span class="px-2 py-1 rounded text-xs font-bold ${a.status === 'aprovado' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
+              ${a.status || 'pendente'}
+            </span>
+          </td>
+          <td class="p-3 text-right space-x-2">
+            ${a.status !== 'aprovado' ? `<button onclick="alterarStatusAluno('${a.id}', 'aprovado')" class="bg-emerald-600 text-slate-950 font-bold text-xs px-2.5 py-1 rounded">Aprovar</button>` : ''}
+            <button onclick="excluirAluno('${a.id}')" class="bg-rose-950 text-rose-400 border border-rose-800 text-xs px-2.5 py-1 rounded">Excluir</button>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    // Excluir Conta do Aluno (Remoção total)
-    async function excluirAluno(id) {
-      if (!confirm('Deseja realmente excluir permanentemente este aluno?')) return;
+    async function alterarTurmaAluno(alunoId, novaTurmaId) {
+      await supabase.from('profiles').update({ turma_id: novaTurmaId || null }).eq('id', alunoId);
+      alert('Turma alterada!');
+    }
 
-      const { error } = await supabase.from('profiles').delete().eq('id', id);
-      if (error) {
-        alert('Erro ao excluir aluno: ' + error.message);
-      } else {
-        alert('Aluno excluído com sucesso!');
-        await carregarAlunos();
-      }
+    async function alterarStatusAluno(id, novoStatus) {
+      await supabase.from('profiles').update({ status: novoStatus }).eq('id', id);
+      carregarAlunos();
+    }
+
+    async function excluirAluno(id) {
+      if (!confirm('Excluir aluno?')) return;
+      await supabase.from('profiles').delete().eq('id', id);
+      carregarAlunos();
     }
   </script>
 </body>
