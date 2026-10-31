@@ -1,5 +1,5 @@
 // ==========================================
-// 1. CONFIGURAÇÃO DO SUPABASE (URL CORRIGIDA)
+// 1. CONFIGURAÇÃO DO SUPABASE
 // ==========================================
 const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -9,7 +9,6 @@ if (!window.supabaseClient) {
 }
 var supabase = window.supabaseClient;
 
-// Variável global para armazenar os dados do aluno logado
 let alunoAtual = null;
 
 // ==========================================
@@ -75,7 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
 
-      // 1. Cadastra o usuário no Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -87,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (authData.user) {
-        // 2. Insere na tabela profiles como 'pendente'
         const { error: profileError } = await supabase.from('profiles').insert([
           {
             id: authData.user.id,
@@ -102,8 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
           alert('Erro ao guardar perfil: ' + profileError.message);
         } else {
           alert('Registo efetuado com sucesso! Aguarda a aprovação do teu professor para acederes.');
-          
-          // Desconecta sessão temporária do cadastro
           await supabase.auth.signOut();
 
           if (typeof toggleAuthMode === 'function') {
@@ -135,7 +130,6 @@ async function verificarSessao() {
 }
 
 async function verificarEstadoEEntrar(user) {
-  // 1. Busca os dados do perfil sem JOINs que causam falhas de RLS
   const { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
@@ -143,19 +137,17 @@ async function verificarEstadoEEntrar(user) {
     .maybeSingle();
 
   if (error || !profile) {
-    alert('Erro ao carregar os teus dados de perfil. O registo de perfil não existe ou não foi aprovado.');
+    alert('Erro ao carregar os teus dados de perfil.');
     await supabase.auth.signOut();
     return;
   }
 
-  // 2. Verifica aprovação
   if (profile.status === 'pendente') {
     alert('A tua conta ainda está a aguardar aprovação pelo professor.');
     await supabase.auth.signOut();
     return;
   }
 
-  // 3. Obtém o nome da turma separadamente
   let nomeTurma = 'Sem Turma';
   if (profile.turma_id) {
     const { data: turma } = await supabase
@@ -171,16 +163,18 @@ async function verificarEstadoEEntrar(user) {
 
   alunoAtual = profile;
 
-  // Exibe a área autenticada
   document.getElementById('auth-section').classList.add('hidden');
   document.getElementById('app-content').classList.remove('hidden');
 
-  const userInfo = document.getElementById('user-info');
-  if (userInfo) {
-    userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${profile.apelido || profile.nome_completo}</strong> (${nomeTurma})`;
-  }
-
+  atualizarCabecalhoUsuario(nomeTurma);
   carregarAvisos();
+}
+
+function atualizarCabecalhoUsuario(nomeTurma = 'Sem Turma') {
+  const userInfo = document.getElementById('user-info');
+  if (userInfo && alunoAtual) {
+    userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${alunoAtual.apelido || alunoAtual.nome_completo}</strong> (${nomeTurma})`;
+  }
 }
 
 // ==========================================
@@ -281,7 +275,7 @@ async function carregarJogos() {
 }
 
 // ==========================================
-// 7. LÓGICA DO PERFIL DO ALUNO
+// 7. LÓGICA DO PERFIL COMPLETO (NOME, APELIDO, AVATAR, SENHA)
 // ==========================================
 async function renderizarPerfil() {
   if (!alunoAtual) return;
@@ -291,27 +285,58 @@ async function renderizarPerfil() {
 
   const { data: meritos } = await supabase.from('meritos').select('*').eq('aluno_id', alunoAtual.id);
 
+  // Avatar em imagem ou Inicial
+  const avatarHTML = alunoAtual.avatar_url 
+    ? `<img src="${alunoAtual.avatar_url}" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-500" alt="Avatar">`
+    : `<div class="w-16 h-16 rounded-full bg-slate-800 border-2 border-emerald-500 flex items-center justify-center text-2xl font-bold text-emerald-400">${(alunoAtual.nome_completo || 'A')[0]}</div>`;
+
   container.innerHTML = `
+    <!-- Topo do Perfil -->
     <div class="flex items-center gap-4">
-      <div class="w-16 h-16 rounded-full bg-slate-800 border-2 border-emerald-500 flex items-center justify-center text-2xl font-bold text-emerald-400">
-        ${(alunoAtual.nome_completo || 'A')[0]}
-      </div>
+      ${avatarHTML}
       <div>
         <h3 class="text-lg font-bold text-slate-100">${alunoAtual.nome_completo}</h3>
         <p class="text-sm text-slate-400">Apelido: <span class="text-emerald-400">${alunoAtual.apelido || 'Não definido'}</span></p>
       </div>
     </div>
 
+    <!-- 1. EDITAR NOME E APELIDO -->
     <div class="border-t border-slate-800 pt-4 space-y-3">
-      <h4 class="font-semibold text-emerald-400 text-sm">Editar Apelido</h4>
+      <h4 class="font-semibold text-emerald-400 text-sm">👤 Alterar Dados Pessoais</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Nome Completo</label>
+          <input type="text" id="novo-nome" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm w-full" value="${alunoAtual.nome_completo || ''}">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Apelido de Exibição</label>
+          <input type="text" id="novo-apelido" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm w-full" value="${alunoAtual.apelido || ''}">
+        </div>
+      </div>
+      <button onclick="atualizarDadosPessoais()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs transition">Guardar Dados</button>
+    </div>
+
+    <!-- 2. ALTERAR FOTO / AVATAR -->
+    <div class="border-t border-slate-800 pt-4 space-y-3">
+      <h4 class="font-semibold text-emerald-400 text-sm">🖼️ Alterar Foto de Perfil (URL da Imagem)</h4>
       <div class="flex gap-2">
-        <input type="text" id="novo-apelido" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm flex-1" placeholder="Novo apelido de exibição" value="${alunoAtual.apelido || ''}">
-        <button onclick="atualizarApelido()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs transition">Guardar</button>
+        <input type="url" id="novo-avatar" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm flex-1" placeholder="Cole o link (URL) da imagem" value="${alunoAtual.avatar_url || ''}">
+        <button onclick="atualizarAvatar()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs transition">Atualizar Foto</button>
       </div>
     </div>
 
+    <!-- 3. ALTERAR SENHA -->
+    <div class="border-t border-slate-800 pt-4 space-y-3">
+      <h4 class="font-semibold text-emerald-400 text-sm">🔒 Alterar Senha de Acesso</h4>
+      <div class="flex gap-2">
+        <input type="password" id="nova-senha" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm flex-1" placeholder="Nova senha (mínimo 6 caracteres)" minlength="6">
+        <button onclick="alterarSenha()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs transition">Alterar Senha</button>
+      </div>
+    </div>
+
+    <!-- 4. MÉTITOS -->
     <div class="border-t border-slate-800 pt-4">
-      <h4 class="font-semibold text-emerald-400 text-sm mb-2">Os Meus Méritos e Conquistas</h4>
+      <h4 class="font-semibold text-emerald-400 text-sm mb-2">🏅 Os Meus Méritos e Conquistas</h4>
       <div class="flex flex-wrap gap-2">
         ${meritos && meritos.length > 0 
           ? meritos.map(m => `<span class="bg-emerald-950 border border-emerald-800 text-emerald-300 text-xs px-3 py-1.5 rounded-full font-medium">🏅 ${m.titulo}</span>`).join('')
@@ -322,20 +347,69 @@ async function renderizarPerfil() {
   `;
 }
 
-async function atualizarApelido() {
-  const novoApelido = document.getElementById('novo-apelido').value;
-  if (!novoApelido || !alunoAtual) return;
+// Função: Atualizar Nome e Apelido
+async function atualizarDadosPessoais() {
+  const novoNome = document.getElementById('novo-nome').value.trim();
+  const novoApelido = document.getElementById('novo-apelido').value.trim();
+
+  if (!novoNome || !alunoAtual) {
+    alert('O nome completo não pode estar em branco.');
+    return;
+  }
 
   const { error } = await supabase
     .from('profiles')
-    .update({ apelido: novoApelido })
+    .update({ 
+      nome_completo: novoNome,
+      apelido: novoApelido 
+    })
     .eq('id', alunoAtual.id);
 
   if (error) {
-    alert('Erro ao atualizar apelido: ' + error.message);
+    alert('Erro ao atualizar dados: ' + error.message);
   } else {
-    alert('Apelido atualizado com sucesso!');
+    alert('Dados atualizados com sucesso!');
+    alunoAtual.nome_completo = novoNome;
     alunoAtual.apelido = novoApelido;
+    atualizarCabecalhoUsuario();
     renderizarPerfil();
+  }
+}
+
+// Função: Atualizar Avatar (Foto)
+async function atualizarAvatar() {
+  const novoAvatar = document.getElementById('novo-avatar').value.trim();
+  if (!alunoAtual) return;
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ avatar_url: novoAvatar })
+    .eq('id', alunoAtual.id);
+
+  if (error) {
+    alert('Erro ao atualizar foto: ' + error.message);
+  } else {
+    alert('Foto de perfil atualizada com sucesso!');
+    alunoAtual.avatar_url = novoAvatar;
+    renderizarPerfil();
+  }
+}
+
+// Função: Alterar Senha
+async function alterarSenha() {
+  const novaSenha = document.getElementById('nova-senha').value;
+
+  if (!novaSenha || novaSenha.length < 6) {
+    alert('A nova senha deve ter no mínimo 6 caracteres.');
+    return;
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: novaSenha });
+
+  if (error) {
+    alert('Erro ao alterar senha: ' + error.message);
+  } else {
+    alert('Senha alterada com sucesso!');
+    document.getElementById('nova-senha').value = '';
   }
 }
