@@ -11,9 +11,7 @@
     <script>
         tailwind.config = {
             theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
-                }
+                extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } }
             }
         }
     </script>
@@ -21,7 +19,6 @@
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased">
 
     <script>
-        // Configuração do Supabase Principal
         const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -41,13 +38,11 @@
                 sessionStorage.setItem('active_student', JSON.stringify(currentStudent));
             } else {
                 const saved = sessionStorage.getItem('active_student');
-                if (saved) {
-                    currentStudent = JSON.parse(saved);
-                }
+                if (saved) currentStudent = JSON.parse(saved);
             }
 
-            if (!currentStudent || !currentStudent.id || !currentStudent.nome) {
-                alert("Identifique-se no Portal Principal antes de iniciar as lições!");
+            if (!currentStudent || !currentStudent.id) {
+                alert("Identifique-se no Portal Principal antes de iniciar!");
                 window.location.href = "../index.html";
                 return;
             }
@@ -55,7 +50,6 @@
             document.getElementById('student-name-display').innerText = currentStudent.nome;
             document.getElementById('student-class-display').innerText = currentStudent.turma;
 
-            // CARREGA O PROGRESSO ANTERIOR DO ALUNO SE EXISTIR
             await carregarProgressoExistente();
             startTimer();
         });
@@ -63,36 +57,29 @@
 
     <!-- CABEÇALHO -->
     <header class="bg-slate-900 border-b border-emerald-500/20 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
-                <div class="flex items-center space-x-3">
-                    <a href="javascript:window.close();" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl font-bold transition" title="Fechar Lição">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </a>
-                    <div>
-                        <h1 class="font-bold text-lg text-emerald-400 leading-tight">Cultura Digital <span class="text-xs bg-emerald-500/20 text-emerald-300 font-medium px-2 py-0.5 rounded border border-emerald-500/30">Módulo 1</span></h1>
-                        <p class="text-xs text-slate-400">Teoria Aprofundada & Diagnóstico Técnico</p>
-                    </div>
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <a href="javascript:window.close();" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl font-bold transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="font-bold text-lg text-emerald-400">Cultura Digital <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">Módulo 1</span></h1>
+                    <p class="text-xs text-slate-400">Teoria Aprofundada & Diagnóstico Técnico</p>
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
+            <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-300">
                     <i class="fa-solid fa-user-graduate text-emerald-400"></i>
                     <span id="student-name-display" class="font-bold">--</span>
                     <span class="text-slate-600">|</span>
                     <span id="student-class-display" class="text-slate-400">--</span>
                 </div>
-
-                <div class="flex items-center gap-3">
-                    <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400 flex items-center gap-1.5">
-                        <i class="fa-solid fa-trophy"></i>
-                        <span id="xp-counter">0 XP</span>
-                    </div>
-                    <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                        <i class="fa-solid fa-clock"></i>
-                        <span id="timer-display">00:00</span>
-                    </div>
+                <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400">
+                    <i class="fa-solid fa-trophy mr-1"></i><span id="xp-counter">0 XP</span>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-400">
+                    <i class="fa-solid fa-clock mr-1"></i><span id="timer-display">00:00</span>
                 </div>
             </div>
         </div>
@@ -102,33 +89,30 @@
     </header>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        <!-- TEORIA -->
-        <section class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col shadow-xl overflow-hidden h-full min-h-[580px]">
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <section class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col shadow-xl min-h-[580px]">
             <div class="p-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
                 <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Tópico Teórico <span id="current-step-num">1</span> de 4</span>
+                    <span class="text-xs font-bold uppercase text-emerald-400">Tópico <span id="current-step-num">1</span> de 4</span>
                     <h2 id="step-title" class="text-lg font-bold text-white">Carregando Teoria...</h2>
                 </div>
-                <span id="step-badge" class="text-xs bg-slate-800 text-slate-300 font-medium px-2 py-1 rounded-md">Fundamentação</span>
+                <span id="step-badge" class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-md">Fundamentação</span>
             </div>
 
             <div class="p-5 flex-1 overflow-y-auto space-y-4 text-slate-300 text-xs sm:text-sm leading-relaxed" id="step-content"></div>
 
             <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-3">
-                <div id="step-feedback" class="text-xs font-medium flex items-center gap-1.5 text-slate-400">
-                    <i class="fa-solid fa-circle-info"></i> Resolva o desafio prático ao lado para avançar.
+                <div id="step-feedback" class="text-xs font-medium text-slate-400">
+                    <i class="fa-solid fa-circle-info"></i> Resolva o desafio ao lado.
                 </div>
-                <button id="next-btn" onclick="nextStep()" disabled class="disabled:opacity-50 disabled:cursor-not-allowed bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all">
+                <button id="next-btn" onclick="nextStep()" disabled class="disabled:opacity-50 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all">
                     <span>Próximo Tópico</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </section>
 
-        <!-- PRÁTICA -->
-        <section class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full min-h-[580px] p-6">
+        <section class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col shadow-2xl min-h-[580px] p-6">
             <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-microchip text-emerald-400"></i>
                 <span>Laboratório de Classificação e Diagnóstico Técnico</span>
@@ -137,20 +121,15 @@
         </section>
     </main>
 
-    <!-- MODAL DE CONCLUSÃO -->
+    <!-- MODAL CONCLUSÃO -->
     <div id="completion-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6 text-center">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 text-center space-y-4">
             <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
                 <i class="fa-solid fa-award"></i>
             </div>
-            <div>
-                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Módulo Concluído!</span>
-                <h3 class="text-2xl font-extrabold text-white mt-1">Fundamentos Consolidados</h3>
-                <p class="text-slate-300 text-sm mt-2">Você concluiu com sucesso a carga teórica e analítica sobre arquitetura de computadores e licenças abertas.</p>
-            </div>
-            <button onclick="window.close();" class="block w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-sm transition text-center cursor-pointer">
-                <i class="fa-solid fa-check mr-2"></i>Concluir e Fechar Lição
-            </button>
+            <h3 class="text-2xl font-extrabold text-white">Módulo Concluído!</h3>
+            <p class="text-slate-300 text-sm">Você concluiu com sucesso todos os tópicos deste módulo.</p>
+            <button onclick="window.close();" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-sm">Concluir e Sair</button>
         </div>
     </div>
 
@@ -160,72 +139,42 @@
                 id: 1,
                 title: "Arquitetura: Hardware, Software e Firmware",
                 badge: "Teoria & Análise",
-                content: `
-                    <p class="font-semibold text-white">1. A Base Física (Hardware):</p>
-                    <p>O hardware engloba todo o substrato tangível de um sistema computacional. Isso inclui semicondutores, circuitos integrados, barramentos de dados e dispositivos eletromecânicos.</p>
-                    
-                    <p class="font-semibold text-white mt-2">2. A Camada Lógica (Software):</p>
-                    <p>O software consiste em sequências estruturadas de instruções lógicas que dizem ao hardware o que executar.</p>
-
-                    <p class="font-semibold text-white mt-2">3. O Elo Intermediário (Firmware):</p>
-                    <p>Gravado diretamente em chips de memória não volátil (ROM/UEFI) na placa-mãe.</p>
-                `,
+                content: `<p class="font-semibold text-white">1. Hardware:</p><p>Componentes físicos tangíveis.</p><p class="font-semibold text-white mt-2">2. Software:</p><p>Instruções lógicas.</p>`,
                 xp: 25,
                 items: [
-                    { name: "Controlador de barramento PCIe na Placa-Mãe", answer: "Hardware", options: ["Hardware", "Software"] },
-                    { name: "Rotina de inicialização gravada na memória Flash (UEFI)", answer: "Software", options: ["Hardware", "Software"] },
-                    { name: "Interpretador de comandos (Shell / Bash)", answer: "Software", options: ["Hardware", "Software"] },
-                    { name: "Módulo de Driver de Vídeo proprietário", answer: "Software", options: ["Hardware", "Software"] }
+                    { name: "Controlador de barramento PCIe", answer: "Hardware", options: ["Hardware", "Software"] },
+                    { name: "Rotina UEFI na memória Flash", answer: "Software", options: ["Hardware", "Software"] }
                 ]
             },
             {
                 id: 2,
-                title: "Periféricos e a Topologia de E/S de Dados",
-                badge: "Fluxo de Informação",
-                content: `
-                    <p class="font-semibold text-white">O Princípio de Entrada e Saída (I/O):</p>
-                    <p>Computadores operam processando fluxos de dados binários através de periféricos.</p>
-                    <p class="font-semibold text-white mt-2">Dispositivos de Entrada (Input):</p>
-                    <p>Capturam estímulos do mundo exterior e convertem para a CPU.</p>
-                    <p class="font-semibold text-white mt-2">Dispositivos de Saída (Output):</p>
-                    <p>Traduzem o processamento interno em formas perceptíveis ao usuário.</p>
-                `,
+                title: "Periféricos e Topologia I/O",
+                badge: "Fluxo de Dados",
+                content: `<p class="font-semibold text-white">Dispositivos de Entrada e Saída:</p><p>Capturam ou traduzem a informação.</p>`,
                 xp: 25,
                 items: [
-                    { name: "Mesa Digitalizadora com Sensor de Pressão", answer: "Entrada", options: ["Entrada", "Saída"] },
-                    { name: "Display de Matriz de Pontos Braille", answer: "Saída", options: ["Entrada", "Saída"] },
-                    { name: "Leitor Biométrico de Impressão Digital", answer: "Entrada", options: ["Entrada", "Saída"] },
-                    { name: "Óculos de Realidade Virtual com Telas Integradas", answer: "Saída", options: ["Entrada", "Saída"] }
+                    { name: "Mesa Digitalizadora", answer: "Entrada", options: ["Entrada", "Saída"] },
+                    { name: "Display Braille", answer: "Saída", options: ["Entrada", "Saída"] }
                 ]
             },
             {
                 id: 3,
-                title: "Filosofia do Conhecimento Aberto: Licenças CC & GPL",
-                badge: "Ética e Legislação",
-                content: `
-                    <p class="font-semibold text-white">Creative Commons (CC):</p>
-                    <p>Para produções intelectuais, artísticas, textos e imagens.</p>
-                    <p class="font-semibold text-white mt-2">GNU General Public License (GPL):</p>
-                    <p>Focada em código-fonte de software sob o conceito de Copyleft.</p>
-                `,
+                title: "Licenças CC & GPL",
+                badge: "Ética",
+                content: `<p class="font-semibold text-white">Creative Commons x GPL:</p><p>Licenciamento aberto de mídia vs software.</p>`,
                 xp: 25,
                 items: [
-                    { name: "Repositório de código-fonte de Kernel colaborativo", answer: "GNU / GPL", options: ["Creative Commons (CC)", "GNU / GPL"] },
-                    { name: "Fotografia educacional em enciclopédia online", answer: "Creative Commons (CC)", options: ["Creative Commons (CC)", "GNU / GPL"] },
-                    { name: "Biblioteca de rotinas matemáticas compiladas em C", answer: "GNU / GPL", options: ["Creative Commons (CC)", "GNU / GPL"] }
+                    { name: "Código do Kernel Linux", answer: "GNU / GPL", options: ["Creative Commons (CC)", "GNU / GPL"] }
                 ]
             },
             {
                 id: 4,
-                title: "Auditoria e Consolidação de Conceitos",
-                badge: "Avaliação Técnica",
-                content: `
-                    <p class="font-semibold text-white">Consolidação Final:</p>
-                    <p>Responda à questão final para concluir a lição do módulo.</p>
-                `,
+                title: "Consolidação e Diagnóstico",
+                badge: "Avaliação",
+                content: `<p class="font-semibold text-white">Revisão Final:</p><p>Responda para finalizar.</p>`,
                 xp: 25,
                 items: [
-                    { name: "Driver de dispositivo que gerencia a placa de rede Wi-Fi:", answer: "Software", options: ["Hardware", "Software"] }
+                    { name: "Driver Wi-Fi", answer: "Software", options: ["Hardware", "Software"] }
                 ]
             }
         ];
@@ -243,7 +192,7 @@
             }
 
             try {
-                const { data: progresso, error } = await _supabase
+                const { data: progresso } = await _supabase
                     .from('se_progresso')
                     .select('*')
                     .eq('aluno_id', currentStudent.id)
@@ -261,7 +210,7 @@
                     renderStep(0);
                 }
             } catch (err) {
-                console.error("Erro ao verificar progresso:", err);
+                console.error("Erro ao carregar progresso:", err);
                 renderStep(0);
             }
         }
@@ -288,11 +237,10 @@
             document.getElementById('top-progress-bar').style.width = `${progressPercent}%`;
 
             document.getElementById('next-btn').disabled = true;
-            document.getElementById('step-feedback').className = "text-xs font-medium flex items-center gap-1.5 text-slate-400";
             document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-info"></i> Responda aos itens ao lado.`;
 
             loadCurrentItem();
-            saveProgressToSupabase(index); // SALVA AUTOMATICAMENTE NO BANCO
+            saveProgressToSupabase(index);
         }
 
         function loadCurrentItem() {
@@ -304,7 +252,6 @@
                     <div class="p-8 bg-slate-950 border border-emerald-500/40 rounded-xl text-center space-y-3">
                         <i class="fa-solid fa-circle-check text-emerald-400 text-4xl"></i>
                         <h4 class="font-bold text-white text-lg">Tópico Teórico Concluído!</h4>
-                        <p class="text-xs text-slate-400">Avançar para o próximo passo.</p>
                     </div>
                 `;
                 unlockNextStep();
@@ -312,7 +259,6 @@
             }
 
             const currentItem = step.items[currentItemIndex];
-            
             let buttonsHTML = currentItem.options.map(opt => `
                 <button onclick="verifyAnswer('${opt}', '${currentItem.answer}')" class="p-4 bg-slate-950 border border-slate-800 hover:border-emerald-500 rounded-xl text-center text-slate-200 font-bold text-sm transition">
                     ${opt}
@@ -321,14 +267,11 @@
 
             container.innerHTML = `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-6 text-center">
-                    <span class="text-xs uppercase tracking-wider text-emerald-400 font-bold">Questão ${currentItemIndex + 1} de ${step.items.length}</span>
-                    <div class="text-base sm:text-lg font-extrabold text-white bg-slate-900 p-4 rounded-lg border border-slate-800">
+                    <span class="text-xs uppercase text-emerald-400 font-bold">Questão ${currentItemIndex + 1} de ${step.items.length}</span>
+                    <div class="text-base font-extrabold text-white bg-slate-900 p-4 rounded-lg border border-slate-800">
                         "${currentItem.name}"
                     </div>
-                    <p class="text-xs text-slate-400">Selecione a classificação correta:</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        ${buttonsHTML}
-                    </div>
+                    <div class="grid grid-cols-2 gap-3">${buttonsHTML}</div>
                 </div>
             `;
         }
@@ -338,7 +281,7 @@
                 currentItemIndex++;
                 loadCurrentItem();
             } else {
-                alert("Classificação incorreta. Tente novamente.");
+                alert("Resposta incorreta. Tente novamente.");
             }
         }
 
@@ -346,9 +289,7 @@
             totalXP += LESSON_STEPS[currentStepIndex].xp;
             document.getElementById('xp-counter').innerText = `${totalXP} XP`;
             document.getElementById('next-btn').disabled = false;
-            document.getElementById('step-feedback').className = "text-xs font-medium flex items-center gap-1.5 text-emerald-400";
-            document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-check"></i> Desafio concluído! Clique ao lado para avançar.`;
-            
+            document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Desafio concluído! Clique em Próximo Tópico.`;
             saveProgressToSupabase(currentStepIndex + 1);
         }
 
@@ -368,31 +309,19 @@
             if (!currentStudent || !currentStudent.id) return;
             try {
                 const isCompleted = stepNumber >= TOTAL_STEPS;
-                
-                const { data: existing } = await _supabase
-                    .from('se_progresso')
-                    .select('id')
-                    .eq('aluno_id', currentStudent.id)
-                    .eq('modulo_id', MODULE_ID)
-                    .maybeSingle();
-
                 const payload = {
                     aluno_id: currentStudent.id,
                     modulo_id: MODULE_ID,
-                    etapa_atual: stepNumber,
-                    total_etapas: TOTAL_STEPS,
+                    etapa_atual: Number(stepNumber),
+                    total_etapas: Number(TOTAL_STEPS),
                     status: isCompleted ? 'concluido' : 'em_andamento',
-                    tempo_segundos: secondsElapsed,
+                    tempo_segundos: Number(secondsElapsed),
                     updated_at: new Date().toISOString()
                 };
 
-                if (existing) {
-                    await _supabase.from('se_progresso').update(payload).eq('id', existing.id);
-                } else {
-                    await _supabase.from('se_progresso').insert([payload]);
-                }
+                await _supabase.from('se_progresso').upsert(payload, { onConflict: 'aluno_id, modulo_id' });
             } catch (err) {
-                console.error("Erro ao sincronizar progresso:", err);
+                console.error("Erro ao salvar progresso:", err);
             }
         }
     </script>
