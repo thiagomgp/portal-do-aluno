@@ -13,19 +13,14 @@ let alunoAtual = null;
 
 // Lista de Avatares CC (Animes, Estudo, Gamers, Jovens)
 const AVATARES_PREDEFINIDOS = [
-  // Anime / Mangá
   { nome: 'Anime Boy 1', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Felix' },
   { nome: 'Anime Girl 1', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aria' },
   { nome: 'Anime Boy 2', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Zack' },
   { nome: 'Anime Girl 2', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Luna' },
-  
-  // Estudo / Estudantes
   { nome: 'Estudante 1', url: 'https://api.dicebear.com/7.x/open-peeps/svg?seed=Student1' },
   { nome: 'Estudante 2', url: 'https://api.dicebear.com/7.x/open-peeps/svg?seed=Student2' },
   { nome: 'Estudante 3', url: 'https://api.dicebear.com/7.x/open-peeps/svg?seed=Student3' },
   { nome: 'Estudante 4', url: 'https://api.dicebear.com/7.x/open-peeps/svg?seed=Student4' },
-
-  // Gamers & Estilo Jovem
   { nome: 'Gamer Pixel', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=PixelGamer' },
   { nome: 'Cyber Jovem', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CyberStudent' },
   { nome: 'Jovem Cool', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CoolKid' },
@@ -33,18 +28,30 @@ const AVATARES_PREDEFINIDOS = [
 ];
 
 // ==========================================
-// 2. NAVEGAÇÃO DE ABAS
+// 2. NAVEGAÇÃO DE ABAS COM DESTAQUE CORRETO
 // ==========================================
 function navigate(tabName) {
   const tabs = ['inicio', 'disciplinas', 'jogos', 'perfil'];
   
   tabs.forEach(tab => {
-    const el = document.getElementById(`tab-${tab}`);
-    if (el) {
+    const elContent = document.getElementById(`tab-${tab}`);
+    const elBtn = document.getElementById(`nav-btn-${tab}`);
+
+    // Alterna visibilidade do conteúdo da aba
+    if (elContent) {
       if (tab === tabName) {
-        el.classList.remove('hidden');
+        elContent.classList.remove('hidden');
       } else {
-        el.classList.add('hidden');
+        elContent.classList.add('hidden');
+      }
+    }
+
+    // Alterna estilo visual do botão da aba (Aba Ativa = Verde)
+    if (elBtn) {
+      if (tab === tabName) {
+        elBtn.className = 'px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-slate-950 shadow-md transition';
+      } else {
+        elBtn.className = 'px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition';
       }
     }
   });
@@ -230,7 +237,7 @@ async function carregarAvisos() {
 }
 
 // ==========================================
-// 5. LÓGICA DAS DISCIPLINAS (BNCC)
+// 5. LÓGICA DAS DISCIPLINAS E ATIVIDADE INTERATIVA
 // ==========================================
 async function carregarDisciplinas() {
   if (!alunoAtual) return;
@@ -257,10 +264,16 @@ async function carregarDisciplinas() {
           <h3 class="text-lg font-bold text-slate-100 mt-2">${disc.nome}</h3>
           <p class="text-xs text-slate-400 mt-1">${disc.descricao || 'Conteúdos da disciplina.'}</p>
         </div>
-        <div class="grid grid-cols-3 gap-2 mt-6">
-          <button onclick="abrirConteudo('${disc.id}', 'aula')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">🎬 Aulas</button>
-          <button onclick="abrirConteudo('${disc.id}', 'material')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📁 Materiais</button>
-          <button onclick="abrirConteudo('${disc.id}', 'prova')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📝 Provas</button>
+        
+        <div class="space-y-2 mt-6">
+          <a href="aulainterativa/intro_hw_sw.html" target="_blank" class="block w-full text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-xs transition shadow">
+            💻 Acessar Aula Interativa (HW & SW)
+          </a>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="abrirConteudo('${disc.id}', 'aula')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">🎬 Aulas</button>
+            <button onclick="abrirConteudo('${disc.id}', 'material')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📁 Materiais</button>
+            <button onclick="abrirConteudo('${disc.id}', 'prova')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📝 Provas</button>
+          </div>
         </div>
       </div>
     `;
@@ -296,7 +309,7 @@ async function carregarJogos() {
 }
 
 // ==========================================
-// 7. LÓGICA DO PERFIL COMPLETO (COM GALERIA DE AVATARES CC)
+// 7. LÓGICA DO PERFIL COMPLETO (AVATARES CC E DADOS)
 // ==========================================
 async function renderizarPerfil() {
   if (!alunoAtual) return;
@@ -306,12 +319,10 @@ async function renderizarPerfil() {
 
   const { data: meritos } = await supabase.from('meritos').select('*').eq('aluno_id', alunoAtual.id);
 
-  // Avatar do Usuário
   const avatarHTML = alunoAtual.avatar_url 
     ? `<img src="${alunoAtual.avatar_url}" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-500 bg-slate-800" alt="Avatar">`
     : `<div class="w-16 h-16 rounded-full bg-slate-800 border-2 border-emerald-500 flex items-center justify-center text-2xl font-bold text-emerald-400">${(alunoAtual.nome_completo || 'A')[0]}</div>`;
 
-  // Render da Galeria de Avatares CC
   const galeriaAvataresHTML = AVATARES_PREDEFINIDOS.map(a => `
     <button onclick="selecionarAvatarPredefinido('${a.url}')" class="group relative p-1 rounded-xl bg-slate-950 border border-slate-800 hover:border-emerald-500 transition focus:outline-none">
       <img src="${a.url}" class="w-12 h-12 rounded-lg bg-slate-900 object-cover" title="${a.nome}" alt="${a.nome}">
@@ -319,7 +330,6 @@ async function renderizarPerfil() {
   `).join('');
 
   container.innerHTML = `
-    <!-- Topo do Perfil -->
     <div class="flex items-center gap-4">
       ${avatarHTML}
       <div>
@@ -328,7 +338,6 @@ async function renderizarPerfil() {
       </div>
     </div>
 
-    <!-- 1. EDITAR NOME E APELIDO -->
     <div class="border-t border-slate-800 pt-4 space-y-3">
       <h4 class="font-semibold text-emerald-400 text-sm">👤 Alterar Dados Pessoais</h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -344,16 +353,11 @@ async function renderizarPerfil() {
       <button onclick="atualizarDadosPessoais()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs transition">Guardar Dados</button>
     </div>
 
-    <!-- 2. ESCOLHER FOTO DE PERFIL / GALERIA DE AVATARES CC -->
     <div class="border-t border-slate-800 pt-4 space-y-4">
       <h4 class="font-semibold text-emerald-400 text-sm">🎨 Escolher Avatar Temático (Animes, Estudo, Gamers)</h4>
-      
-      <!-- Galeria de ícones predefinidos -->
       <div class="flex flex-wrap gap-3 p-3 bg-slate-950 border border-slate-800/80 rounded-xl">
         ${galeriaAvataresHTML}
       </div>
-
-      <!-- Ou inserir link customizado -->
       <div>
         <label class="block text-xs text-slate-400 mb-1">Ou cole o link (URL) da sua imagem:</label>
         <div class="flex gap-2">
@@ -363,7 +367,6 @@ async function renderizarPerfil() {
       </div>
     </div>
 
-    <!-- 3. ALTERAR SENHA -->
     <div class="border-t border-slate-800 pt-4 space-y-3">
       <h4 class="font-semibold text-emerald-400 text-sm">🔒 Alterar Senha de Acesso</h4>
       <div class="flex gap-2">
@@ -372,7 +375,6 @@ async function renderizarPerfil() {
       </div>
     </div>
 
-    <!-- 4. MÉTITOS -->
     <div class="border-t border-slate-800 pt-4">
       <h4 class="font-semibold text-emerald-400 text-sm mb-2">🏅 Os Meus Méritos e Conquistas</h4>
       <div class="flex flex-wrap gap-2">
@@ -385,13 +387,11 @@ async function renderizarPerfil() {
   `;
 }
 
-// Função: Selecionar Avatar da Galeria
 async function selecionarAvatarPredefinido(url) {
   document.getElementById('novo-avatar').value = url;
   await atualizarAvatar();
 }
 
-// Função: Atualizar Dados Pessoais
 async function atualizarDadosPessoais() {
   const novoNome = document.getElementById('novo-nome').value.trim();
   const novoApelido = document.getElementById('novo-apelido').value.trim();
@@ -403,10 +403,7 @@ async function atualizarDadosPessoais() {
 
   const { error } = await supabase
     .from('profiles')
-    .update({ 
-      nome_completo: novoNome,
-      apelido: novoApelido 
-    })
+    .update({ nome_completo: novoNome, apelido: novoApelido })
     .eq('id', alunoAtual.id);
 
   if (error) {
@@ -420,7 +417,6 @@ async function atualizarDadosPessoais() {
   }
 }
 
-// Função: Atualizar Avatar (Foto)
 async function atualizarAvatar() {
   const novoAvatar = document.getElementById('novo-avatar').value.trim();
   if (!alunoAtual) return;
@@ -439,7 +435,6 @@ async function atualizarAvatar() {
   }
 }
 
-// Função: Alterar Senha
 async function alterarSenha() {
   const novaSenha = document.getElementById('nova-senha').value;
 
