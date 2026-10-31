@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultura Digital - Módulo 2: Domínio do Teclado e Atalhos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'], 
+                        mono: ['JetBrains Mono', 'monospace'] 
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- SUPABASE & CONTEXTO INICIAL -->
+    <script>
+        const SUPABASE_URL = "https://pnybenlfazdjgqnyuypn.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_2pzNR2UAF2-jfiXQDqrA3w_lwFryik0";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentStudent = null;
+        const MODULE_ID = "teclado_atalhos";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = sessionStorage.getItem('active_student');
+            if (saved) {
+                currentStudent = JSON.parse(saved);
+                document.getElementById('student-name-display').innerText = currentStudent.nome;
+                document.getElementById('student-class-display').innerText = currentStudent.turma;
+            } else {
+                document.getElementById('student-name-display').innerText = "Aluno Visitante";
+                document.getElementById('student-class-display').innerText = "Geral";
+            }
+        });
+    </script>
+
+    <!-- CABEÇALHO COESO -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-3">
+                    <a href="javascript:history.back()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 p-2.5 rounded-xl font-bold transition flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1 class="font-bold text-lg text-white leading-tight">
+                            Cultura Digital <span class="text-xs bg-cyan-500/20 text-cyan-400 font-medium px-2 py-0.5 rounded border border-cyan-500/30">Módulo 2</span>
+                        </h1>
+                        <p class="text-xs text-slate-400">Domínio Avançado do Teclado, Atalhos e Ditado Extenso</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
+                <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs text-slate-300">
+                    <i class="fa-solid fa-user-graduate text-cyan-400"></i>
+                    <span id="student-name-display" class="font-bold">--</span>
+                    <span class="text-slate-600">|</span>
+                    <span id="student-class-display" class="text-slate-400">--</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-trophy text-amber-400"></i>
+                        <span id="xp-counter">0 XP</span>
+                    </div>
+                    <div class="bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-semibold text-cyan-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock"></i>
+                        <span id="timer-display">00:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-full bg-slate-900 h-1.5">
+            <div id="top-progress-bar" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 w-0 transition-all duration-500"></div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- PAINEL ESQUERDO: TEORIA -->
+        <section class="lg:col-span-5 bg-slate-800 border border-slate-700 rounded-2xl flex flex-col shadow-xl overflow-hidden h-full min-h-[580px]">
+            <div class="p-4 bg-slate-800/90 border-b border-slate-700/80 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Tópico Teórico <span id="current-step-num">1</span> de 4</span>
+                    <h2 id="step-title" class="text-lg font-bold text-white">Carregando Teoria...</h2>
+                </div>
+                <span id="step-badge" class="text-xs bg-slate-700 text-slate-300 font-medium px-2 py-1 rounded-md">Fundamentação</span>
+            </div>
+
+            <div class="p-5 flex-1 overflow-y-auto space-y-4 text-slate-300 text-xs sm:text-sm leading-relaxed" id="step-content"></div>
+
+            <div class="p-4 bg-slate-800 border-t border-slate-700 flex items-center justify-between gap-3">
+                <div id="step-feedback" class="text-xs font-medium flex items-center gap-1.5 text-slate-400">
+                    <i class="fa-solid fa-circle-info"></i> Complete a atividade ao lado para avançar.
+                </div>
+                <button id="next-btn" onclick="nextStep()" disabled class="disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all">
+                    <span>Próxima Etapa</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- PAINEL DIREITO: LABORATÓRIO PRÁTICO -->
+        <section class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full min-h-[580px] p-6">
+            <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-keyboard text-cyan-400"></i>
+                <span>Laboratório Prático, Atalhos e Ditado Amplo</span>
+            </h3>
+            <div id="interactive-container" class="flex-1 flex flex-col justify-center gap-4"></div>
+        </section>
+    </main>
+
+    <!-- MODAL DE CONCLUSÃO -->
+    <div id="completion-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6 text-center">
+            <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Desafio de Digitação Concluído!</span>
+                <h3 class="text-2xl font-extrabold text-white mt-1">Pontuação Registrada com Sucesso</h3>
+                <p class="text-slate-300 text-sm mt-2">Seu tempo e índice de precisão foram gravados na base de dados.</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-xs text-left space-y-2">
+                <div class="flex justify-between"><span class="text-slate-400">Aluno:</span> <strong id="res-name" class="text-white">--</strong></div>
+                <div class="flex justify-between"><span class="text-slate-400">Tempo de Execução:</span> <strong id="res-time" class="text-cyan-400">--</strong></div>
+                <div class="flex justify-between"><span class="text-slate-400">Pontuação Final:</span> <strong id="res-xp" class="text-amber-400">-- XP</strong></div>
+            </div>
+            <button onclick="window.history.back()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-house"></i> Voltar ao Portal de Lições
+            </button>
+        </div>
+    </div>
+
+    <!-- MOTOR DE LÓGICA E INTERAÇÕES DA AULA -->
+    <script>
+        const LESSON_STEPS = [
+            {
+                id: 1,
+                title: "Anatomia e Teclas Modificadoras",
+                badge: "Teoria & Análise",
+                content: `
+                    <p class="font-semibold text-white">Zonas do Teclado e Modificadores:</p>
+                    <p>O teclado divide-se em blocos funcionais (Alfanumérico, Função, Navegação e Numpad). Teclas como <strong>Ctrl</strong>, <strong>Alt</strong>, <strong>Shift</strong> e <strong>AltGr</strong> modificam o comportamento das teclas comuns para gerar caracteres terciários e comandos rápidos.</p>
+                `,
+                xp: 25,
+                type: 'quiz',
+                items: [
+                    { name: "Qual tecla modificadora combinada com 'C' e 'V' viabiliza operações rápidas de área de transferência?", answer: "Ctrl (Control)", options: ["Ctrl (Control)", "Caps Lock"] },
+                    { name: "Para que serve primariamente a tecla 'Home' no Bloco de Navegação?", answer: "Retornar o cursor para o início da linha atual", options: ["Retornar o cursor para o início da linha atual", "Apagar o caractere à direita"] }
+                ]
+            },
+            {
+                id: 2,
+                title: "Acentuação ABNT2 e Caracteres Especiais",
+                badge: "Ortografia & Teclas Mortas",
+                content: `
+                    <p class="font-semibold text-white">Teclas Mortas e Padrão ABNT2:</p>
+                    <p>No teclado padrão brasileiro (ABNT2), acentos (´, ˆ, ~, \`) são <em>teclas mortas</em>. Para o caractere de arroba (<strong>@</strong>) no padrão ABNT2, utiliza-se a combinação <strong>AltGr + Q</strong> (ou Ctrl + Alt + Q).</p>
+                `,
+                xp: 25,
+                type: 'quiz',
+                items: [
+                    { name: "Para digitar o caractere de arroba (@) em um teclado padrão ABNT2, qual combinação correta deve ser efetuada?", answer: "AltGr + Q (ou Ctrl + Alt + Q)", options: ["AltGr + Q (ou Ctrl + Alt + Q)", "Shift + 2"] },
+                    { name: "Como o sistema operacional processa uma tecla morta (ex: acento agudo seguido da letra 'a')?", answer: "Aguarda a digitação da vogal para fundi-las em um único caractere (á)", options: ["Aguarda a digitação da vogal para fundi-las em um único caractere (á)", "Exibe imediatamente o acento isolado e pula o espaço"] }
+                ]
+            },
+            {
+                id: 3,
+                title: "Simulador Interativo: Alternância de Janelas (Alt + Tab)",
+                badge: "Simulador Prático",
+                content: `
+                    <p class="font-semibold text-white">Simulação do Alt + Tab:</p>
+                    <p>O atalho <strong>Alt + Tab</strong> permite alternar rapidamente entre aplicações abertas no Windows sem usar o mouse.</p>
+                    <p class="mt-2 text-cyan-400"><strong>Desafio:</strong> Clique no botão correspondente à janela solicitada no simulador ao lado para alternar com sucesso.</p>
+                `,
+                xp: 25,
+                type: 'alt_tab_sim'
+            },
+            {
+                id: 4,
+                title: "Desafio de Digitação Amplo e Ditado Técnico",
+                badge: "Avaliação Prática Ampla",
+                content: `
+                    <p class="font-semibold text-white">Teste Extenso de Digitação:</p>
+                    <p>Agora você colocará à prova toda a sua agilidade com acentuação complexa, símbolos terciários e pontuação especial.</p>
+                    <ul class="list-disc list-inside space-y-1 text-xs mt-2 text-slate-300 bg-slate-900/60 p-3 rounded border border-slate-700">
+                        <li>Acentuação completa: <strong>á, ê, í, õ, à</strong>.</li>
+                        <li>Pontuação e Símbolos: <strong>( ) [ ] { } " " : ; ! ? - @ % & /</strong>.</li>
+                        <li>Colar texto (Ctrl+V) está <strong>desabilitado</strong> neste campo!</li>
+                    </ul>
+                `,
+                xp: 25,
+                type: 'dictation_test_extended'
+            }
+        ];
+
+        let currentStepIndex = 0;
+        let totalXP = 0;
+        let secondsElapsed = 0;
+        let timerInterval = null;
+        let currentItemIndex = 0;
+
+        const altTabTargets = [
+            { target: "Navegador Web", windows: ["Bloco de Notas", "Navegador Web", "Explorador de Arquivos"] },
+            { target: "Editor de Texto", windows: ["Gerenciador de Tarefas", "Editor de Texto", "Calculadora"] }
+        ];
+        let altTabStep = 0;
+
+        const targetExtendedDictation = `Atenção (estudantes do curso): a avaliação prática exige 100% de precisão! Verifique se a acentuação gráfica - agudo (á, é), circunflexo (ê, ô), til (ã, õ) e crase (à) - funciona corretamente. Não esqueça dos caracteres especiais: ç, @, %, colchetes [100%] e aspas "Cultura Digital". Você está pronto?`;
+
+        window.onload = function() {
+            startTimer();
+            renderStep(0);
+        };
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function renderStep(index) {
+            const step = LESSON_STEPS[index];
+            currentItemIndex = 0;
+            document.getElementById('current-step-num').innerText = step.id;
+            document.getElementById('step-title').innerText = step.title;
+            document.getElementById('step-badge').innerText = step.badge;
+            document.getElementById('step-content').innerHTML = step.content;
+
+            const progressPercent = (index / LESSON_STEPS.length) * 100;
+            document.getElementById('top-progress-bar').style.width = `${progressPercent}%`;
+
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('step-feedback').className = "text-xs font-medium flex items-center gap-1.5 text-slate-400";
+            document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-info"></i> Conclua a atividade ao lado.`;
+
+            loadInteractiveArea(step);
+        }
+
+        function loadInteractiveArea(step) {
+            const container = document.getElementById('interactive-container');
+            container.innerHTML = '';
+
+            if (step.type === 'quiz') {
+                loadQuizItem(step);
+            } else if (step.type === 'alt_tab_sim') {
+                loadAltTabSimulator();
+            } else if (step.type === 'dictation_test_extended') {
+                loadExtendedDictationTest();
+            }
+        }
+
+        function loadQuizItem(step) {
+            const container = document.getElementById('interactive-container');
+            if (currentItemIndex >= step.items.length) {
+                container.innerHTML = `
+                    <div class="p-8 bg-slate-900 border border-emerald-500/40 rounded-xl text-center space-y-3">
+                        <i class="fa-solid fa-circle-check text-emerald-400 text-4xl"></i>
+                        <h4 class="font-bold text-white text-lg">Tópico Concluído com Sucesso!</h4>
+                    </div>
+                `;
+                unlockNextStep();
+                return;
+            }
+
+            const item = step.items[currentItemIndex];
+            let buttonsHTML = item.options.map(opt => `
+                <button onclick="verifyQuizAnswer('${opt.replace(/'/g, "\\'")}', '${item.answer.replace(/'/g, "\\'")}')" class="p-4 bg-slate-900 border border-slate-700 hover:border-cyan-500 rounded-xl text-center text-slate-200 font-bold text-xs sm:text-sm transition">
+                    ${opt}
+                </button>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6 text-center">
+                    <span class="text-xs uppercase tracking-wider text-cyan-400 font-bold">Questão ${currentItemIndex + 1} de ${step.items.length}</span>
+                    <div class="text-sm sm:text-base font-extrabold text-white bg-slate-950 p-4 rounded-lg border border-slate-800">
+                        "${item.name}"
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        ${buttonsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function verifyQuizAnswer(selected, correct) {
+            if (selected === correct) {
+                currentItemIndex++;
+                loadQuizItem(LESSON_STEPS[currentStepIndex]);
+            } else {
+                alert("Resposta incorreta. Revise o texto teórico e tente novamente.");
+            }
+        }
+
+        function loadAltTabSimulator() {
+            const container = document.getElementById('interactive-container');
+            if (altTabStep >= altTabTargets.length) {
+                container.innerHTML = `
+                    <div class="p-8 bg-slate-900 border border-emerald-500/40 rounded-xl text-center space-y-3">
+                        <i class="fa-solid fa-circle-check text-emerald-400 text-4xl"></i>
+                        <h4 class="font-bold text-white text-lg">Simulação de Alt + Tab Concluída!</h4>
+                    </div>
+                `;
+                unlockNextStep();
+                return;
+            }
+
+            const currentObj = altTabTargets[altTabStep];
+            let windowsHTML = currentObj.windows.map(win => `
+                <button onclick="verifyAltTab('${win}', '${currentObj.target}')" class="p-4 bg-slate-900 border border-slate-700 hover:border-cyan-500 rounded-xl text-center text-slate-200 font-bold text-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-window-maximize text-cyan-400"></i> ${win}
+                </button>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6 text-center">
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block mb-1">Simulador de Janelas Ativas (Alt + Tab pressionado)</span>
+                        <h4 class="text-base font-bold text-amber-400">Alterne para a janela: <span class="underline text-white">${currentObj.target}</span></h4>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        ${windowsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function verifyAltTab(selected, target) {
+            if (selected === target) {
+                altTabStep++;
+                loadAltTabSimulator();
+            } else {
+                alert("Janela incorreta! Selecione a janela indicada na instrução.");
+            }
+        }
+
+        function loadExtendedDictationTest() {
+            const container = document.getElementById('interactive-container');
+            container.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+                    <div>
+                        <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider block mb-1">Texto de Referência para Ditado:</span>
+                        <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs sm:text-sm leading-relaxed select-none" id="dictation-target">
+                            ${targetExtendedDictation}
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Sua Digitação:</span>
+                        <textarea id="dictation-input" onpaste="return false;" oninput="checkDictationProgress()" placeholder="Digite o texto acima exatamente como apresentado..." class="w-full h-32 p-3 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 font-mono text-xs sm:text-sm focus:outline-none focus:border-cyan-500 resize-none"></textarea>
+                    </div>
+
+                    <div id="dictation-status" class="text-xs text-slate-400 font-mono flex justify-between">
+                        <span>Caracteres: <strong id="char-count" class="text-white">0</strong> / ${targetExtendedDictation.length}</span>
+                        <span id="match-status" class="text-amber-400 font-semibold">Aguardando digitação...</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkDictationProgress() {
+            const inputVal = document.getElementById('dictation-input').value;
+            const countElem = document.getElementById('char-count');
+            const statusElem = document.getElementById('match-status');
+
+            countElem.innerText = inputVal.length;
+
+            if (inputVal === targetExtendedDictation) {
+                statusElem.className = "text-emerald-400 font-semibold";
+                statusElem.innerText = "Texto Perfeito!";
+                unlockNextStep();
+            } else if (targetExtendedDictation.startsWith(inputVal)) {
+                statusElem.className = "text-cyan-400 font-semibold";
+                statusElem.innerText = "Digitando com precisão...";
+            } else {
+                statusElem.className = "text-rose-400 font-semibold";
+                statusElem.innerText = "Erro de digitação detectado!";
+            }
+        }
+
+        function unlockNextStep() {
+            totalXP += LESSON_STEPS[currentStepIndex].xp;
+            document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+            
+            const btn = document.getElementById('next-btn');
+            btn.disabled = false;
+            
+            const feedback = document.getElementById('step-feedback');
+            feedback.className = "text-xs font-medium flex items-center gap-1.5 text-emerald-400";
+            feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Etapa concluída! Clique em Avançar.`;
+        }
+
+        function nextStep() {
+            if (currentStepIndex < LESSON_STEPS.length - 1) {
+                currentStepIndex++;
+                renderStep(currentStepIndex);
+            } else {
+                finishLesson();
+            }
+        }
+
+        async function finishLesson() {
+            clearInterval(timerInterval);
+            document.getElementById('top-progress-bar').style.width = '100%';
+
+            const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+            const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+            const timeStr = `${mins}:${secs}`;
+
+            document.getElementById('res-name').innerText = currentStudent ? currentStudent.nome : "Aluno Visitante";
+            document.getElementById('res-time').innerText = timeStr;
+            document.getElementById('res-xp').innerText = `${totalXP} XP`;
+
+            if (currentStudent && currentStudent.id) {
+                try {
+                    await _supabase.from('desempenho').insert([{
+                        aluno_id: currentStudent.id,
+                        modulo_id: MODULE_ID,
+                        xp: totalXP,
+                        tempo_segundos: secondsElapsed,
+                        concluido: true
+                    }]);
+                } catch (e) {
+                    console.error("Erro ao salvar no Supabase:", e);
+                }
+            }
+
+            document.getElementById('completion-modal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
