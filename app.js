@@ -135,31 +135,48 @@ async function verificarSessao() {
 }
 
 async function verificarEstadoEEntrar(user) {
+  // 1. Busca os dados do perfil sem JOINs que causam falhas de RLS
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('*, turmas(nome)')
+    .select('*')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (error || !profile) {
-    alert('Erro ao carregar os teus dados de perfil.');
+    alert('Erro ao carregar os teus dados de perfil. O registo de perfil não existe ou não foi aprovado.');
+    await supabase.auth.signOut();
     return;
   }
 
+  // 2. Verifica aprovação
   if (profile.status === 'pendente') {
     alert('A tua conta ainda está a aguardar aprovação pelo professor.');
     await supabase.auth.signOut();
     return;
   }
 
+  // 3. Obtém o nome da turma separadamente
+  let nomeTurma = 'Sem Turma';
+  if (profile.turma_id) {
+    const { data: turma } = await supabase
+      .from('turmas')
+      .select('nome')
+      .eq('id', profile.turma_id)
+      .maybeSingle();
+
+    if (turma) {
+      nomeTurma = turma.nome;
+    }
+  }
+
   alunoAtual = profile;
 
+  // Exibe a área autenticada
   document.getElementById('auth-section').classList.add('hidden');
   document.getElementById('app-content').classList.remove('hidden');
 
   const userInfo = document.getElementById('user-info');
   if (userInfo) {
-    const nomeTurma = profile.turmas ? profile.turmas.nome : 'Sem Turma';
     userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${profile.apelido || profile.nome_completo}</strong> (${nomeTurma})`;
   }
 
