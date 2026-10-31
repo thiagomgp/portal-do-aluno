@@ -4,9 +4,13 @@
 const SUPABASE_URL = 'https://iivgusjzerqrdgctcvo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Evita a redeclaração se 'supabase' já existir no escopo global
+if (typeof window.supabaseClient === 'undefined') {
+  window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+const supabase = window.supabaseClient;
 
-// Variable global para armazenar os dados do aluno logado
+// Variável global para armazenar os dados do aluno logado
 let alunoAtual = null;
 
 // ==========================================
