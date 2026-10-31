@@ -4,11 +4,14 @@
 const SUPABASE_URL = 'https://iivgusjzerqrdgctcvo.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
 
-// Inicializa o cliente do Supabase
-var supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+if (!window.supabaseClient) {
+  window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+var supabase = window.supabaseClient;
 
 // Variável global para armazenar os dados do aluno logado
 let alunoAtual = null;
+
 // ==========================================
 // 2. NAVEGAÇÃO DE ABAS
 // ==========================================
@@ -26,7 +29,6 @@ function navigate(tabName) {
     }
   });
 
-  // Atualiza os dados da aba correspondente
   if (tabName === 'disciplinas') carregarDisciplinas();
   if (tabName === 'jogos') carregarJogos();
   if (tabName === 'perfil') renderizarPerfil();
@@ -39,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
   carregarTurmasCadastro();
   verificarSessao();
 
-  // Formulário de Login
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -62,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Formulário de Registo (Novo Aluno)
   const registerForm = document.getElementById('register-form');
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
@@ -73,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = document.getElementById('reg-email').value;
       const password = document.getElementById('reg-password').value;
 
-      // 1. Regista no Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -84,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // 2. Insere na tabela profiles como pendente
       if (authData.user) {
         const { error: profileError } = await supabase.from('profiles').insert([
           {
@@ -99,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (profileError) {
           alert('Erro ao guardar perfil: ' + profileError.message);
         } else {
-          alert('Registo efetuado com sucesso! Aguarda a aprovação do teu professor para acederes.');
+          alert('Registo efetuado com sucesso! Aguarda a aprovação do teu professor.');
           if (typeof toggleAuthMode === 'function') {
             toggleAuthMode('login');
           }
@@ -110,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Carrega as turmas dinamicamente no <select> de Registo
 async function carregarTurmasCadastro() {
   const selectTurma = document.getElementById('reg-turma');
   if (!selectTurma) return;
@@ -122,7 +119,6 @@ async function carregarTurmasCadastro() {
   }
 }
 
-// Verifica se já existe utilizador com sessão ativa no navegador
 async function verificarSessao() {
   const { data: { session } } = await supabase.auth.getSession();
   if (session && session.user) {
@@ -130,7 +126,6 @@ async function verificarSessao() {
   }
 }
 
-// Valida se a conta do aluno já foi aprovada pelo professor
 async function verificarEstadoEEntrar(user) {
   const { data: profile, error } = await supabase
     .from('profiles')
@@ -151,23 +146,18 @@ async function verificarEstadoEEntrar(user) {
 
   alunoAtual = profile;
 
-  // Exibe o painel e oculta os formulários de entrada
   document.getElementById('auth-section').classList.add('hidden');
   document.getElementById('app-content').classList.remove('hidden');
 
   const userInfo = document.getElementById('user-info');
   if (userInfo) {
     const nomeTurma = profile.turmas ? profile.turmas.nome : 'Sem Turma';
-    userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${profile.apelido || profile.nome_completo}</strong> (${nomeTurma})`;
+    userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${profile.apelido \vert{}\vert{} profile.nome_completo}</strong> (${nomeTurma})`;
   }
 
-  // Carrega o Mural Inicial
   carregarAvisos();
 }
 
-// ==========================================
-// 4. LÓGICA DO MURAL DE AVISOS (INÍCIO)
-// ==========================================
 async function carregarAvisos() {
   if (!alunoAtual) return;
 
@@ -196,13 +186,9 @@ async function carregarAvisos() {
   `).join('');
 }
 
-// ==========================================
-// 5. LÓGICA DAS DISCIPLINAS (BNCC)
-// ==========================================
 async function carregarDisciplinas() {
   if (!alunoAtual) return;
 
-  // Consulta apenas disciplinas autorizadas para a turma do aluno
   const { data: disciplinasLiberadas, error } = await supabase
     .from('turma_disciplinas')
     .select('disciplinas(*)')
@@ -239,9 +225,6 @@ function abrirConteudo(disciplinaId, tipo) {
   alert(`A abrir os conteúdos do tipo [${tipo.toUpperCase()}] para a disciplina.`);
 }
 
-// ==========================================
-// 6. LÓGICA DOS JOGOS PEDAGÓGICOS
-// ==========================================
 async function carregarJogos() {
   const { data: jogos, error } = await supabase.from('jogos').select('*');
   const container = document.getElementById('lista-jogos');
@@ -263,16 +246,12 @@ async function carregarJogos() {
   `).join('');
 }
 
-// ==========================================
-// 7. LÓGICA DO PERFIL DO ALUNO
-// ==========================================
 async function renderizarPerfil() {
   if (!alunoAtual) return;
 
   const container = document.getElementById('dados-perfil');
   if (!container) return;
 
-  // Procura os méritos do aluno
   const { data: meritos } = await supabase.from('meritos').select('*').eq('aluno_id', alunoAtual.id);
 
   container.innerHTML = `
@@ -295,31 +274,4 @@ async function renderizarPerfil() {
     </div>
 
     <div class="border-t border-slate-800 pt-4">
-      <h4 class="font-semibold text-emerald-400 text-sm mb-2">Os Meus Méritos e Conquistas</h4>
-      <div class="flex flex-wrap gap-2">
-        ${meritos && meritos.length > 0 
-          ? meritos.map(m => `<span class="bg-emerald-950 border border-emerald-800 text-emerald-300 text-xs px-3 py-1.5 rounded-full font-medium">🏅 ${m.titulo}</span>`).join('')
-          : '<p class="text-xs text-slate-500">Ainda não tens méritos atribuídos pelo teu professor.</p>'
-        }
-      </div>
-    </div>
-  `;
-}
-
-async function atualizarApelido() {
-  const novoApelido = document.getElementById('novo-apelido').value;
-  if (!novoApelido || !alunoAtual) return;
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({ apelido: novoApelido })
-    .eq('id', alunoAtual.id);
-
-  if (error) {
-    alert('Erro ao atualizar apelido: ' + error.message);
-  } else {
-    alert('Apelido atualizado com sucesso!');
-    alunoAtual.apelido = novoApelido;
-    renderizarPerfil();
-  }
-}
+      <h4 class="font-semibold text-emerald-40
