@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,50 +7,226 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-900 text-white min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
 
-  <nav class="p-4 bg-slate-800 flex justify-between items-center border-b border-indigo-500/30">
-    <h1 class="text-xl font-bold text-indigo-400">Painel do Professor</h1>
-    <span class="text-sm text-slate-400">Gestão e Acompanhamento</span>
+  <!-- Navegação Superior -->
+  <nav class="p-4 bg-slate-900 border-b border-indigo-500/30 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-2">
+      <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></div>
+      <h1 class="text-xl font-bold text-indigo-400">Painel do Professor</h1>
+    </div>
+    <span class="text-sm text-slate-400">Gestão & Acompanhamento</span>
   </nav>
 
-  <main class="container mx-auto p-6 space-y-6">
-    <!-- Secção de Gestão de Alunos -->
-    <section class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-      <h2 class="text-lg font-bold text-indigo-400 mb-4">Lista de Alunos</h2>
+  <main class="container mx-auto p-6 space-y-8">
+
+    <!-- SECÇÃO 1: GESTÃO DE TURMAS (CRIAR E EXCLUIR) -->
+    <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+      <h2 class="text-lg font-bold text-indigo-400 mb-4 flex items-center gap-2">
+        🏫 Gerenciar Turmas
+      </h2>
+      
+      <!-- Formulário para Criar Turma -->
+      <form id="form-criar-turma" class="flex gap-3 mb-6">
+        <input type="text" id="nome-turma" class="flex-1 p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500" placeholder="Ex: Turma 81, 101, 201..." required>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-lg transition">Criar Turma</button>
+      </form>
+
+      <!-- Lista de Turmas Existentes -->
+      <div id="lista-turmas" class="flex flex-wrap gap-3">
+        <!-- Turmas serão carregadas aqui -->
+      </div>
+    </section>
+
+    <!-- SECÇÃO 2: GESTÃO E APROVAÇÃO DE ALUNOS -->
+    <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold text-indigo-400">🎓 Alunos Registrados</h2>
+        <button onclick="carregarAlunos()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300">Atualizar Lista</button>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="border-b border-slate-700 text-slate-400 text-sm">
-              <th class="p-2">Nome</th>
-              <th class="p-2">Turma</th>
-              <th class="p-2">Status</th>
-              <th class="p-2 text-right">Ações</th>
+            <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider">
+              <th class="p-3">Nome Completo</th>
+              <th class="p-3">Turma</th>
+              <th class="p-3">Status</th>
+              <th class="p-3 text-right">Ações</th>
             </tr>
           </thead>
-          <tbody id="tabela-alunos" class="divide-y divide-slate-700">
-            <!-- Preenchido via JS com alunos registados -->
+          <tbody id="tabela-alunos" class="divide-y divide-slate-800 text-sm">
+            <!-- Linhas dos alunos -->
           </tbody>
         </table>
       </div>
     </section>
 
-    <!-- Secção de Envio de Avisos -->
-    <section class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-      <h2 class="text-lg font-bold text-indigo-400 mb-4">Enviar Novo Aviso</h2>
+    <!-- SECÇÃO 3: ENVIAR AVISO -->
+    <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+      <h2 class="text-lg font-bold text-indigo-400">📢 Publicar Aviso no Mural</h2>
       <form id="form-aviso" class="space-y-4">
         <div>
-          <label class="block text-sm mb-1">Título do Aviso</label>
-          <input type="text" id="aviso-titulo" class="w-full p-2 bg-slate-900 rounded border border-slate-700 text-white" required>
+          <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Título</label>
+          <input type="text" id="aviso-titulo" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500" required>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Destino</label>
+            <select id="aviso-tipo" onchange="alternarDestinoAviso()" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white">
+              <option value="turma">Toda a Turma</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Selecione a Turma</label>
+            <select id="aviso-turma" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white">
+              <!-- Turmas aqui -->
+            </select>
+          </div>
         </div>
         <div>
-          <label class="block text-sm mb-1">Mensagem</label>
-          <textarea id="aviso-mensagem" class="w-full p-2 bg-slate-900 rounded border border-slate-700 text-white" rows="3" required></textarea>
+          <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Mensagem</label>
+          <textarea id="aviso-mensagem" rows="3" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500" required></textarea>
         </div>
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded font-bold transition">Publicar Aviso</button>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-lg transition">Publicar Aviso</button>
       </form>
     </section>
+
   </main>
 
+  <script>
+    const SUPABASE_URL = 'https://iivgusjzerqrdgctcvo.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarTurmas();
+      carregarAlunos();
+
+      // Criar Turma
+      document.getElementById('form-criar-turma').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome-turma').value.trim();
+        if (!nome) return;
+
+        const { error } = await supabase.from('turmas').insert([{ nome: nome }]);
+        if (error) {
+          alert('Erro ao criar turma: ' + error.message);
+        } else {
+          document.getElementById('nome-turma').value = '';
+          carregarTurmas();
+        }
+      });
+
+      // Publicar Aviso
+      document.getElementById('form-aviso').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const titulo = document.getElementById('aviso-titulo').value;
+        const mensagem = document.getElementById('aviso-mensagem').value;
+        const turmaId = document.getElementById('aviso-turma').value;
+
+        const { error } = await supabase.from('avisos').insert([{
+          titulo: titulo,
+          mensagem: mensagem,
+          tipo: 'turma',
+          turma_id: turmaId
+        }]);
+
+        if (error) {
+          alert('Erro ao publicar aviso: ' + error.message);
+        } else {
+          alert('Aviso publicado com sucesso!');
+          document.getElementById('form-aviso').reset();
+        }
+      });
+    });
+
+    // Carregar Turmas e exibir botões de exclusão
+    async function carregarTurmas() {
+      const { data: turmas, error } = await supabase.from('turmas').select('*').order('nome');
+      const container = document.getElementById('lista-turmas');
+      const selectAviso = document.getElementById('aviso-turma');
+
+      if (error || !turmas || turmas.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500">Nenhuma turma cadastrada ainda.</p>';
+        selectAviso.innerHTML = '<option value="">Crie uma turma primeiro...</option>';
+        return;
+      }
+
+      container.innerHTML = turmas.map(t => `
+        <div class="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg">
+          <span class="text-sm font-semibold text-indigo-300">${t.nome}</span>
+          <button onclick="excluirTurma('${t.id}', '${t.nome}')" class="text-xs text-rose-500 hover:text-rose-400 font-bold ml-1">✕</button>
+        </div>
+      `).join('');
+
+      selectAviso.innerHTML = turmas.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+    }
+
+    // Excluir Turma
+    async function excluirTurma(id, nome) {
+      if (!confirm(`Tem certeza que deseja excluir a turma "${nome}"?`)) return;
+
+      const { error } = await supabase.from('turmas').delete().eq('id', id);
+      if (error) {
+        alert('Erro ao excluir turma: ' + error.message);
+      } else {
+        carregarTurmas();
+      }
+    }
+
+    // Carregar Lista de Alunos para Aprovação / Gestão
+    async function carregarAlunos() {
+      const { data: alunos, error } = await supabase
+        .from('profiles')
+        .select('*, turmas(nome)')
+        .eq('role', 'aluno')
+        .order('created_at', { ascending: false });
+
+      const tabela = document.getElementById('tabela-alunos');
+      if (error || !alunos || alunos.length === 0) {
+        tabela.innerHTML = '<tr><td colspan="4" class="p-4 text-slate-500 text-center">Nenhum aluno registrado.</td></tr>';
+        return;
+      }
+
+      tabela.innerHTML = alunos.map(a => `
+        <tr>
+          <td class="p-3 font-medium text-slate-200">${a.nome_completo}</td>
+          <td class="p-3 text-slate-400">${a.turmas ? a.turmas.nome : 'Sem Turma'}</td>
+          <td class="p-3">
+            <span class="px-2 py-1 rounded text-xs font-bold ${a.status === 'aprovado' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
+              ${a.status || 'pendente'}
+            </span>
+          </td>
+          <td class="p-3 text-right space-x-2">
+            ${a.status !== 'aprovado' ? `<button onclick="alterarStatusAluno('${a.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded transition">Aprovar</button>` : ''}
+            <button onclick="excluirAluno('${a.id}')" class="bg-rose-950 hover:bg-rose-900 text-rose-400 border border-rose-800 text-xs px-2.5 py-1 rounded transition">Excluir</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Aprovar Aluno
+    async function alterarStatusAluno(id, novoStatus) {
+      const { error } = await supabase.from('profiles').update({ status: novoStatus }).eq('id', id);
+      if (error) {
+        alert('Erro ao atualizar aluno: ' + error.message);
+      } else {
+        carregarAlunos();
+      }
+    }
+
+    // Excluir Conta do Aluno
+    async function excluirAluno(id) {
+      if (!confirm('Deseja realmente excluir a conta deste aluno?')) return;
+      const { error } = await supabase.from('profiles').delete().eq('id', id);
+      if (error) {
+        alert('Erro ao excluir aluno: ' + error.message);
+      } else {
+        carregarAlunos();
+      }
+    }
+  </script>
 </body>
 </html>
