@@ -1,61 +1,100 @@
 // ==========================================
-// 5. LÓGICA DAS DISCIPLINAS E CONTEÚDOS DAS AULAS
+// FORMULÁRIO DE LOGIN CORRIGIDO (PREVINE RECARREGAMENTO)
 // ==========================================
-async function carregarDisciplinas() {
-  if (!alunoAtual) return;
+document.addEventListener('DOMContentLoaded', () => {
+  carregarTurmasCadastro();
+  verificarSessao();
 
-  const { data: disciplinasLiberadas, error } = await supabase
-    .from('turma_disciplinas')
-    .select('disciplinas(*)')
-    .eq('turma_id', alunoAtual.turma_id);
+  const loginForm = document.getElementById('login-form');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Impede a recarga da página
+      e.stopPropagation();
 
-  const container = document.getElementById('lista-disciplinas');
-  if (!container) return;
+      const emailInput = document.getElementById('login-email');
+      const passwordInput = document.getElementById('login-password');
 
-  if (error || !disciplinasLiberadas || disciplinasLiberadas.length === 0) {
-    container.innerHTML = '<p class="text-slate-400 col-span-full">Ainda não existem disciplinas atribuídas à tua turma.</p>';
-    return;
+      if (!emailInput || !passwordInput) return;
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+        if (error) {
+          alert('Erro ao entrar: ' + error.message);
+          return;
+        }
+
+        if (data && data.user) {
+          await verificarEstadoEEntrar(data.user);
+        }
+      } catch (err) {
+        console.error('Erro inesperado no login:', err);
+        alert('Ocorreu um erro ao tentar realizar o login.');
+      }
+    });
   }
+});
 
-  container.innerHTML = disciplinasLiberadas.map(item => {
-    const disc = item.disciplinas;
-    return `
-      <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 hover:border-emerald-500/50 transition shadow-lg flex flex-col justify-between">
-        <div>
-          <span class="text-xs font-semibold px-2 py-1 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/50">${disc.codigo_bncc || 'BNCC'}</span>
-          <h3 class="text-lg font-bold text-slate-100 mt-2">${disc.nome}</h3>
-          <p class="text-xs text-slate-400 mt-1">${disc.descricao || 'Conteúdos da disciplina.'}</p>
-        </div>
-        
-        <div class="grid grid-cols-3 gap-2 mt-6">
-          <button onclick="abrirAulasDisciplina('${disc.id}')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">🎬 Aulas</button>
-          <button onclick="abrirConteudo('${disc.id}', 'material')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📁 Materiais</button>
-          <button onclick="abrirConteudo('${disc.id}', 'prova')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📝 Provas</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
+// ==========================================
+// VERIFICAÇÃO DE PERFIL E LIBERAÇÃO DE TELA
+// ==========================================
+async function verificarEstadoEEntrar(user) {
+  try {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
 
-// Lógica para abrir a aula com credenciais do aluno logado
-function abrirAulasDisciplina(disciplinaId) {
-  if (!alunoAtual) return;
+    if (error) {
+      alert('Erro na consulta do perfil: ' + error.message);
+      await supabase.auth.signOut();
+      return;
+    }
 
-  // Prepara os dados na sessão
-  const alunoDados = {
-    id: alunoAtual.id,
-    nome: alunoAtual.nome_completo,
-    turma: alunoAtual.turma_id || 'Geral'
-  };
-  sessionStorage.setItem('active_student', JSON.stringify(alunoDados));
+    if (!profile) {
+      alert('Perfil de aluno não encontrado na base de dados.');
+      await supabase.auth.signOut();
+      return;
+    }
 
-  // Monta a URL com parâmetros seguros
-  const params = new URLSearchParams({
-    id: alunoAtual.id,
-    nome: alunoAtual.nome_completo,
-    turma: alunoDados.turma
-  });
+    if (profile.status === 'pendente') {
+      alert('A tua conta ainda está a aguardar aprovação pelo professor.');
+      await supabase.auth.signOut();
+      return;
+    }
 
-  // Abre a aula interativa
-  window.open(`aulainterativa/intro_hw_sw.html?${params.toString()}`, '_blank');
+    let nomeTurma = 'Sem Turma';
+    if (profile.turma_id) {
+      const { data: turma } = await supabase
+        .from('turmas')
+        .select('nome')
+        .eq('id', profile.turma_id)
+        .maybeSingle();
+
+      if (turma) {
+        nomeTurma = turma.nome;
+      }
+    }
+
+    alunoAtual = profile;
+
+    // Oculta tela de login e exibe o portal
+    const authSection = document.getElementById('auth-section');
+    const appContent = document.getElementById('app-content');
+
+    if (authSection) authSection.classList.add('hidden');
+    if (appContent) appContent.classList.remove('hidden');
+
+    atualizarCabecalhoUsuario(nomeTurma);
+    carregarAvisos();
+  } catch (err) {
+    console.error('Erro ao verificar estado:', err);
+  }
 }
