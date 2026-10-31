@@ -11,6 +11,27 @@ var supabase = window.supabaseClient;
 
 let alunoAtual = null;
 
+// Lista de Avatares CC (Animes, Estudo, Gamers, Jovens)
+const AVATARES_PREDEFINIDOS = [
+  // Anime / Mangá
+  { nome: 'Anime Boy 1', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Felix' },
+  { nome: 'Anime Girl 1', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aria' },
+  { nome: 'Anime Boy 2', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Zack' },
+  { nome: 'Anime Girl 2', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Luna' },
+  
+  // Estudo / Estudantes
+  { nome: 'Estudante 1', url: 'https://api.dicebear.com/7.x/open-peeps/svg?seed=Student1' },
+  { nome: 'Estudante 2', url: 'https://api.dicebear.com/7.x/open-peeps/svg?seed=Student2' },
+  { nome: 'Estudante 3', url: 'https://api.dicebear.com/7.x/open-peeps/svg?seed=Student3' },
+  { nome: 'Estudante 4', url: 'https://api.dicebear.com/7.x/open-peeps/svg?seed=Student4' },
+
+  // Gamers & Estilo Jovem
+  { nome: 'Gamer Pixel', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=PixelGamer' },
+  { nome: 'Cyber Jovem', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CyberStudent' },
+  { nome: 'Jovem Cool', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CoolKid' },
+  { nome: 'Jovem Creative', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Artist' }
+];
+
 // ==========================================
 // 2. NAVEGAÇÃO DE ABAS
 // ==========================================
@@ -275,7 +296,7 @@ async function carregarJogos() {
 }
 
 // ==========================================
-// 7. LÓGICA DO PERFIL COMPLETO (NOME, APELIDO, AVATAR, SENHA)
+// 7. LÓGICA DO PERFIL COMPLETO (COM GALERIA DE AVATARES CC)
 // ==========================================
 async function renderizarPerfil() {
   if (!alunoAtual) return;
@@ -285,10 +306,17 @@ async function renderizarPerfil() {
 
   const { data: meritos } = await supabase.from('meritos').select('*').eq('aluno_id', alunoAtual.id);
 
-  // Avatar em imagem ou Inicial
+  // Avatar do Usuário
   const avatarHTML = alunoAtual.avatar_url 
-    ? `<img src="${alunoAtual.avatar_url}" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-500" alt="Avatar">`
+    ? `<img src="${alunoAtual.avatar_url}" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-500 bg-slate-800" alt="Avatar">`
     : `<div class="w-16 h-16 rounded-full bg-slate-800 border-2 border-emerald-500 flex items-center justify-center text-2xl font-bold text-emerald-400">${(alunoAtual.nome_completo || 'A')[0]}</div>`;
+
+  // Render da Galeria de Avatares CC
+  const galeriaAvataresHTML = AVATARES_PREDEFINIDOS.map(a => `
+    <button onclick="selecionarAvatarPredefinido('${a.url}')" class="group relative p-1 rounded-xl bg-slate-950 border border-slate-800 hover:border-emerald-500 transition focus:outline-none">
+      <img src="${a.url}" class="w-12 h-12 rounded-lg bg-slate-900 object-cover" title="${a.nome}" alt="${a.nome}">
+    </button>
+  `).join('');
 
   container.innerHTML = `
     <!-- Topo do Perfil -->
@@ -316,12 +344,22 @@ async function renderizarPerfil() {
       <button onclick="atualizarDadosPessoais()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs transition">Guardar Dados</button>
     </div>
 
-    <!-- 2. ALTERAR FOTO / AVATAR -->
-    <div class="border-t border-slate-800 pt-4 space-y-3">
-      <h4 class="font-semibold text-emerald-400 text-sm">🖼️ Alterar Foto de Perfil (URL da Imagem)</h4>
-      <div class="flex gap-2">
-        <input type="url" id="novo-avatar" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm flex-1" placeholder="Cole o link (URL) da imagem" value="${alunoAtual.avatar_url || ''}">
-        <button onclick="atualizarAvatar()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs transition">Atualizar Foto</button>
+    <!-- 2. ESCOLHER FOTO DE PERFIL / GALERIA DE AVATARES CC -->
+    <div class="border-t border-slate-800 pt-4 space-y-4">
+      <h4 class="font-semibold text-emerald-400 text-sm">🎨 Escolher Avatar Temático (Animes, Estudo, Gamers)</h4>
+      
+      <!-- Galeria de ícones predefinidos -->
+      <div class="flex flex-wrap gap-3 p-3 bg-slate-950 border border-slate-800/80 rounded-xl">
+        ${galeriaAvataresHTML}
+      </div>
+
+      <!-- Ou inserir link customizado -->
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Ou cole o link (URL) da sua imagem:</label>
+        <div class="flex gap-2">
+          <input type="url" id="novo-avatar" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm flex-1" placeholder="https://..." value="${alunoAtual.avatar_url || ''}">
+          <button onclick="atualizarAvatar()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs transition">Usar URL Customizada</button>
+        </div>
       </div>
     </div>
 
@@ -347,7 +385,13 @@ async function renderizarPerfil() {
   `;
 }
 
-// Função: Atualizar Nome e Apelido
+// Função: Selecionar Avatar da Galeria
+async function selecionarAvatarPredefinido(url) {
+  document.getElementById('novo-avatar').value = url;
+  await atualizarAvatar();
+}
+
+// Função: Atualizar Dados Pessoais
 async function atualizarDadosPessoais() {
   const novoNome = document.getElementById('novo-nome').value.trim();
   const novoApelido = document.getElementById('novo-apelido').value.trim();
