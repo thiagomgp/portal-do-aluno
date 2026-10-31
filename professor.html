@@ -180,46 +180,45 @@
     }
 
     // Carregar Lista de Alunos para Aprovação / Gestão
-    // Carregar Lista de Alunos para Aprovação / Gestão (Corrigido)
-async function carregarAlunos() {
-  const tabela = document.getElementById('tabela-alunos');
-  
-  // 1. Busca os alunos
-  const { data: alunos, error: errorAlunos } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('role', 'aluno')
-    .order('created_at', { ascending: false });
+    async function carregarAlunos() {
+      const tabela = document.getElementById('tabela-alunos');
+      
+      // 1. Busca os alunos sem JOIN complexo
+      const { data: alunos, error: errorAlunos } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'aluno')
+        .order('created_at', { ascending: false });
 
-  if (errorAlunos || !alunos || alunos.length === 0) {
-    tabela.innerHTML = '<tr><td colspan="4" class="p-4 text-slate-500 text-center">Nenhum aluno registrado.</td></tr>';
-    return;
-  }
+      if (errorAlunos || !alunos || alunos.length === 0) {
+        tabela.innerHTML = '<tr><td colspan="4" class="p-4 text-slate-500 text-center">Nenhum aluno registrado.</td></tr>';
+        return;
+      }
 
-  // 2. Busca o mapa de turmas para associar os nomes
-  const { data: turmas } = await supabase.from('turmas').select('id, nome');
-  const mapaTurmas = {};
-  if (turmas) {
-    turmas.forEach(t => mapaTurmas[t.id] = t.nome);
-  }
+      // 2. Busca turmas para mapeamento visual de nomes
+      const { data: turmas } = await supabase.from('turmas').select('id, nome');
+      const mapaTurmas = {};
+      if (turmas) {
+        turmas.forEach(t => mapaTurmas[t.id] = t.nome);
+      }
 
-  // 3. Renderiza a tabela
-  tabela.innerHTML = alunos.map(a => `
-    <tr>
-      <td class="p-3 font-medium text-slate-200">${a.nome_completo}</td>
-      <td class="p-3 text-slate-400">${mapaTurmas[a.turma_id] || 'Sem Turma'}</td>
-      <td class="p-3">
-        <span class="px-2 py-1 rounded text-xs font-bold ${a.status === 'aprovado' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
-          ${a.status || 'pendente'}
-        </span>
-      </td>
-      <td class="p-3 text-right space-x-2">
-        ${a.status !== 'aprovado' ? `<button onclick="alterarStatusAluno('${a.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded transition">Aprovar</button>` : ''}
-        <button onclick="excluirAluno('${a.id}')" class="bg-rose-950 hover:bg-rose-900 text-rose-400 border border-rose-800 text-xs px-2.5 py-1 rounded transition">Excluir</button>
-      </td>
-    </tr>
-  `).join('');
-}
+      // 3. Renderiza os alunos registrados
+      tabela.innerHTML = alunos.map(a => `
+        <tr>
+          <td class="p-3 font-medium text-slate-200">${a.nome_completo}</td>
+          <td class="p-3 text-slate-400">${mapaTurmas[a.turma_id] || 'Sem Turma'}</td>
+          <td class="p-3">
+            <span class="px-2 py-1 rounded text-xs font-bold ${a.status === 'aprovado' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
+              ${a.status || 'pendente'}
+            </span>
+          </td>
+          <td class="p-3 text-right space-x-2">
+            ${a.status !== 'aprovado' ? `<button onclick="alterarStatusAluno('${a.id}', 'aprovado')" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded transition">Aprovar</button>` : ''}
+            <button onclick="excluirAluno('${a.id}')" class="bg-rose-950 hover:bg-rose-900 text-rose-400 border border-rose-800 text-xs px-2.5 py-1 rounded transition">Excluir</button>
+          </td>
+        </tr>
+      `).join('');
+    }
 
     // Aprovar Aluno
     async function alterarStatusAluno(id, novoStatus) {
