@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal do Aluno</title>
+  <!-- Tailwind CSS para estilização rápida -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SDK do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<bg-slate-900 class="bg-slate-900 text-white min-h-screen">
+
+  <!-- Navegação Superior -->
+  <nav class="p-4 bg-slate-800 flex justify-between items-center border-b border-emerald-500/30">
+    <h1 class="text-xl font-bold text-emerald-400">Portal do Aluno</h1>
+    <div id="user-info" class="text-sm text-slate-300">
+      <!-- Exibido após login -->
+    </div>
+  </nav>
+
+  <!-- Conteúdo Principal -->
+  <main class="container mx-auto p-6">
+    <!-- Secção de Login / Identificação -->
+    <section id="auth-section" class="max-w-md mx-auto bg-slate-800 p-6 rounded-xl border border-slate-700">
+      <h2 class="text-lg font-bold mb-4 text-emerald-400">Acesso ao Portal</h2>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">Email</label>
+          <input type="email" id="email" class="w-full p-2 bg-slate-900 rounded border border-slate-700 text-white" required>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Palavra-passe</label>
+          <input type="password" id="password" class="w-full p-2 bg-slate-900 rounded border border-slate-700 text-white" required>
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 p-2 rounded font-bold transition">Entrar</button>
+      </form>
+    </section>
+
+    <!-- Painel de Navegação do Aluno (Início, Disciplinas, Jogos, Perfil) -->
+    <div id="app-content" class="hidden">
+      <nav class="flex gap-4 border-b border-slate-700 pb-3 mb-6">
+        <button onclick="navigate('inicio')" class="px-4 py-2 bg-emerald-600 rounded">Início (Mural)</button>
+        <button onclick="navigate('disciplinas')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded">Disciplinas</button>
+        <button onclick="navigate('jogos')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded">Jogos</button>
+        <button onclick="navigate('perfil')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded">Perfil</button>
+      </nav>
+
+      <!-- Áreas Dinâmicas -->
+      <section id="tab-inicio">
+        <h3 class="text-xl font-bold mb-4">Mural de Avisos</h3>
+        <div id="lista-avisos" class="space-y-3"><!-- Avisos inseridos via JS --></div>
+      </section>
+
+      <section id="tab-disciplinas" class="hidden">
+        <h3 class="text-xl font-bold mb-4">Minhas Disciplinas (BNCC)</h3>
+        <div id="lista-disciplinas" class="grid grid-cols-1 md:grid-cols-2 gap-4"><!-- Cards das matérias --></div>
+      </section>
+
+      <section id="tab-jogos" class="hidden">
+        <h3 class="text-xl font-bold mb-4">Jogos Pedagógicos</h3>
+        <div id="lista-jogos" class="grid grid-cols-1 md:grid-cols-3 gap-4"><!-- Jogos --></div>
+      </section>
+
+      <section id="tab-perfil" class="hidden">
+        <h3 class="text-xl font-bold mb-4">Meu Perfil</h3>
+        <!-- Opções de editar apelido, ver méritos e alterar foto -->
+      </section>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
