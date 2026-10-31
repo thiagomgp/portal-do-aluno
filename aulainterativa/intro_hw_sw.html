@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultura Digital - Módulo 1: Fundamentos de Hardware, Software e Licenciamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased">
+
+    <script>
+        const SUPABASE_URL = "https://pnybenlfazdjgqnyuypn.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_2pzNR2UAF2-jfiXQDqrA3w_lwFryik0";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentStudent = null;
+        const MODULE_ID = "intro_hw_sw";
+        const TOTAL_STEPS = 4;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlId = urlParams.get('id');
+            const urlNome = urlParams.get('nome');
+            const urlTurma = urlParams.get('turma');
+
+            if (urlId && urlNome) {
+                currentStudent = { id: urlId, nome: urlNome, turma: urlTurma || 'Geral' };
+                sessionStorage.setItem('active_student', JSON.stringify(currentStudent));
+            } else {
+                const saved = sessionStorage.getItem('active_student');
+                if (saved) {
+                    currentStudent = JSON.parse(saved);
+                }
+            }
+
+            // TRAVA DE SEGURANÇA: Se não estiver autenticado, redireciona para o portal
+            if (!currentStudent || !currentStudent.id || !currentStudent.nome) {
+                alert("Você precisa se identificar no Portal Principal antes de iniciar as lições!");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            document.getElementById('student-name-display').innerText = currentStudent.nome;
+            document.getElementById('student-class-display').innerText = currentStudent.turma;
+        });
+    </script>
+
+    <!-- CABEÇALHO -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-3">
+                    <a href="javascript:window.close();" class="bg-slate-700 hover:bg-slate-600 text-slate-200 p-2.5 rounded-xl font-bold transition" title="Fechar Lição">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1 class="font-bold text-lg text-white leading-tight">Cultura Digital <span class="text-xs bg-cyan-500/20 text-cyan-400 font-medium px-2 py-0.5 rounded border border-cyan-500/30">Módulo 1</span></h1>
+                        <p class="text-xs text-slate-400">Teoria Aprofundada & Diagnóstico Técnico</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
+                <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs text-slate-300">
+                    <i class="fa-solid fa-user-graduate text-cyan-400"></i>
+                    <span id="student-name-display" class="font-bold">--</span>
+                    <span class="text-slate-600">|</span>
+                    <span id="student-class-display" class="text-slate-400">--</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-trophy text-amber-400"></i>
+                        <span id="xp-counter">0 XP</span>
+                    </div>
+                    <div class="bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-semibold text-cyan-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock"></i>
+                        <span id="timer-display">00:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-full bg-slate-900 h-1.5">
+            <div id="top-progress-bar" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 w-0 transition-all duration-500"></div>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- ESQUERDA: TEORIA APROFUNDADA -->
+        <section class="lg:col-span-5 bg-slate-800 border border-slate-700 rounded-2xl flex flex-col shadow-xl overflow-hidden h-full min-h-[580px]">
+            <div class="p-4 bg-slate-800/90 border-b border-slate-700/80 flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Tópico Teórico <span id="current-step-num">1</span> de 4</span>
+                    <h2 id="step-title" class="text-lg font-bold text-white">Carregando Teoria...</h2>
+                </div>
+                <span id="step-badge" class="text-xs bg-slate-700 text-slate-300 font-medium px-2 py-1 rounded-md">Fundamentação</span>
+            </div>
+
+            <div class="p-5 flex-1 overflow-y-auto space-y-4 text-slate-300 text-xs sm:text-sm leading-relaxed" id="step-content"></div>
+
+            <div class="p-4 bg-slate-800 border-t border-slate-700 flex items-center justify-between gap-3">
+                <div id="step-feedback" class="text-xs font-medium flex items-center gap-1.5 text-slate-400">
+                    <i class="fa-solid fa-circle-info"></i> Resolva o desafio prático ao lado para avançar.
+                </div>
+                <button id="next-btn" onclick="nextStep()" disabled class="disabled:opacity-50 disabled:cursor-not-allowed bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all">
+                    <span>Próximo Tópico</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- DIREITA: LABORATÓRIO ANALÍTICO -->
+        <section class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full min-h-[580px] p-6">
+            <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-microchip text-cyan-400"></i>
+                <span>Laboratório de Classificação e Diagnóstico Técnico</span>
+            </h3>
+            <div id="interactive-container" class="flex-1 flex flex-col justify-center gap-4"></div>
+        </section>
+    </main>
+
+    <!-- MODAL DE CONCLUSÃO -->
+    <div id="completion-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6 text-center">
+            <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-award"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Módulo Concluído com Mérito!</span>
+                <h3 class="text-2xl font-extrabold text-white mt-1">Fundamentos Consolidados</h3>
+                <p class="text-slate-300 text-sm mt-2">Você concluiu com sucesso a carga teórica e analítica sobre arquitetura de computadores e licenças abertas.</p>
+            </div>
+            <button onclick="window.close();" class="block w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition text-center cursor-pointer">
+                <i class="fa-solid fa-check mr-2"></i>Concluir e Fechar Lição
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const LESSON_STEPS = [
+            {
+                id: 1,
+                title: "Arquitetura: Hardware, Software e Firmware",
+                badge: "Teoria & Análise",
+                content: `
+                    <p class="font-semibold text-white">1. A Base Física (Hardware):</p>
+                    <p>O hardware engloba todo o substrato tangível de um sistema computacional. Isso inclui semicondutores, circuitos integrados, barramentos de dados, unidades de armazenamento magnético/estado sólido e dispositivos eletromecânicos.</p>
+                    
+                    <p class="font-semibold text-white mt-2">2. A Camada Lógica (Software):</p>
+                    <p>O software consiste em sequências estruturadas de instruções lógicas compiladas ou interpretadas que dizem ao hardware exatamente quais operações executar. Divide-se em <em>Software de Sistema</em> e <em>Software de Aplicação</em>.</p>
+
+                    <p class="font-semibold text-white mt-2">3. O Elo Intermediário (Firmware):</p>
+                    <p>Gravado diretamente em chips de memória não volátil (como ROM, EEPROM ou Flash) na placa-mãe, o firmware atua como a rotina inicial de inicialização (POST/UEFI).</p>
+                `,
+                xp: 25,
+                items: [
+                    { name: "Controlador de barramento PCIe na Placa-Mãe", answer: "Hardware", options: ["Hardware", "Software"] },
+                    { name: "Rotina de inicialização gravada na memória Flash (UEFI)", answer: "Software", options: ["Hardware", "Software"] },
+                    { name: "Interpretador de comandos (Shell / Bash)", answer: "Software", options: ["Hardware", "Software"] },
+                    { name: "Módulo de Driver de Vídeo proprietário", answer: "Software", options: ["Hardware", "Software"] }
+                ]
+            },
+            {
+                id: 2,
+                title: "Periféricos e a Topologia de E/S de Dados",
+                badge: "Fluxo de Informação",
+                content: `
+                    <p class="font-semibold text-white">O Princípio de Entrada e Saída (I/O):</p>
+                    <p>Computadores operam processando fluxos de dados binários. Para interagir com o operador e o ambiente, utilizam-se canais denominados <strong>periféricos</strong>.</p>
+                    
+                    <p class="font-semibold text-white mt-2">Dispositivos de Entrada (Input):</p>
+                    <p>Capturam estímulos físicos do mundo exterior e os convertem em sinais elétricos interpretáveis pela CPU.</p>
+
+                    <p class="font-semibold text-white mt-2">Dispositivos de Saída (Output):</p>
+                    <p>Traduzem o processamento lógico interno em formas perceptíveis aos sentidos humanos ou acionamentos industriais.</p>
+                `,
+                xp: 25,
+                items: [
+                    { name: "Mesa Digitalizadora com Sensor de Pressão", answer: "Entrada", options: ["Entrada", "Saída"] },
+                    { name: "Display de Matriz de Pontos Braille para Deficientes Visuais", answer: "Saída", options: ["Entrada", "Saída"] },
+                    { name: "Leitor Biométrico de Impressão Digital Óptico", answer: "Entrada", options: ["Entrada", "Saída"] },
+                    { name: "Óculos de Realidade Virtual com Telas Integradas", answer: "Saída", options: ["Entrada", "Saída"] }
+                ]
+            },
+            {
+                id: 3,
+                title: "Filosofia do Conhecimento Aberto: Licenças CC & GPL",
+                badge: "Ética e Legislação",
+                content: `
+                    <p class="font-semibold text-white">O Monopólio do Copyright vs. Copyleft:</p>
+                    <p>Historicamente, a legislação de direitos autorais restringe a cópia e modificação. Modelos colaborativos emergiram para garantir o compartilhamento legal e a inovação aberta.</p>
+                    
+                    <p class="font-semibold text-white mt-2">Creative Commons (CC):</p>
+                    <p>Criada primariamente para produções intelectuais, artísticas, literárias e científicas (textos, imagens, multimídia).</p>
+
+                    <p class="font-semibold text-white mt-2">GNU General Public License (GPL):</p>
+                    <p>Focada estritamente em código-fonte de software. Utiliza o conceito de <em>Copyleft</em> para garantir liberdade de reuso e modificação.</p>
+                `,
+                xp: 25,
+                items: [
+                    { name: "Repositório de código-fonte de um Kernel de sistema operacional colaborativo", answer: "GNU / GPL", options: ["Creative Commons (CC)", "GNU / GPL"] },
+                    { name: "Fotografia educacional de alta resolução publicada em enciclopédia online", answer: "Creative Commons (CC)", options: ["Creative Commons (CC)", "GNU / GPL"] },
+                    { name: "Biblioteca de rotinas matemáticas compiladas em linguagem C para reuso", answer: "GNU / GPL", options: ["Creative Commons (CC)", "GNU / GPL"] }
+                ]
+            },
+            {
+                id: 4,
+                title: "Auditoria e Consolidação de Conceitos",
+                badge: "Avaliação Técnica",
+                content: `
+                    <p class="font-semibold text-white">Consolidação Final:</p>
+                    <p>A habilidade de distinguir com precisão a natureza dos componentes de um sistema computacional e seus marcos legais é pré-requisito para profissionais de tecnologia.</p>
+                    <p>Responda à questão final de auditoria para certificar seu desempenho neste módulo.</p>
+                `,
+                xp: 25,
+                items: [
+                    { name: "Um driver de dispositivo que gerencia a comunicação direta entre o kernel e uma placa de rede Wi-Fi é classificado como:", answer: "Software", options: ["Hardware", "Software"] }
+                ]
+            }
+        ];
+
+        let currentStepIndex = 0;
+        let totalXP = 0;
+        let secondsElapsed = 0;
+        let timerInterval = null;
+        let currentItemIndex = 0;
+
+        window.onload = function() {
+            startTimer();
+            renderStep(0);
+        };
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function renderStep(index) {
+            const step = LESSON_STEPS[index];
+            currentItemIndex = 0;
+            document.getElementById('current-step-num').innerText = step.id;
+            document.getElementById('step-title').innerText = step.title;
+            document.getElementById('step-badge').innerText = step.badge;
+            document.getElementById('step-content').innerHTML = step.content;
+
+            const progressPercent = (index / LESSON_STEPS.length) * 100;
+            document.getElementById('top-progress-bar').style.width = `${progressPercent}%`;
+
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('step-feedback').className = "text-xs font-medium flex items-center gap-1.5 text-slate-400";
+            document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-info"></i> Responda aos itens analíticos ao lado.`;
+
+            loadCurrentItem();
+            saveProgressToSupabase(index);
+        }
+
+        function loadCurrentItem() {
+            const step = LESSON_STEPS[currentStepIndex];
+            const container = document.getElementById('interactive-container');
+            
+            if (currentItemIndex >= step.items.length) {
+                container.innerHTML = `
+                    <div class="p-8 bg-slate-900 border border-emerald-500/40 rounded-xl text-center space-y-3">
+                        <i class="fa-solid fa-circle-check text-emerald-400 text-4xl"></i>
+                        <h4 class="font-bold text-white text-lg">Tópico Teórico Concluído!</h4>
+                        <p class="text-xs text-slate-400">Análise realizada com sucesso. Prossiga para o próximo tópico.</p>
+                    </div>
+                `;
+                unlockNextStep();
+                return;
+            }
+
+            const currentItem = step.items[currentItemIndex];
+            
+            let buttonsHTML = currentItem.options.map(opt => `
+                <button onclick="verifyAnswer('${opt}', '${currentItem.answer}')" class="p-4 bg-slate-900 border border-slate-700 hover:border-cyan-500 rounded-xl text-center text-slate-200 font-bold text-sm transition">
+                    ${opt}
+                </button>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6 text-center">
+                    <span class="text-xs uppercase tracking-wider text-cyan-400 font-bold">Questão ${currentItemIndex + 1} de ${step.items.length}</span>
+                    <div class="text-base sm:text-lg font-extrabold text-white bg-slate-950 p-4 rounded-lg border border-slate-800">
+                        "${currentItem.name}"
+                    </div>
+                    <p class="text-xs text-slate-400">Selecione a classificação correta:</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        ${buttonsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function verifyAnswer(selected, correct) {
+            if (selected === correct) {
+                currentItemIndex++;
+                loadCurrentItem();
+            } else {
+                alert("Classificação incorreta. Revise o texto teórico à esquerda e tente novamente.");
+            }
+        }
+
+        function unlockNextStep() {
+            totalXP += LESSON_STEPS[currentStepIndex].xp;
+            document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+            document.getElementById('next-btn').disabled = false;
+            document.getElementById('step-feedback').className = "text-xs font-medium flex items-center gap-1.5 text-emerald-400";
+            document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-check"></i> Desafio concluído! Clique ao lado para avançar.`;
+            
+            saveProgressToSupabase(currentStepIndex + 1);
+        }
+
+        async function nextStep() {
+            if (currentStepIndex < LESSON_STEPS.length - 1) {
+                currentStepIndex++;
+                renderStep(currentStepIndex);
+            } else {
+                clearInterval(timerInterval);
+                document.getElementById('top-progress-bar').style.width = '100%';
+                document.getElementById('completion-modal').classList.remove('hidden');
+                await saveProgressToSupabase(TOTAL_STEPS);
+            }
+        }
+
+        async function saveProgressToSupabase(stepNumber) {
+            if (!currentStudent || !currentStudent.id) return;
+            try {
+                const isCompleted = stepNumber >= TOTAL_STEPS;
+                
+                // 1. Verifica se já existe um registo para este aluno e módulo
+                const { data: existing } = await _supabase
+                    .from('se_progresso')
+                    .select('id')
+                    .eq('aluno_id', currentStudent.id)
+                    .eq('modulo_id', MODULE_ID)
+                    .maybeSingle();
+
+                const payload = {
+                    aluno_id: currentStudent.id,
+                    modulo_id: MODULE_ID,
+                    etapa_atual: stepNumber,
+                    total_etapas: TOTAL_STEPS,
+                    status: isCompleted ? 'concluido' : 'em_andamento',
+                    tempo_segundos: secondsElapsed,
+                    updated_at: new Date().toISOString()
+                };
+
+                let error;
+                if (existing) {
+                    // 2. Atualiza se já existir
+                    const res = await _supabase
+                        .from('se_progresso')
+                        .update(payload)
+                        .eq('id', existing.id);
+                    error = res.error;
+                } else {
+                    // 3. Insere se for a primeira vez
+                    const res = await _supabase
+                        .from('se_progresso')
+                        .insert([payload]);
+                    error = res.error;
+                }
+
+                if (error) {
+                    console.error("Erro ao sincronizar com se_progresso:", error.message);
+                }
+            } catch (err) {
+                console.error("Erro na requisição ao Supabase:", err);
+            }
+        }
+    </script>
+</body>
+</html>
