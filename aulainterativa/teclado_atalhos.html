@@ -33,7 +33,6 @@
         const MODULE_ID = "teclado_atalhos";
 
         window.addEventListener('DOMContentLoaded', async () => {
-            // Recupera o aluno logado via URL ou sessionStorage
             const urlParams = new URLSearchParams(window.location.search);
             const saved = sessionStorage.getItem('active_student');
             
@@ -55,7 +54,6 @@
                 document.getElementById('student-class-display').innerText = "Geral";
             }
 
-            // CARREGA O PROGRESSO SALVO NO SUPABASE ANTES DE INICIAR A INTERFACE
             await carregarProgressoSalvo();
         });
 
@@ -71,14 +69,10 @@
                     .maybeSingle();
 
                 if (data && !error) {
-                    // Restaura o tempo de estudo anterior
                     secondsElapsed = data.tempo_segundos || 0;
-                    
-                    // Converte a etapa do banco (base 1) para o índice do array LESSON_STEPS (base 0)
                     const etapaSalvaIndex = Math.max(0, (data.etapa_atual || 1) - 1);
                     currentStepIndex = etapaSalvaIndex;
 
-                    // Recalcula o XP acumulado das etapas anteriores concluídas
                     totalXP = 0;
                     for (let i = 0; i < currentStepIndex; i++) {
                         totalXP += LESSON_STEPS[i].xp;
@@ -90,7 +84,6 @@
             }
         }
 
-        // Função para atualizar progresso no Supabase em tempo real
         async function salvarProgressoAoVivo(etapaAtual, status = 'em_andamento') {
             if (!currentStudent || !currentStudent.id) return;
 
@@ -182,7 +175,7 @@
         <section class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full min-h-[580px] p-6">
             <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-keyboard text-cyan-400"></i>
-                <span>Laboratório Prático, Atalhos e Ditado Amplo</span>
+                <span>Laboratório Prático, Atalhos e Teste de Digitação</span>
             </h3>
             <div id="interactive-container" class="flex-1 flex flex-col justify-center gap-4"></div>
         </section>
@@ -195,14 +188,15 @@
                 <i class="fa-solid fa-trophy"></i>
             </div>
             <div>
-                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Desafio de Digitação Concluído!</span>
-                <h3 class="text-2xl font-extrabold text-white mt-1">Pontuação Registrada com Sucesso</h3>
-                <p class="text-slate-300 text-sm mt-2">Seu tempo e índice de precisão foram gravados na base de dados.</p>
+                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Módulo Concluído com Éxito!</span>
+                <h3 class="text-2xl font-extrabold text-white mt-1">Pontuação e Velocidade Registradas</h3>
+                <p class="text-slate-300 text-sm mt-2">Você atingiu a meta mínima de velocidade e precisão exigida no curso.</p>
             </div>
             <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-xs text-left space-y-2">
                 <div class="flex justify-between"><span class="text-slate-400">Aluno:</span> <strong id="res-name" class="text-white">--</strong></div>
-                <div class="flex justify-between"><span class="text-slate-400">Tempo de Execução:</span> <strong id="res-time" class="text-cyan-400">--</strong></div>
-                <div class="flex justify-between"><span class="text-slate-400">Pontuação Final:</span> <strong id="res-xp" class="text-amber-400">-- XP</strong></div>
+                <div class="flex justify-between"><span class="text-slate-400">Tempo de Estudo:</span> <strong id="res-time" class="text-cyan-400">--</strong></div>
+                <div class="flex justify-between"><span class="text-slate-400">Velocidade Final:</span> <strong id="res-ppm" class="text-emerald-400">-- PPM</strong></div>
+                <div class="flex justify-between"><span class="text-slate-400">Pontuação Total:</span> <strong id="res-xp" class="text-amber-400">-- XP</strong></div>
             </div>
             <button onclick="window.history.back()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-house"></i> Voltar ao Portal de Lições
@@ -257,16 +251,19 @@
             },
             {
                 id: 4,
-                title: "Desafio de Digitação Amplo e Ditado Técnico",
-                badge: "Avaliação Prática Ampla",
+                title: "Teste Prático Final de Digitação (Meta: 15 PPM)",
+                badge: "Avaliação de Velocidade",
                 content: `
-                    <p class="font-semibold text-white">Teste Extenso de Digitação:</p>
-                    <p>Agora você colocará à prova toda a sua agilidade com acentuação complexa, símbolos terciários e pontuação especial.</p>
-                    <ul class="list-disc list-inside space-y-1 text-xs mt-2 text-slate-300 bg-slate-900/60 p-3 rounded border border-slate-700">
-                        <li>Acentuação completa: <strong>á, ê, í, õ, à</strong>.</li>
-                        <li>Pontuação e Símbolos: <strong>( ) [ ] { } " " : ; ! ? - @ % & /</strong>.</li>
-                        <li>Colar texto (Ctrl+V) está <strong>desabilitado</strong> neste campo!</li>
-                    </ul>
+                    <p class="font-semibold text-white">Desafio Final de Digitação:</p>
+                    <p>Para concluir este módulo, você deve digitar o texto abaixo exatamente como apresentado.</p>
+                    <div class="bg-cyan-950/40 border border-cyan-800 p-3 rounded-lg text-xs space-y-1.5 mt-2">
+                        <p class="text-cyan-300 font-bold">🎯 Critérios para Aprovação:</p>
+                        <ul class="list-disc list-inside text-slate-300 space-y-1">
+                            <li>Precisão de <strong>100%</strong> no texto e acentuação.</li>
+                            <li>Velocidade mínima de <strong>15 PPM</strong> (Palavras Por Minuto).</li>
+                            <li>Colar texto (Ctrl+V) está totalmente <strong>bloqueado</strong>!</li>
+                        </ul>
+                    </div>
                 `,
                 xp: 25,
                 type: 'dictation_test_extended'
@@ -279,6 +276,12 @@
         let timerInterval = null;
         let currentItemIndex = 0;
 
+        // Variaveis especificas do Teste de Digitação
+        let dictationStartTime = null;
+        let dictationTimerInterval = null;
+        let dictationSeconds = 0;
+        let finalPPMCalculated = 0;
+
         const altTabTargets = [
             { target: "Navegador Web", windows: ["Bloco de Notas", "Navegador Web", "Explorador de Arquivos"] },
             { target: "Editor de Texto", windows: ["Gerenciador de Tarefas", "Editor de Texto", "Calculadora"] }
@@ -289,7 +292,6 @@
 
         window.onload = function() {
             startTimer();
-            // Renderiza a etapa recuperada do Supabase (currentStepIndex)
             renderStep(currentStepIndex);
         };
 
@@ -418,25 +420,42 @@
             }
         }
 
+        // --- TESTE DE DIGITAÇÃO COM MÉTRICA DE PPM ---
         function loadExtendedDictationTest() {
+            dictationStartTime = null;
+            dictationSeconds = 0;
+            if (dictationTimerInterval) clearInterval(dictationTimerInterval);
+
             const container = document.getElementById('interactive-container');
             container.innerHTML = `
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Texto de Referência:</span>
+                        <span class="text-xs font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">Meta: 15 PPM</span>
+                    </div>
+
+                    <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs sm:text-sm leading-relaxed select-none" id="dictation-target">
+                        ${targetExtendedDictation}
+                    </div>
+
                     <div>
-                        <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider block mb-1">Texto de Referência para Ditado:</span>
-                        <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 font-mono text-xs sm:text-sm leading-relaxed select-none" id="dictation-target">
-                            ${targetExtendedDictation}
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sua Digitação:</span>
+                            <span class="text-xs font-mono text-slate-400">Tempo de Teste: <strong id="test-timer" class="text-white">0s</strong></span>
                         </div>
+                        <textarea id="dictation-input" onpaste="return false;" oninput="checkDictationProgress()" placeholder="Clique aqui e comece a digitar para iniciar o teste..." class="w-full h-28 p-3 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 font-mono text-xs sm:text-sm focus:outline-none focus:border-cyan-500 resize-none"></textarea>
                     </div>
 
-                    <div>
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Sua Digitação:</span>
-                        <textarea id="dictation-input" onpaste="return false;" oninput="checkDictationProgress()" placeholder="Digite o texto acima exatamente como apresentado..." class="w-full h-32 p-3 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 font-mono text-xs sm:text-sm focus:outline-none focus:border-cyan-500 resize-none"></textarea>
-                    </div>
-
-                    <div id="dictation-status" class="text-xs text-slate-400 font-mono flex justify-between">
+                    <div id="dictation-status" class="text-xs text-slate-400 font-mono flex flex-wrap justify-between gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
                         <span>Caracteres: <strong id="char-count" class="text-white">0</strong> / ${targetExtendedDictation.length}</span>
-                        <span id="match-status" class="text-amber-400 font-semibold">Aguardando digitação...</span>
+                        <span>Velocidade Atual: <strong id="ppm-count" class="text-cyan-400">0 PPM</strong></span>
+                        <span id="match-status" class="text-amber-400 font-semibold">Aguardando início...</span>
+                    </div>
+
+                    <div id="retry-container" class="hidden text-center pt-2">
+                        <button onclick="loadExtendedDictationTest()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">
+                            🔄 Refazer Teste de Digitação
+                        </button>
                     </div>
                 </div>
             `;
@@ -445,14 +464,40 @@
         function checkDictationProgress() {
             const inputVal = document.getElementById('dictation-input').value;
             const countElem = document.getElementById('char-count');
+            const ppmElem = document.getElementById('ppm-count');
             const statusElem = document.getElementById('match-status');
+
+            // Inicia o cronômetro do teste no primeiro caractere digitado
+            if (!dictationStartTime && inputVal.length > 0) {
+                dictationStartTime = Date.now();
+                dictationTimerInterval = setInterval(() => {
+                    dictationSeconds = Math.floor((Date.now() - dictationStartTime) / 1000);
+                    const timerElem = document.getElementById('test-timer');
+                    if (timerElem) timerElem.innerText = `${dictationSeconds}s`;
+                }, 1000);
+            }
 
             countElem.innerText = inputVal.length;
 
+            // Cálculo de PPM (Palavras por minuto = (caracteres / 5) / minutos)
+            const tempoEmMinutos = Math.max(dictationSeconds / 60, 1 / 60);
+            const palavrasDigitadas = inputVal.length / 5;
+            const ppmAtual = Math.round(palavrasDigitadas / tempoEmMinutos);
+            ppmElem.innerText = `${ppmAtual} PPM`;
+
             if (inputVal === targetExtendedDictation) {
-                statusElem.className = "text-emerald-400 font-semibold";
-                statusElem.innerText = "Texto Perfeito!";
-                unlockNextStep();
+                clearInterval(dictationTimerInterval);
+                finalPPMCalculated = ppmAtual;
+
+                if (ppmAtual >= 15) {
+                    statusElem.className = "text-emerald-400 font-semibold";
+                    statusElem.innerText = `✓ Perfeito! ${ppmAtual} PPM (Meta Atingida)`;
+                    unlockNextStep();
+                } else {
+                    statusElem.className = "text-amber-400 font-semibold";
+                    statusElem.innerText = `⚠️ Precisão 100%, mas sua velocidade foi de ${ppmAtual} PPM (Mínimo exigido: 15 PPM).`;
+                    document.getElementById('retry-container').classList.remove('hidden');
+                }
             } else if (targetExtendedDictation.startsWith(inputVal)) {
                 statusElem.className = "text-cyan-400 font-semibold";
                 statusElem.innerText = "Digitando com precisão...";
@@ -485,6 +530,8 @@
 
         async function finishLesson() {
             clearInterval(timerInterval);
+            if (dictationTimerInterval) clearInterval(dictationTimerInterval);
+
             document.getElementById('top-progress-bar').style.width = '100%';
 
             const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
@@ -493,9 +540,10 @@
 
             document.getElementById('res-name').innerText = currentStudent ? currentStudent.nome : "Aluno Visitante";
             document.getElementById('res-time').innerText = timeStr;
+            document.getElementById('res-ppm').innerText = `${finalPPMCalculated} PPM`;
             document.getElementById('res-xp').innerText = `${totalXP} XP`;
 
-            // Marca o progresso como CONCLUÍDO
+            // Salva como CONCLUÍDO no Supabase
             await salvarProgressoAoVivo(4, 'concluido');
 
             if (currentStudent && currentStudent.id) {
