@@ -30,7 +30,7 @@
     
     let currentStudent = null;
     const MODULE_ID = "desafio_nuvem";
-    const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
+    const DEFAULT_UUID_TESTE = "659ebb95-7f24-4e4f-91ec-2248ae3a4bc0";
 
     function isUUIDValido(str) {
       return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -41,24 +41,28 @@
       const saved = sessionStorage.getItem('active_student');
       
       if (saved) {
-        currentStudent = JSON.parse(saved);
-      } else if (urlParams.has('id')) {
-        const rawId = urlParams.get('id');
-        currentStudent = {
-          id: isUUIDValido(rawId) ? rawId : DEFAULT_UUID_DEMO,
-          nome: urlParams.get('nome') || 'Aluno',
-          turma: urlParams.get('turma') || 'Geral'
-        };
-      } else {
-        currentStudent = {
-          id: DEFAULT_UUID_DEMO,
-          nome: "Aluno Demo",
-          turma: "Geral"
-        };
+        try { currentStudent = JSON.parse(saved); } catch(e){}
+      } 
+      
+      if (!currentStudent || !currentStudent.id) {
+        if (urlParams.has('id')) {
+          const rawId = urlParams.get('id');
+          currentStudent = {
+            id: isUUIDValido(rawId) ? rawId : DEFAULT_UUID_TESTE,
+            nome: urlParams.get('nome') || 'teste teste',
+            turma: urlParams.get('turma') || 'Geral'
+          };
+        } else {
+          currentStudent = {
+            id: DEFAULT_UUID_TESTE,
+            nome: "teste teste",
+            turma: "Geral"
+          };
+        }
       }
 
       if (!isUUIDValido(currentStudent.id)) {
-        currentStudent.id = DEFAULT_UUID_DEMO;
+        currentStudent.id = DEFAULT_UUID_TESTE;
       }
 
       if (currentStudent && currentStudent.nome) {
@@ -70,12 +74,46 @@
 
     async function carregarProgressoSalvo() {
       if (!currentStudent || !currentStudent.id) return;
+      let etapaEncontrada = 1;
+
       try {
-        const { data } = await _supabase.from('se_progresso').select('*').eq('aluno_id', currentStudent.id).eq('modulo_id', MODULE_ID).maybeSingle();
-        if (data) {
-          secondsElapsed = data.tempo_segundos || 0;
+        const { data, error } = await _supabase
+          .from('se_progresso')
+          .select('etapa_atual, tempo_segundos, status')
+          .eq('aluno_id', currentStudent.id)
+          .in('modulo_id', [MODULE_ID, 'Modulo3-desafio_nuvem', 'Modulo3-desafio-nuvem']);
+
+        if (data && data.length > 0 && !error) {
+          secondsElapsed = data[0].tempo_segundos || 0;
+          etapaEncontrada = data[0].etapa_atual || 1;
         }
       } catch (err) {}
+
+      if (etapaEncontrada === 1) {
+        const keys = [`progresso_${MODULE_ID}`, `progresso_Modulo3-${MODULE_ID}`];
+        for (const key of keys) {
+          const local = localStorage.getItem(key);
+          if (local) {
+            try {
+              const parsed = JSON.parse(local);
+              etapaEncontrada = Math.max(etapaEncontrada, parsed.etapa_atual || 1);
+              secondsElapsed = Math.max(secondsElapsed, parsed.tempo_segundos || 0);
+            } catch(e){}
+          }
+        }
+      }
+
+      if (etapaEncontrada >= 2) {
+        userItems.unshift({ name: 'EDU_DIGITAL_2026', isFolder: true, owner: 'eu', date: 'hoje', parent: 'root', createdByStudent: true });
+        currentFolder = 'EDU_DIGITAL_2026';
+        currentStep = 2;
+        document.getElementById('task-title-text').innerText = "2. Subpastas das Matérias Escolares";
+        document.getElementById('task-desc-text').innerText = "Você está em 'EDU_DIGITAL_2026'. Crie duas subpastas: 'Matemática' e 'Português'.";
+        document.getElementById('task-badge-step').innerText = "Etapa 2 de 3";
+        document.getElementById('folder-breadcrumb').innerText = "Meu Drive > EDU_DIGITAL_2026";
+      }
+
+      renderDriveTable();
     }
 
     async function salvarProgressoAoVivo(etapaAtual, status = 'em_andamento') {
@@ -91,16 +129,26 @@
         updated_at: new Date().toISOString()
       };
 
-      try {
-        const { data: updated, error: updateError } = await _supabase
-          .from('se_progresso')
-          .update(payload)
-          .eq('aluno_id', currentStudent.id)
-          .eq('modulo_id', MODULE_ID)
-          .select();
+      localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
+      localStorage.setItem(`progresso_Modulo3-${MODULE_ID}`, JSON.stringify(payload));
 
-        if (!updateError && (!updated || updated.length === 0)) {
-          await _supabase.from('se_progresso').insert([payload]);
+      try {
+        const { error } = await _supabase
+          .from('se_progresso')
+          .upsert(payload, { onConflict: 'aluno_id,modulo_id' });
+
+        if (error && (error.code === '23505' || error.status === 409)) {
+          await _supabase
+            .from('se_progresso')
+            .update({
+              etapa_atual: Number(etapaAtual),
+              total_etapas: 3,
+              tempo_segundos: Number(secondsElapsed),
+              status: status,
+              updated_at: new Date().toISOString()
+            })
+            .eq('aluno_id', payload.aluno_id)
+            .eq('modulo_id', MODULE_ID);
         }
       } catch (err) {}
     }
