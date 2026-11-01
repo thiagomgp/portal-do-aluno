@@ -33,9 +33,9 @@
 
       <div class="flex items-center gap-4">
         <div id="user-info-bar" class="text-xs text-slate-300 flex items-center gap-2">
-          <span>👋 Olá, <strong id="student-display-name" class="text-white">Aluno Demo</strong></span>
+          <span>👋 Olá, <strong id="student-display-name" class="text-white">Carregando...</strong></span>
           <span class="text-slate-600">|</span>
-          <span id="student-display-class" class="text-slate-400">Geral</span>
+          <span id="student-display-class" class="text-slate-400">--</span>
         </div>
         <button onclick="fazerLogout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-lg transition">
           Sair
@@ -101,10 +101,7 @@
         <p class="text-xs text-slate-400 mt-1">Selecione uma opção dentro da disciplina para ver o conteúdo.</p>
       </div>
 
-      <!-- GRID COMPACTA DE DISCIPLINAS -->
       <div id="lista-disciplinas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        
-        <!-- CARD DA DISCIPLINA COMPACTO -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 max-w-md">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
@@ -116,7 +113,6 @@
             </div>
           </div>
 
-          <!-- BOTÕES COM TAMANHO PADRONIZADO -->
           <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
             <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
               <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
@@ -129,13 +125,9 @@
             </button>
           </div>
         </div>
-
       </div>
 
-      <!-- PAINEL DE CONTEÚDOS -->
       <div id="painel-conteudo-disciplina" class="hidden pt-4 space-y-4 border-t border-slate-800">
-        
-        <!-- SUB-CONTEÚDO: AULAS INTERATIVAS -->
         <div id="sub-conteudo-aulas" class="hidden space-y-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
             <i class="fa-solid fa-list-check"></i> Atividades Interativas Disponíveis
@@ -148,7 +140,6 @@
           </div>
         </div>
 
-        <!-- SUB-CONTEÚDO: MATERIAIS -->
         <div id="sub-conteudo-materiais" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
           <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
             <i class="fa-solid fa-folder-open"></i>
@@ -157,7 +148,6 @@
           <p class="text-xs text-slate-400">Nenhum material em PDF anexado no momento.</p>
         </div>
 
-        <!-- SUB-CONTEÚDO: PROVAS -->
         <div id="sub-conteudo-provas" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
           <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
             <i class="fa-solid fa-file-signature"></i>
@@ -165,7 +155,6 @@
           <h4 class="text-sm font-bold text-white">Avaliações & Testes Práticos</h4>
           <p class="text-xs text-slate-400">Não há provas ou testes pendentes agendados.</p>
         </div>
-
       </div>
     </section>
 
@@ -195,9 +184,9 @@
         <div class="flex items-center gap-4 border-b border-slate-800 pb-6">
           <img id="profile-avatar-preview" src="https://api.dicebear.com/7.x/bottts/svg?seed=Aluno" alt="Avatar" class="w-16 h-16 rounded-full bg-slate-950 border-2 border-emerald-400 object-cover">
           <div>
-            <h3 id="profile-header-name" class="text-lg font-bold text-white">Aluno Demo</h3>
-            <p id="profile-header-nickname" class="text-xs text-emerald-400 font-medium">@aluno_demo</p>
-            <p id="profile-header-email" class="text-xs text-slate-400 mt-0.5">aluno@escola.com</p>
+            <h3 id="profile-header-name" class="text-lg font-bold text-white">--</h3>
+            <p id="profile-header-nickname" class="text-xs text-emerald-400 font-medium">@--</p>
+            <p id="profile-header-email" class="text-xs text-slate-400 mt-0.5">--</p>
           </div>
         </div>
 
@@ -216,7 +205,7 @@
 
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">E-mail de Acesso:</label>
-            <input type="email" id="profile-email-input" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="aluno@escola.com">
+            <input type="email" id="profile-email-input" readonly class="w-full p-2.5 bg-slate-900/60 border border-slate-800 rounded-lg text-slate-400 text-xs cursor-not-allowed" title="O e-mail é gerenciado pelo login">
           </div>
 
           <div>
@@ -249,83 +238,112 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let activeStudent = null;
-    const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
-
-    function isUUIDValido(str) {
-      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-    }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      recuperarOuCriarSessaoAluno();
+      await carregarSessaoReal();
       await varrerEExibirAulasGitHub();
 
-      document.getElementById('form-update-profile')?.addEventListener('submit', (e) => {
+      // Gravação real no banco de dados ao salvar o perfil
+      document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (!activeStudent || !activeStudent.id) return;
+
         const novoNome = document.getElementById('profile-name-input').value.trim();
         const novoApelido = document.getElementById('profile-nickname-input').value.trim();
-        const novoEmail = document.getElementById('profile-email-input').value.trim();
         const novaFoto = document.getElementById('profile-avatar-url').value.trim();
 
-        if (novoNome) activeStudent.nome = novoNome;
-        activeStudent.apelido = novoApelido;
-        if (novoEmail) activeStudent.email = novoEmail;
-        if (novaFoto) activeStudent.foto_url = novaFoto;
+        const updates = {
+          nome_completo: novoNome || activeStudent.nome,
+          apelido: novoApelido,
+          avatar_url: novaFoto
+        };
 
-        sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
+        const { error } = await _supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', activeStudent.id);
 
-        alert("Perfil atualizado!");
-        recuperarOuCriarSessaoAluno();
+        if (error) {
+          alert("Erro ao salvar no banco: " + error.message);
+        } else {
+          alert("Perfil atualizado no banco de dados com sucesso!");
+          await carregarSessaoReal();
+        }
       });
 
-      document.getElementById('form-update-password')?.addEventListener('submit', (e) => {
+      // Alteração de senha direto no Supabase Auth
+      document.getElementById('form-update-password')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert("Senha alterada com sucesso!");
-        document.getElementById('profile-new-password').value = '';
+        const novaSenha = document.getElementById('profile-new-password').value;
+
+        const { error } = await _supabase.auth.updateUser({ password: novaSenha });
+
+        if (error) {
+          alert("Erro ao alterar senha: " + error.message);
+        } else {
+          alert("Senha alterada com sucesso!");
+          document.getElementById('profile-new-password').value = '';
+        }
       });
     });
 
-    function recuperarOuCriarSessaoAluno() {
+    // CARREGA DADOS DO ALUNO REGISTRADO (OBTÉM E-MAIL REAL DA AUTH.USERS E PROFILE DO BANCO)
+    async function carregarSessaoReal() {
+      const { data: { session } } = await _supabase.auth.getSession();
       const urlParams = new URLSearchParams(window.location.search);
-      const saved = sessionStorage.getItem('active_student');
 
-      if (saved) {
-        activeStudent = JSON.parse(saved);
-        if (!isUUIDValido(activeStudent.id)) activeStudent.id = DEFAULT_UUID_DEMO;
-      } else if (urlParams.has('id')) {
-        const rawId = urlParams.get('id');
-        activeStudent = {
-          id: isUUIDValido(rawId) ? rawId : DEFAULT_UUID_DEMO,
-          nome: urlParams.get('nome') || 'Aluno Demo',
-          turma: urlParams.get('turma') || 'Geral'
-        };
+      let userId = null;
+      let userEmail = '';
+
+      if (session && session.user) {
+        userId = session.user.id;
+        userEmail = session.user.email;
       } else {
-        activeStudent = {
-          id: DEFAULT_UUID_DEMO,
-          nome: "Aluno Demo",
-          apelido: "aluno_demo",
-          turma: "Geral",
-          email: "aluno@escola.com"
-        };
+        const saved = sessionStorage.getItem('active_student');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          userId = parsed.id;
+          userEmail = parsed.email || '';
+        } else if (urlParams.has('id')) {
+          userId = urlParams.get('id');
+        }
       }
+
+      if (!userId) return;
+
+      // Busca o perfil cadastrado no Supabase
+      const { data: profile } = await _supabase
+        .from('profiles')
+        .select('*, turmas(nome)')
+        .eq('id', userId)
+        .maybeSingle();
+
+      activeStudent = {
+        id: userId,
+        email: userEmail || (profile ? profile.email : ''),
+        nome: profile?.nome_completo || urlParams.get('nome') || 'Aluno',
+        apelido: profile?.apelido || '',
+        turma: profile?.turmas?.nome || urlParams.get('turma') || 'Geral',
+        foto_url: profile?.avatar_url || ''
+      };
 
       sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
 
-      const nomeExibicao = activeStudent.nome || 'Aluno Demo';
-      const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : '@aluno_demo';
-      const emailExibicao = activeStudent.email || 'aluno@escola.com';
+      const nomeExibicao = activeStudent.nome;
+      const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
 
-      if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
-      if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || 'Geral';
-      
-      if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
-      if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
-      if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = emailExibicao;
-      
-      if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
-      if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || 'aluno_demo';
-      if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = emailExibicao;
+      document.getElementById('student-display-name').innerText = nomeExibicao;
+      document.getElementById('student-display-class').innerText = activeStudent.turma;
 
-      if (activeStudent.foto_url && document.getElementById('profile-avatar-url')) {
+      document.getElementById('profile-header-name').innerText = nomeExibicao;
+      document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
+      document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
+
+      document.getElementById('profile-name-input').value = nomeExibicao;
+      document.getElementById('profile-nickname-input').value = activeStudent.apelido;
+      document.getElementById('profile-email-input').value = activeStudent.email || '';
+
+      if (activeStudent.foto_url) {
         document.getElementById('profile-avatar-url').value = activeStudent.foto_url;
         document.getElementById('profile-avatar-preview').src = activeStudent.foto_url;
       }
@@ -342,35 +360,19 @@
       try {
         let progressosMap = {};
 
-        // 1. TENTA LER DO SUPABASE PARA ALUNOS AUTENTICADOS REAIS
-        if (activeStudent && activeStudent.id && activeStudent.id !== DEFAULT_UUID_DEMO) {
-          try {
-            const { data: progressos } = await _supabase
-              .from('se_progresso')
-              .select('modulo_id, etapa_atual, total_etapas, status')
-              .eq('aluno_id', activeStudent.id);
+        if (activeStudent && activeStudent.id) {
+          const { data: progressos } = await _supabase
+            .from('se_progresso')
+            .select('modulo_id, etapa_atual, total_etapas, status')
+            .eq('aluno_id', activeStudent.id);
 
-            if (progressos) {
-              progressos.forEach(p => {
-                progressosMap[p.modulo_id] = p;
-              });
-            }
-          } catch(e) {}
+          if (progressos) {
+            progressos.forEach(p => {
+              progressosMap[p.modulo_id] = p;
+            });
+          }
         }
 
-        // 2. LEITURA NO LOCALSTORAGE PARA O ALUNO DEMO / MODULO LOCAL
-        const modulosAtivos = ['intro_hw_sw', 'desafio_nuvem', 'Modulo1-introducao', 'Modulo3-desafio_nuvem'];
-        modulosAtivos.forEach(modId => {
-          const localData = localStorage.getItem(`progresso_${modId}`);
-          if (localData) {
-            try {
-              const p = JSON.parse(localData);
-              progressosMap[modId] = p;
-            } catch(e) {}
-          }
-        });
-
-        // 3. BUSCA MÓDULOS NO REPOSITÓRIO GITHUB
         const res = await fetch('https://api.github.com/repos/thiagomgp/portal-do-aluno/contents/aulainterativa');
         const arquivos = await res.json();
 
@@ -492,8 +494,9 @@
       });
     }
 
-    function fazerLogout() {
-      sessionStorage.removeItem('active_student');
+    async function fazerLogout() {
+      await _supabase.auth.signOut();
+      sessionStorage.clear();
       window.location.reload();
     }
   </script>
