@@ -198,7 +198,7 @@
         let timerInterval = null;
         let currentItemIndex = 0;
 
-        // 1. CARREGAMENTO DE PROGRESSO CORRIGIDO
+        // 1. CARREGAMENTO RESISTENTE A ERROS DE BANCO
         async function carregarProgressoExistente() {
             if (!currentStudent || !currentStudent.id) {
                 renderStep(0);
@@ -214,20 +214,21 @@
                         .from('se_progresso')
                         .select('etapa_atual, tempo_segundos, status')
                         .eq('aluno_id', currentStudent.id)
-                        .in('modulo_id', [MODULE_ID, 'intro_hw_sw', 'Modulo1-introducao'])
-                        .maybeSingle();
+                        .in('modulo_id', [MODULE_ID, 'intro_hw_sw', 'Modulo1-introducao', 'hardware_software']);
 
-                    if (data && !error) {
-                        etapaEncontrada = Number(data.etapa_atual || 1);
-                        tempoEncontrado = Number(data.tempo_segundos || 0);
+                    if (data && data.length > 0 && !error) {
+                        const registroMaisRecente = data[0];
+                        etapaEncontrada = Number(registroMaisRecente.etapa_atual || 1);
+                        tempoEncontrado = Number(registroMaisRecente.tempo_segundos || 0);
                     }
                 } catch (err) {
                     console.warn("Aviso ao buscar progresso no banco:", err);
                 }
             }
 
+            // Fallback no LocalStorage se não encontrou no Supabase
             if (etapaEncontrada === 1) {
-                const localKeys = [`progresso_${MODULE_ID}`, `progresso_Modulo1-introducao`, `progresso_intro_hw_sw`];
+                const localKeys = [`progresso_${MODULE_ID}`, `progresso_Modulo1-introducao`, `progresso_intro_hw_sw`, `progresso_hardware_software`];
                 for (const key of localKeys) {
                     const localData = localStorage.getItem(key);
                     if (localData) {
@@ -242,7 +243,6 @@
 
             secondsElapsed = tempoEncontrado;
 
-            // Corrige o mapeamento de etapas (Etapa 1 -> Índice 0, Etapa 2 -> Índice 1...)
             let idxParaCarregar = Math.max(0, etapaEncontrada - 1);
             if (idxParaCarregar >= TOTAL_STEPS) {
                 idxParaCarregar = TOTAL_STEPS - 1;
@@ -258,7 +258,7 @@
             renderStep(currentStepIndex);
         }
 
-        // 2. SALVAMENTO DE PROGRESSO BLINDADO
+        // 2. GRAVAÇÃO BLINDADA COM VERIFICAÇÃO SELETIVA
         async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
             if (!currentStudent || !currentStudent.id) return;
 
@@ -272,7 +272,7 @@
                 updated_at: new Date().toISOString()
             };
 
-            // Guarda em múltiplos nomes para garantir compatibilidade
+            // Guarda em Redundância Local
             localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
             localStorage.setItem(`progresso_Modulo1-introducao`, JSON.stringify(payload));
             localStorage.setItem(`progresso_intro_hw_sw`, JSON.stringify(payload));
@@ -280,11 +280,32 @@
             if (currentStudent.id === DEFAULT_UUID_DEMO) return;
 
             try {
-                await _supabase
+                // Checa primeiro se o registro já existe para o aluno
+                const { data: existente } = await _supabase
                     .from('se_progresso')
-                    .upsert(payload, { onConflict: 'aluno_id,modulo_id' });
+                    .select('id')
+                    .eq('aluno_id', currentStudent.id)
+                    .eq('modulo_id', MODULE_ID)
+                    .maybeSingle();
+
+                if (existente && existente.id) {
+                    await _supabase
+                        .from('se_progresso')
+                        .update({
+                            etapa_atual: Number(stepNumber),
+                            total_etapas: Number(TOTAL_STEPS),
+                            status: status,
+                            tempo_segundos: Number(secondsElapsed),
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', existente.id);
+                } else {
+                    await _supabase
+                        .from('se_progresso')
+                        .insert([payload]);
+                }
             } catch (err) {
-                console.error("Exceção na gravação:", err);
+                console.error("Erro ao salvar progresso:", err);
             }
         }
 
@@ -363,7 +384,6 @@
             document.getElementById('next-btn').disabled = false;
             document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Desafio concluído! Clique em Próximo Tópico.`;
             
-            // Salva o avanço da etapa atual (Etapa 1 concluída -> Salva etapa 2 em andamento)
             const proximaEtapa = Math.min(TOTAL_STEPS, currentStepIndex + 2);
             saveProgressToSupabase(proximaEtapa, currentStepIndex + 1 >= TOTAL_STEPS ? 'concluido' : 'em_andamento');
         }
