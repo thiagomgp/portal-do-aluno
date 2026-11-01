@@ -94,7 +94,7 @@
         </div>
       </div>
 
-      <!-- VISÃO GERAL DA TURMA (EXIBIDO QUANDO SELECIONA APENAS A TURMA) -->
+      <!-- VISÃO GERAL DA TURMA -->
       <div id="container-visao-turma" class="hidden space-y-4">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
           <h3 class="font-bold text-indigo-400 text-sm" id="titulo-turma-visao">--</h3>
@@ -118,7 +118,7 @@
         </div>
       </div>
 
-      <!-- VISÃO COMPLETA DO ALUNO (EXIBIDO QUANDO SELECIONA O ALUNO) -->
+      <!-- VISÃO COMPLETA DO ALUNO -->
       <div id="container-historico-detalhado" class="hidden space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 gap-2">
           <div>
@@ -145,7 +145,7 @@
       </div>
     </section>
 
-    <!-- ABA 3: GESTÃO GERAL DO SISTEMA (GERENCIAR TURMAS, DISCIPLINAS, ALUNOS E AVISOS) -->
+    <!-- ABA 3: GESTÃO GERAL DO SISTEMA -->
     <div id="aba-gestao" class="hidden space-y-8">
       
       <!-- GESTÃO DE TURMAS -->
@@ -162,7 +162,7 @@
         <div id="lista-turmas" class="flex flex-wrap gap-3"></div>
       </section>
 
-      <!-- GESTÃO E ATRIBUIÇÃO DE DISCIPLINAS -->
+      <!-- GESTÃO DE DISCIPLINAS -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
           📚 Gestão de Disciplinas & Atribuição a Turmas
@@ -363,7 +363,6 @@
       await carregarAvisosMural();
     }
 
-    // ALTERNA ENTRE AS ABAS PRINCIPAIS (OCULTA GERENCIAMENTO QUANDO ESTÁ NAS ATIVIDADES)
     function mudarAbaPrincipal(aba) {
       document.getElementById('aba-ultimas').classList.toggle('hidden', aba !== 'ultimas');
       document.getElementById('aba-aluno').classList.toggle('hidden', aba !== 'aluno');
@@ -402,7 +401,7 @@
 
       tabela.innerHTML = registos.map(r => {
         const nome = r.profiles ? (r.profiles.apelido || r.profiles.nome_completo) : 'Aluno';
-        const modulo = r.modulo_id || 'Módulo 1';
+        const modulo = r.modulo_id || 'Módulo';
         const dataAcesso = r.updated_at ? new Date(r.updated_at).toLocaleString('pt-BR') : 'Recente';
         
         const porcentagem = Math.round(((r.etapa_atual || 1) / (r.total_etapas || 4)) * 100);
@@ -417,7 +416,7 @@
         return `
           <tr class="hover:bg-slate-950/40 transition">
             <td class="p-3 font-semibold text-slate-200">${nome}</td>
-            <td class="p-3 text-indigo-300 font-medium">${modulo}</td>
+            <td class="p-3 text-indigo-300 font-medium font-mono">${modulo}</td>
             <td class="p-3">
               <span class="text-xs text-slate-300 font-bold">${r.etapa_atual || 1}/${r.total_etapas || 4} (${porcentagem}%)</span>
             </td>
@@ -429,7 +428,7 @@
       }).join('');
     }
 
-    // 2. PROCESSAR SELEÇÃO DA TURMA (EXIBE GERAL DA TURMA OU PREPARA ALUNOS)
+    // 2. PROCESSAR SELEÇÃO DA TURMA
     async function processarSelecaoTurma() {
       const turmaId = document.getElementById('filtro-turma-aluno').value;
       const selectAluno = document.getElementById('filtro-aluno-especifico');
@@ -445,7 +444,6 @@
         return;
       }
 
-      // Busca alunos da turma
       const { data: alunos } = await supabase
         .from('profiles')
         .select('id, nome_completo, apelido')
@@ -462,11 +460,9 @@
       selectAluno.innerHTML = '<option value="">Todos os alunos (Visão Geral da Turma)</option>' + 
         alunos.map(a => `<option value="${a.id}">${a.nome_completo} (${a.apelido || 'Sem apelido'})</option>`).join('');
 
-      // Exibe a Visão Geral da Turma
       exibirVisaoGeralTurma(turmaId, alunos);
     }
 
-    // VISÃO GERAL DA TURMA
     async function exibirVisaoGeralTurma(turmaId, alunos) {
       const containerTurma = document.getElementById('container-visao-turma');
       const tbody = document.getElementById('tabela-visao-turma');
@@ -478,7 +474,6 @@
 
       tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">Compilando dados da turma...</td></tr>';
 
-      // Busca o histórico de todos os alunos pertencentes à turma
       const idsAlunos = alunos.map(a => a.id);
       const { data: progressos } = await supabase
         .from('se_progresso')
@@ -515,7 +510,7 @@
       carregarHistoricoAlunoEspecifico();
     }
 
-    // 3. CARREGAR HISTÓRICO COMPLETO DO ALUNO (EXIBE 100% DAS ATIVIDADES INICIADAS)
+    // 3. CARREGAR HISTÓRICO COMPLETO DO ALUNO
     async function carregarHistoricoAlunoEspecifico() {
       const alunoId = document.getElementById('filtro-aluno-especifico').value;
       const containerTurma = document.getElementById('container-visao-turma');
@@ -523,7 +518,6 @@
       const tbody = document.getElementById('tabela-historico-individual');
 
       if (!alunoId) {
-        // Se desmarcar o aluno, volta para a visão da turma
         const turmaId = document.getElementById('filtro-turma-aluno').value;
         if (turmaId) processarSelecaoTurma();
         return;
@@ -535,7 +529,6 @@
       containerAluno.classList.remove('hidden');
       tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Buscando todas as atividades do aluno...</td></tr>';
 
-      // Consulta abrangente de todas as tarefas registradas do aluno
       const { data: historico, error } = await supabase
         .from('se_progresso')
         .select('*')
@@ -565,7 +558,7 @@
 
         return `
           <tr class="hover:bg-slate-950/40 transition">
-            <td class="p-3 font-bold text-white">${item.modulo_id || 'Módulo'}</td>
+            <td class="p-3 font-bold text-white font-mono">${item.modulo_id || 'Módulo'}</td>
             <td class="p-3 text-slate-400">${dataAcesso}</td>
             <td class="p-3 font-mono text-cyan-400">${duracaoStr}</td>
             <td class="p-3 text-slate-300 font-bold">${item.etapa_atual || 1}/${item.total_etapas || 4} (${porcentagem}%)</td>
