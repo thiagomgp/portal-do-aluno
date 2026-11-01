@@ -14,26 +14,15 @@
       suppressWarning: true,
       theme: {
         extend: {
-          fontFamily: { sans: ['Roboto', 'sans-serif'] },
-          colors: {
-            driveDarkBg: '#131314',
-            driveHeaderBg: '#131314',
-            driveSidebarBg: '#131314',
-            driveSurfaceBg: '#1e1f20',
-            driveHoverBg: '#282a2c',
-            driveActiveBg: '#004a77',
-            driveActiveText: '#c2e7ff',
-            driveTextMuted: '#c4c7c5',
-            driveBlueAccent: '#a8c7fa'
-          }
+          fontFamily: { sans: ['Roboto', 'sans-serif'] }
         }
       }
     }
   </script>
 </head>
-<body class="bg-[#131314] text-[#e3e2e6] font-sans h-screen flex flex-col justify-between overflow-hidden select-none">
+<body class="bg-[#131314] text-[#e3e2e6] font-sans h-screen flex flex-col justify-between overflow-hidden select-none" onclick="fecharMenuNovoFora(event)">
 
-  <!-- SUPABASE & SESSÃO DO ALUNOS -->
+  <!-- SUPABASE & SESSÃO -->
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -89,8 +78,8 @@
     }
   </script>
 
-  <!-- 1. BARRA SUPERIOR (HEADER RÉRPLICA CHROME / GOOGLE DRIVE) -->
-  <header class="h-16 px-4 flex items-center justify-between border-b border-[#282a2c] bg-[#131314] shrink-0">
+  <!-- BARRA SUPERIOR IDÊNTICA AO GOOGLE DRIVE NO CHROME -->
+  <header class="h-16 px-4 flex items-center justify-between border-b border-[#282a2c] bg-[#131314] shrink-0 z-20">
     <div class="flex items-center gap-3 w-60">
       <a href="javascript:history.back()" class="p-2 hover:bg-[#282a2c] rounded-full text-[#c4c7c5] transition" title="Voltar ao Portal do Aluno">
         <i class="fa-solid fa-arrow-left"></i>
@@ -110,7 +99,7 @@
       </div>
     </div>
 
-    <!-- BOTÕES DE SUPORTE E PERFIL DO USUÁRIO -->
+    <!-- BOTÕES DE SUPORTE E PERFIL -->
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-1 text-[#c4c7c5]">
         <button class="p-2 hover:bg-[#282a2c] rounded-full"><i class="fa-regular fa-circle-question text-lg"></i></button>
@@ -130,17 +119,105 @@
     </div>
   </header>
 
-  <!-- 2. CORPO PRINCIPAL DO DRIVE -->
-  <main class="flex-1 flex overflow-hidden">
+  <!-- CORPO PRINCIPAL DO DRIVE -->
+  <main class="flex-1 flex overflow-hidden relative">
     
-    <!-- BARRA LATERAL ESQUERDA COMPLETA -->
-    <aside class="w-60 bg-[#131314] p-3 flex flex-col justify-between border-r border-[#282a2c] shrink-0">
+    <!-- BARRA LATERAL ESQUERDA -->
+    <aside class="w-60 bg-[#131314] p-3 flex flex-col justify-between border-r border-[#282a2c] shrink-0 relative">
       <div class="space-y-4">
-        <!-- BOTÃO NOVO FIEL AO GOOGLE DRIVE REAL -->
-        <button onclick="promptCriarPastaDrive()" class="bg-[#37393b] hover:bg-[#444746] text-[#e3e2e6] font-medium py-3.5 px-5 rounded-2xl text-sm flex items-center gap-3 shadow-md transition w-36">
-          <i class="fa-solid fa-plus text-xl text-[#a8c7fa]"></i>
-          <span class="font-medium text-sm">Novo</span>
-        </button>
+        
+        <!-- CONTAINER DO BOTÃO NOVO & MENU DROPDOWN -->
+        <div class="relative inline-block text-left">
+          <button id="btn-novo-drive" onclick="toggleMenuNovo(event)" class="bg-[#37393b] hover:bg-[#444746] text-[#e3e2e6] font-medium py-3.5 px-5 rounded-2xl text-sm flex items-center gap-3 shadow-md transition w-36">
+            <i class="fa-solid fa-plus text-xl text-[#a8c7fa]"></i>
+            <span class="font-medium text-sm">Novo</span>
+          </button>
+
+          <!-- MENU DROPDOWN REAL DO "+ NOVO" -->
+          <div id="dropdown-novo" class="hidden absolute top-14 left-0 w-64 bg-[#1e1f20] border border-[#37393b] rounded-2xl shadow-2xl py-2 z-50 text-xs text-[#e3e2e6]">
+            <button onclick="promptCriarPastaDrive()" class="w-full text-left px-4 py-2.5 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-folder-plus text-[#c4c7c5] text-sm"></i>
+                <span class="font-medium">Nova pasta</span>
+              </div>
+              <span class="text-[10px] text-[#c4c7c5]">Alt+C, depois F</span>
+            </button>
+
+            <div class="my-1 border-t border-[#282a2c]"></div>
+
+            <button onclick="opcaoSimulada('Upload de arquivo')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-file-arrow-up text-[#c4c7c5] text-sm"></i>
+                <span>Upload de arquivo</span>
+              </div>
+              <span class="text-[10px] text-[#c4c7c5]">Alt+C, depois U</span>
+            </button>
+
+            <button onclick="opcaoSimulada('Upload de pasta')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-folder-arrow-up text-[#c4c7c5] text-sm"></i>
+                <span>Upload de pasta</span>
+              </div>
+              <span class="text-[10px] text-[#c4c7c5]">Alt+C, depois I</span>
+            </button>
+
+            <div class="my-1 border-t border-[#282a2c]"></div>
+
+            <button onclick="opcaoSimulada('Novo Projeto')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center gap-3 text-[#8ab4f8] font-medium transition">
+              <i class="fa-solid fa-plus text-sm"></i>
+              <span>Novo projeto</span>
+            </button>
+
+            <div class="my-1 border-t border-[#282a2c]"></div>
+
+            <button onclick="opcaoSimulada('Google Docs')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-file-lines text-blue-400 text-sm"></i>
+                <span>Google Docs</span>
+              </div>
+              <i class="fa-solid fa-caret-right text-[#c4c7c5] text-[10px]"></i>
+            </button>
+
+            <button onclick="opcaoSimulada('Planilhas do Google')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-table text-emerald-400 text-sm"></i>
+                <span>Planilhas do Google</span>
+              </div>
+              <i class="fa-solid fa-caret-right text-[#c4c7c5] text-[10px]"></i>
+            </button>
+
+            <button onclick="opcaoSimulada('Google Slides')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-file-powerpoint text-amber-400 text-sm"></i>
+                <span>Google Slides</span>
+              </div>
+              <i class="fa-solid fa-caret-right text-[#c4c7c5] text-[10px]"></i>
+            </button>
+
+            <button onclick="opcaoSimulada('Google Vids')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-video text-purple-400 text-sm"></i>
+                <span>Google Vids</span>
+              </div>
+            </button>
+
+            <button onclick="opcaoSimulada('Google Formulários')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-list-check text-[#a8c7fa] text-sm"></i>
+                <span>Google Formulários</span>
+              </div>
+              <i class="fa-solid fa-caret-right text-[#c4c7c5] text-[10px]"></i>
+            </button>
+
+            <button onclick="opcaoSimulada('Mais')" class="w-full text-left px-4 py-2 hover:bg-[#282a2c] flex items-center justify-between transition">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-ellipsis text-[#c4c7c5] text-sm"></i>
+                <span>Mais</span>
+              </div>
+              <i class="fa-solid fa-caret-right text-[#c4c7c5] text-[10px]"></i>
+            </button>
+          </div>
+        </div>
 
         <nav class="space-y-0.5 text-xs">
           <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
@@ -199,8 +276,8 @@
     <!-- ÁREA PRINCIPAL DO CONTEÚDO -->
     <section class="flex-1 flex flex-col overflow-hidden bg-[#131314] px-6 pt-3 pb-6 space-y-4">
       
-      <!-- BANNER DISCRETO DE TAREFA / INSTRUÇÕES PARA O ALUNO -->
-      <div class="bg-[#1e1f20] border border-[#37393b] p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+      <!-- BANNER DISCRETO DE INSTRUÇÃO -->
+      <div class="bg-[#1e1f20] border border-[#37393b] p-3.5 rounded-2xl flex justify-between items-center shadow-md shrink-0">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center font-bold text-xs">
             3
@@ -211,17 +288,17 @@
               <span id="task-badge-step" class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded border border-amber-500/30">Etapa 1 de 3</span>
             </div>
             <h3 id="task-title-text" class="text-sm font-bold text-white mt-0.5">1. Estrutura Principal no Google Drive</h3>
-            <p id="task-desc-text" class="text-xs text-[#c4c7c5]">Clique no botão <strong class="text-white">+ Novo</strong> no menu esquerdo e crie a pasta principal <code class="text-amber-300 font-mono font-bold">EDU_DIGITAL_2026</code>.</p>
+            <p id="task-desc-text" class="text-xs text-[#c4c7c5]">Clique no botão <strong class="text-white">+ Novo</strong> $\rightarrow$ <strong class="text-white">Nova pasta</strong> e crie a pasta <code class="text-amber-300 font-mono font-bold">EDU_DIGITAL_2026</code>.</p>
           </div>
         </div>
 
         <button onclick="promptCriarPastaDrive()" class="bg-[#004a77] hover:bg-[#005b92] text-[#c2e7ff] text-xs font-bold px-4 py-2 rounded-xl transition border border-[#8ab4f8]/30">
-          + Criar Pasta
+          + Nova Pasta
         </button>
       </div>
 
-      <!-- TÍTULO MEU DRIVE & FILTROS (EXATO DO PRINT REAL) -->
-      <div class="space-y-3">
+      <!-- TÍTULO E FILTROS -->
+      <div class="space-y-3 shrink-0">
         <div class="flex justify-between items-center">
           <h2 id="folder-breadcrumb" class="text-xl font-medium text-white flex items-center gap-2">
             <span>Meu Drive</span>
@@ -235,7 +312,7 @@
           </div>
         </div>
 
-        <!-- BARRA DE FILTROS REAL DO DRIVE (GEMINI, TIPO, PESSOAS...) -->
+        <!-- FILTROS REAL DO DRIVE -->
         <div class="flex flex-wrap items-center gap-2 text-xs">
           <button class="bg-[#1e1f20] hover:bg-[#282a2c] border border-[#37393b] text-[#8ab4f8] px-3 py-1.5 rounded-lg flex items-center gap-2 font-medium">
             <i class="fa-solid fa-sparkles text-xs"></i> Pedir ao Gemini
@@ -255,7 +332,7 @@
         </div>
       </div>
 
-      <!-- TABELA DE ARQUIVOS REAL DO DRIVE (RÉPLICA DO PRINT) -->
+      <!-- TABELA DE ARQUIVOS COM PASTAS GENÉRICAS / ESCOLARES -->
       <div class="flex-1 overflow-y-auto border-t border-[#282a2c] pt-2">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
@@ -268,7 +345,7 @@
             </tr>
           </thead>
           <tbody id="drive-files-tbody" class="divide-y divide-[#1e1f20] text-[#e3e2e6]">
-            <!-- Os arquivos/pastas reais e criados pelo aluno aparecem aqui -->
+            <!-- Renderizado via JavaScript -->
           </tbody>
         </table>
       </div>
@@ -297,22 +374,16 @@
     let currentStep = 1;
     let secondsElapsed = 0;
 
-    // LISTA DE ARQUIVOS PRÉ-EXISTENTES DO SEU DRIVE REAL (RÉPLICA DO SEU PRINT)
+    // NOVAS PASTAS GENÉRICAS E ESCOLARES (SUBSTITUINDO AS ANTERIORES)
     const initialDriveItems = [
-      { name: 'cerveja e afins', isFolder: true, owner: 'eu', date: '29 de mar. de 2019 eu', parent: 'root' },
-      { name: 'documentos uteis', isFolder: true, owner: 'eu', date: '21 de ago. de 2025 eu', parent: 'root' },
-      { name: 'Escola', isFolder: true, owner: 'eu', date: '25 de out. eu', parent: 'root' },
-      { name: 'fotos', isFolder: true, owner: 'eu', date: '25 de out. eu', parent: 'root' },
-      { name: 'hamachi', isFolder: true, owner: 'eu', date: '29 de set. de 2017 eu', parent: 'root' },
-      { name: 'livros', isFolder: true, owner: 'eu', date: '6 de ago. de 2019 eu', parent: 'root' },
-      { name: 'matematica ana', isFolder: true, owner: 'eu', date: '18 de mai. de 2018 eu', parent: 'root' },
-      { name: 'plataforma de provas', isFolder: true, owner: 'eu', date: '12 de abr. eu', parent: 'root' },
-      { name: 'projeto de historias', isFolder: true, owner: 'eu', date: '27 de jul. eu', parent: 'root' },
-      { name: 'psicologia', isFolder: true, owner: 'eu', date: '25 de out. eu', parent: 'root' },
-      { name: 'receitas', isFolder: true, owner: 'eu', date: '16 de set. de 2019 eu', parent: 'root' },
-      { name: 'servidor de minecraft', isFolder: true, owner: 'eu', date: '13 de ago. eu', parent: 'root' },
-      { name: 'site thiago', isFolder: true, owner: 'eu', date: '1 de mar. eu', parent: 'root' },
-      { name: 'Theo', isFolder: true, owner: 'eu', date: '25 de out. eu', parent: 'root' }
+      { name: 'Documentos do Aluno', isFolder: true, owner: 'eu', date: '20 de jan. de 2026', parent: 'root' },
+      { name: 'Projetos Escolares', isFolder: true, owner: 'eu', date: '15 de fev. de 2026', parent: 'root' },
+      { name: 'Fotos das Aulas', isFolder: true, owner: 'eu', date: '10 de mar. de 2026', parent: 'root' },
+      { name: 'Trabalhos em Grupo 2025', isFolder: true, owner: 'eu', date: '25 de out. de 2025', parent: 'root' },
+      { name: 'Anotações de Estudos', isFolder: true, owner: 'eu', date: '12 de nov. de 2025', parent: 'root' },
+      { name: 'Apresentações e Slides', isFolder: true, owner: 'eu', date: '05 de dez. de 2025', parent: 'root' },
+      { name: 'Atividades Práticas', isFolder: true, owner: 'eu', date: '18 de jan. de 2026', parent: 'root' },
+      { name: 'Modelos e Exemplos', isFolder: true, owner: 'eu', date: '28 de fev. de 2026', parent: 'root' }
     ];
 
     let userItems = [...initialDriveItems];
@@ -323,7 +394,30 @@
       renderDriveTable();
     });
 
+    function toggleMenuNovo(e) {
+      if (e) e.stopPropagation();
+      const dropdown = document.getElementById('dropdown-novo');
+      dropdown.classList.toggle('hidden');
+    }
+
+    function fecharMenuNovoFora(e) {
+      const dropdown = document.getElementById('dropdown-novo');
+      const btn = document.getElementById('btn-novo-drive');
+      if (dropdown && !dropdown.classList.contains('hidden')) {
+        if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      }
+    }
+
+    function opcaoSimulada(nomeOpcao) {
+      document.getElementById('dropdown-novo').classList.add('hidden');
+      alert(`Opção "${nomeOpcao}" selecionada na simulação! Para cumprir o desafio atual, clique em "Nova pasta".`);
+    }
+
     function promptCriarPastaDrive() {
+      document.getElementById('dropdown-novo').classList.add('hidden');
+      
       const nome = prompt("Digite o nome da nova pasta:");
       if (!nome) return;
 
@@ -336,7 +430,7 @@
           currentStep = 2;
 
           document.getElementById('task-title-text').innerText = "2. Subpastas das Matérias Escolares";
-          document.getElementById('task-desc-text').innerText = "Você está dentro de 'EDU_DIGITAL_2026'. Crie duas subpastas: 'Matemática' e 'Português'.";
+          document.getElementById('task-desc-text').innerText = "Você está em 'EDU_DIGITAL_2026'. Crie duas subpastas: 'Matemática' e 'Português'.";
           document.getElementById('task-badge-step').innerText = "Etapa 2 de 3";
           document.getElementById('folder-breadcrumb').innerText = "Meu Drive > EDU_DIGITAL_2026";
 
@@ -378,7 +472,7 @@
       const items = userItems.filter(i => i.parent === currentFolder);
 
       if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-[#c4c7c5]">Nenhuma pasta criada neste local. Clique em "+ Novo".</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-[#c4c7c5]">Nenhuma pasta criada neste local. Clique em "+ Novo" -> "Nova pasta".</td></tr>`;
         return;
       }
 
