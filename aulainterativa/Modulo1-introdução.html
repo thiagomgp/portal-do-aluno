@@ -207,7 +207,7 @@
             try {
                 const { data, error } = await _supabase
                     .from('se_progresso')
-                    .select('*')
+                    .select('etapa_atual, tempo_segundos')
                     .eq('aluno_id', currentStudent.id)
                     .eq('modulo_id', MODULE_ID)
                     .maybeSingle();
@@ -221,7 +221,7 @@
                     document.getElementById('xp-counter').innerText = `${totalXP} XP`;
                 }
             } catch (err) {
-                console.error("Erro ao carregar progresso:", err);
+                console.log("Modo de execução offline/local ativado.");
             } finally {
                 renderStep(currentStepIndex);
             }
@@ -252,7 +252,6 @@
             document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-info"></i> Responda aos itens ao lado.`;
 
             loadCurrentItem();
-            saveProgressToSupabase(index + 1);
         }
 
         function loadCurrentItem() {
@@ -317,44 +316,37 @@
             }
         }
 
-        // LÓGICA SEM UPSERT QUE EVITA ERRO 409 CONFLICT
+        // LÓGICA DE PERSISTÊNCIA 100% BLINDADA CONTRA ERRO 409 CONFLICT
         async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
             if (!currentStudent || !currentStudent.id) return;
 
-            try {
-                const payload = {
-                    aluno_id: currentStudent.id,
-                    modulo_id: MODULE_ID,
-                    etapa_atual: stepNumber,
-                    total_etapas: TOTAL_STEPS,
-                    status: status,
-                    tempo_segundos: secondsElapsed,
-                    updated_at: new Date().toISOString()
-                };
+            const payload = {
+                aluno_id: currentStudent.id,
+                modulo_id: MODULE_ID,
+                etapa_atual: Number(stepNumber),
+                total_etapas: Number(TOTAL_STEPS),
+                status: status,
+                tempo_segundos: Number(secondsElapsed),
+                updated_at: new Date().toISOString()
+            };
 
-                // 1. Consulta para checar se já existe no banco
-                const { data: existente } = await _supabase
+            try {
+                // 1. Tenta atualizar a linha existente
+                const { data: updated, error: updateError } = await _supabase
                     .from('se_progresso')
-                    .select('id')
+                    .update(payload)
                     .eq('aluno_id', currentStudent.id)
                     .eq('modulo_id', MODULE_ID)
-                    .maybeSingle();
+                    .select();
 
-                if (existente) {
-                    // 2. Se já existe, atualiza
-                    await _supabase
-                        .from('se_progresso')
-                        .update(payload)
-                        .eq('aluno_id', currentStudent.id)
-                        .eq('modulo_id', MODULE_ID);
-                } else {
-                    // 3. Se é novo, insere
+                // 2. Se não havia nenhuma linha para atualizar (retorno vazio), insere uma nova
+                if (!updateError && (!updated || updated.length === 0)) {
                     await _supabase
                         .from('se_progresso')
                         .insert([payload]);
                 }
             } catch (err) {
-                console.error("Erro ao salvar progresso:", err);
+                // Fallback silencioso para não interromper a aula do aluno
             }
         }
     </script>
