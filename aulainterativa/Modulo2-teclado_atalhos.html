@@ -46,7 +46,7 @@
                 if (urlParams.has('id')) {
                     currentStudent = {
                         id: urlParams.get('id'),
-                        nome: urlParams.get('nome') || 'Aluno',
+                        nome: urlParams.get('nome') || 'teste teste',
                         turma: urlParams.get('turma') || 'Geral'
                     };
                 } else {
@@ -73,34 +73,34 @@
         async function carregarProgressoSalvo() {
             let etapaCarregada = 1;
 
-            // 1. Tenta carregar do Supabase
             if (currentStudent && currentStudent.id) {
                 try {
                     const { data, error } = await _supabase
                         .from('se_progresso')
                         .select('etapa_atual, tempo_segundos, status')
                         .eq('aluno_id', currentStudent.id)
-                        .eq('modulo_id', MODULE_ID)
-                        .maybeSingle();
+                        .in('modulo_id', [MODULE_ID, 'Modulo2-teclado_atalhos', 'Modulo2-teclado-atalhos']);
 
-                    if (data && !error) {
-                        secondsElapsed = data.tempo_segundos || 0;
-                        etapaCarregada = data.etapa_atual || 1;
+                    if (data && data.length > 0 && !error) {
+                        secondsElapsed = data[0].tempo_segundos || 0;
+                        etapaCarregada = data[0].etapa_atual || 1;
                     }
                 } catch (err) {
-                    console.error("Erro ao carregar progresso anterior do banco:", err);
+                    console.error("Erro ao carregar progresso do banco:", err);
                 }
             }
 
-            // 2. Fallback via LocalStorage se não encontrou no banco
             if (etapaCarregada === 1) {
-                const local = localStorage.getItem(`progresso_${MODULE_ID}`);
-                if (local) {
-                    try {
-                        const parsed = JSON.parse(local);
-                        etapaCarregada = parsed.etapa_atual || 1;
-                        secondsElapsed = parsed.tempo_segundos || 0;
-                    } catch(e){}
+                const keys = [`progresso_${MODULE_ID}`, `progresso_Modulo2-teclado_atalhos`];
+                for (const key of keys) {
+                    const local = localStorage.getItem(key);
+                    if (local) {
+                        try {
+                            const parsed = JSON.parse(local);
+                            etapaCarregada = Math.max(etapaCarregada, parsed.etapa_atual || 1);
+                            secondsElapsed = Math.max(secondsElapsed, parsed.tempo_segundos || 0);
+                        } catch(e){}
+                    }
                 }
             }
 
@@ -123,14 +123,28 @@
                 updated_at: new Date().toISOString()
             };
 
-            // Salva no LocalStorage em duas chaves para compatibilidade com o Portal
             localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
             localStorage.setItem(`progresso_Modulo2-${MODULE_ID}`, JSON.stringify(payload));
 
-            // Sincroniza no Supabase
             if (currentStudent && currentStudent.id) {
                 try {
-                    await _supabase.from('se_progresso').upsert(payload, { onConflict: 'aluno_id,modulo_id' });
+                    const { error } = await _supabase
+                        .from('se_progresso')
+                        .upsert(payload, { onConflict: 'aluno_id,modulo_id' });
+
+                    if (error && (error.code === '23505' || error.status === 409)) {
+                        await _supabase
+                            .from('se_progresso')
+                            .update({
+                                etapa_atual: etapaAtual,
+                                total_etapas: LESSON_STEPS.length,
+                                tempo_segundos: secondsElapsed,
+                                status: status,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('aluno_id', payload.aluno_id)
+                            .eq('modulo_id', MODULE_ID);
+                    }
                 } catch (err) {
                     console.error("Erro ao sincronizar progresso no Supabase:", err);
                 }
