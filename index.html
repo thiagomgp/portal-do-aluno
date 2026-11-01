@@ -75,7 +75,7 @@
         <p class="text-xs text-slate-400 mt-1">Acompanhe comunicados importantes da disciplina.</p>
       </div>
 
-      <div class="space-y-4">
+      <div id="lista-avisos" class="space-y-4">
         <div class="bg-slate-900 border-l-4 border-emerald-500 border-y border-r border-slate-800 rounded-r-2xl p-5 shadow-lg space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -101,7 +101,7 @@
         <p class="text-xs text-slate-400 mt-1">Selecione uma opção dentro da disciplina para ver o conteúdo.</p>
       </div>
 
-      <!-- CARD DA DISCIPLINA -->
+      <!-- CARD DA DISCIPLINA COM BOTÕES DE LARGURA PADRONIZADA -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm">
@@ -113,15 +113,15 @@
           </div>
         </div>
 
-        <!-- BOTÕES DE SELEÇÃO INTERNA -->
-        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 max-w-md">
-          <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition">
+        <!-- BOTÕES COM TAMANHO PADRONIZADO (w-32) -->
+        <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
+          <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="w-32 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition">
             <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
           </button>
-          <button id="btn-sub-materiais" onclick="selecionarSubAbaDisciplina('materiais')" class="bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
+          <button id="btn-sub-materiais" onclick="selecionarSubAbaDisciplina('materiais')" class="w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
             <i class="fa-solid fa-folder text-xs"></i> Materiais
           </button>
-          <button id="btn-sub-provas" onclick="selecionarSubAbaDisciplina('provas')" class="bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
+          <button id="btn-sub-provas" onclick="selecionarSubAbaDisciplina('provas')" class="w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
             <i class="fa-solid fa-file-pen text-xs"></i> Provas
           </button>
         </div>
@@ -233,7 +233,6 @@
 
   </main>
 
-  <!-- SCRIPTS E LÓGICA DE SESSÃO DA PÁGINA -->
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -250,7 +249,7 @@
       recuperarOuCriarSessaoAluno();
       await varrerEExibirAulasGitHub();
 
-      document.getElementById('form-update-profile').addEventListener('submit', (e) => {
+      document.getElementById('form-update-profile')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const novoNome = document.getElementById('profile-name-input').value.trim();
         const novoApelido = document.getElementById('profile-nickname-input').value.trim();
@@ -265,7 +264,7 @@
         recuperarOuCriarSessaoAluno();
       });
 
-      document.getElementById('form-update-password').addEventListener('submit', (e) => {
+      document.getElementById('form-update-password')?.addEventListener('submit', (e) => {
         e.preventDefault();
         alert("Senha alterada com sucesso!");
         document.getElementById('profile-new-password').value = '';
@@ -301,17 +300,17 @@
       const nomeExibicao = activeStudent.nome || 'Aluno Demo';
       const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : '@aluno_demo';
 
-      document.getElementById('student-display-name').innerText = nomeExibicao;
-      document.getElementById('student-display-class').innerText = activeStudent.turma || 'Geral';
+      if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
+      if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || 'Geral';
       
-      document.getElementById('profile-header-name').innerText = nomeExibicao;
-      document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
-      document.getElementById('profile-header-email').innerText = activeStudent.email || 'aluno@escola.com';
+      if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
+      if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
+      if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'aluno@escola.com';
       
-      document.getElementById('profile-name-input').value = nomeExibicao;
-      document.getElementById('profile-nickname-input').value = activeStudent.apelido || 'aluno_demo';
+      if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
+      if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || 'aluno_demo';
 
-      if (activeStudent.foto_url) {
+      if (activeStudent.foto_url && document.getElementById('profile-avatar-url')) {
         document.getElementById('profile-avatar-url').value = activeStudent.foto_url;
         document.getElementById('profile-avatar-preview').src = activeStudent.foto_url;
       }
@@ -323,6 +322,7 @@
 
     async function varrerEExibirAulasGitHub() {
       const grid = document.getElementById('grid-aulas-automaticas');
+      if (!grid) return;
 
       try {
         let progressosMap = {};
@@ -352,7 +352,6 @@
         grid.innerHTML = arquivosHtml.map((file, index) => {
           const rawNameNoExt = file.name.replace('.html', '');
           
-          // MAPEAMENTO UNIFICADO DE CHAVES ENTRE NOME DO ARQUIVO E BANCO SUPABASE
           let moduloKey = rawNameNoExt;
           if (rawNameNoExt.toLowerCase().includes('introduc') || rawNameNoExt.toLowerCase().includes('modulo1')) {
             moduloKey = 'intro_hw_sw';
@@ -423,28 +422,38 @@
     }
 
     function selecionarSubAbaDisciplina(subAba) {
-      document.getElementById('sub-conteudo-aulas').classList.toggle('hidden', subAba !== 'aulas');
-      document.getElementById('sub-conteudo-materiais').classList.toggle('hidden', subAba !== 'materiais');
-      document.getElementById('sub-conteudo-provas').classList.toggle('hidden', subAba !== 'provas');
+      document.getElementById('sub-conteudo-aulas')?.classList.toggle('hidden', subAba !== 'aulas');
+      document.getElementById('sub-conteudo-materiais')?.classList.toggle('hidden', subAba !== 'materiais');
+      document.getElementById('sub-conteudo-provas')?.classList.toggle('hidden', subAba !== 'provas');
 
-      document.getElementById('btn-sub-aulas').className = subAba === 'aulas'
-        ? 'bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
-        : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
+      const btnAulas = document.getElementById('btn-sub-aulas');
+      const btnMateriais = document.getElementById('btn-sub-materiais');
+      const btnProvas = document.getElementById('btn-sub-provas');
 
-      document.getElementById('btn-sub-materiais').className = subAba === 'materiais'
-        ? 'bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
-        : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
+      if (btnAulas) {
+        btnAulas.className = subAba === 'aulas'
+          ? 'w-32 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
+          : 'w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
+      }
 
-      document.getElementById('btn-sub-provas').className = subAba === 'provas'
-        ? 'bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
-        : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
+      if (btnMateriais) {
+        btnMateriais.className = subAba === 'materiais'
+          ? 'w-32 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
+          : 'w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
+      }
+
+      if (btnProvas) {
+        btnProvas.className = subAba === 'provas'
+          ? 'w-32 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
+          : 'w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
+      }
     }
 
     function mudarAbaPortal(aba) {
-      document.getElementById('secao-inicio').classList.toggle('hidden', aba !== 'inicio');
-      document.getElementById('secao-disciplinas').classList.toggle('hidden', aba !== 'disciplinas');
-      document.getElementById('secao-jogos').classList.toggle('hidden', aba !== 'jogos');
-      document.getElementById('secao-perfil').classList.toggle('hidden', aba !== 'perfil');
+      document.getElementById('secao-inicio')?.classList.toggle('hidden', aba !== 'inicio');
+      document.getElementById('secao-disciplinas')?.classList.toggle('hidden', aba !== 'disciplinas');
+      document.getElementById('secao-jogos')?.classList.toggle('hidden', aba !== 'jogos');
+      document.getElementById('secao-perfil')?.classList.toggle('hidden', aba !== 'perfil');
 
       const abas = ['inicio', 'disciplinas', 'jogos', 'perfil'];
       abas.forEach(a => {
