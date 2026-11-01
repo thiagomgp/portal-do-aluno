@@ -316,7 +316,7 @@
             }
         }
 
-        // LÓGICA DE PERSISTÊNCIA 100% BLINDADA CONTRA ERRO 409 CONFLICT
+        // LÓGICA DE PERSISTÊNCIA CORRIGIDA (SEM 409 CONFLICT)
         async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
             if (!currentStudent || !currentStudent.id) return;
 
@@ -331,22 +331,15 @@
             };
 
             try {
-                // 1. Tenta atualizar a linha existente
-                const { data: updated, error: updateError } = await _supabase
+                const { error } = await _supabase
                     .from('se_progresso')
-                    .update(payload)
-                    .eq('aluno_id', currentStudent.id)
-                    .eq('modulo_id', MODULE_ID)
-                    .select();
+                    .upsert(payload, { onConflict: 'aluno_id,modulo_id' });
 
-                // 2. Se não havia nenhuma linha para atualizar (retorno vazio), insere uma nova
-                if (!updateError && (!updated || updated.length === 0)) {
-                    await _supabase
-                        .from('se_progresso')
-                        .insert([payload]);
+                if (error) {
+                    console.warn("Sincronização:", error.message);
                 }
             } catch (err) {
-                // Fallback silencioso para não interromper a aula do aluno
+                // Silencioso
             }
         }
     </script>
