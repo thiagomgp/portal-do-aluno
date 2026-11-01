@@ -63,7 +63,7 @@
             document.getElementById('student-name-display').innerText = currentStudent.nome || "Aluno";
             document.getElementById('student-class-display').innerText = currentStudent.turma || "Geral";
 
-            await ();
+            await carregarProgressoExistente();
             startTimer();
         });
     </script>
@@ -198,87 +198,89 @@
         let timerInterval = null;
         let currentItemIndex = 0;
 
-        // 1. CARREGAMENTO DE PROGRESSO (SUPABASE + FALLBACK LOCALSTORAGE)
-    async function carregarProgressoExistente() {
-        if (!currentStudent || !currentStudent.id) {
-            renderStep(0);
-            return;
-        }
-
-        // Se for o aluno Demo/Teste, carrega do localStorage para evitar erro no console
-        if (currentStudent.id === DEFAULT_UUID_DEMO) {
-            const localData = localStorage.getItem(`progresso_${MODULE_ID}`);
-            if (localData) {
-                const parsed = JSON.parse(localData);
-                secondsElapsed = parsed.tempo_segundos || 0;
-                const etapaSalva = Math.max(0, (parsed.etapa_atual || 1) - 1);
-                currentStepIndex = Math.min(etapaSalva, TOTAL_STEPS - 1);
-                totalXP = currentStepIndex * 25;
-                document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+        // 1. CARREGAMENTO DE PROGRESSO
+        async function carregarProgressoExistente() {
+            if (!currentStudent || !currentStudent.id) {
+                renderStep(0);
+                return;
             }
-            renderStep(currentStepIndex);
-            return;
-        }
 
-        // Se for um aluno real autenticado com UUID do Supabase
-        try {
-            const { data, error } = await _supabase
-                .from('se_progresso')
-                .select('etapa_atual, tempo_segundos')
-                .eq('aluno_id', currentStudent.id)
-                .eq('modulo_id', MODULE_ID)
-                .maybeSingle();
-
-            if (data && !error) {
-                secondsElapsed = data.tempo_segundos || 0;
-                const etapaSalva = Math.max(0, (data.etapa_atual || 1) - 1);
-                currentStepIndex = Math.min(etapaSalva, TOTAL_STEPS - 1);
-                totalXP = currentStepIndex * 25;
-                document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+            // Aluno Demo/Teste: carrega do localStorage para evitar requisição rejeitada pelo Supabase
+            if (currentStudent.id === DEFAULT_UUID_DEMO) {
+                const localData = localStorage.getItem(`progresso_${MODULE_ID}`);
+                if (localData) {
+                    try {
+                        const parsed = JSON.parse(localData);
+                        secondsElapsed = parsed.tempo_segundos || 0;
+                        const etapaSalva = Math.max(0, (parsed.etapa_atual || 1) - 1);
+                        currentStepIndex = Math.min(etapaSalva, TOTAL_STEPS - 1);
+                        totalXP = currentStepIndex * 25;
+                        document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+                    } catch (e) {}
+                }
+                renderStep(currentStepIndex);
+                return;
             }
-        } catch (err) {
-            console.log("Modo local ativado.");
-        } finally {
-            renderStep(currentStepIndex);
-        }
-    }
 
-    // 2. SALVAMENTO DE PROGRESSO 100% LIMPO (SEM ERROS DE FOREIGN KEY NO CONSOLE)
-    async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
-        if (!currentStudent || !currentStudent.id) return;
+            // Aluno real cadastrado
+            try {
+                const { data, error } = await _supabase
+                    .from('se_progresso')
+                    .select('etapa_atual, tempo_segundos')
+                    .eq('aluno_id', currentStudent.id)
+                    .eq('modulo_id', MODULE_ID)
+                    .maybeSingle();
 
-        const payload = {
-            aluno_id: currentStudent.id,
-            modulo_id: MODULE_ID,
-            etapa_atual: Number(stepNumber),
-            total_etapas: Number(TOTAL_STEPS),
-            status: status,
-            tempo_segundos: Number(secondsElapsed),
-            updated_at: new Date().toISOString()
-        };
-
-        // Se for Aluno Demo / Visitante, salva localmente no navegador e evita requisição HTTP
-        if (currentStudent.id === DEFAULT_UUID_DEMO) {
-            localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
-            return;
-        }
-
-        // Se for Aluno Cadastrado no Banco
-        try {
-            const { data: updated, error: updateError } = await _supabase
-                .from('se_progresso')
-                .update(payload)
-                .eq('aluno_id', currentStudent.id)
-                .eq('modulo_id', MODULE_ID)
-                .select();
-
-            if (!updateError && (!updated || updated.length === 0)) {
-                await _supabase.from('se_progresso').insert([payload]);
+                if (data && !error) {
+                    secondsElapsed = data.tempo_segundos || 0;
+                    const etapaSalva = Math.max(0, (data.etapa_atual || 1) - 1);
+                    currentStepIndex = Math.min(etapaSalva, TOTAL_STEPS - 1);
+                    totalXP = currentStepIndex * 25;
+                    document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+                }
+            } catch (err) {
+                // Fallback silencioso
+            } finally {
+                renderStep(currentStepIndex);
             }
-        } catch (err) {
-            // Ignora silenciosamente para não poluir o console do aluno
         }
-    }
+
+        // 2. SALVAMENTO DE PROGRESSO BLINDADO
+        async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
+            if (!currentStudent || !currentStudent.id) return;
+
+            const payload = {
+                aluno_id: currentStudent.id,
+                modulo_id: MODULE_ID,
+                etapa_atual: Number(stepNumber),
+                total_etapas: Number(TOTAL_STEPS),
+                status: status,
+                tempo_segundos: Number(secondsElapsed),
+                updated_at: new Date().toISOString()
+            };
+
+            // Aluno Demo: grava no localStorage e não dispara chamada HTTP
+            if (currentStudent.id === DEFAULT_UUID_DEMO) {
+                localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
+                return;
+            }
+
+            // Aluno cadastrado no Supabase
+            try {
+                const { data: updated, error: updateError } = await _supabase
+                    .from('se_progresso')
+                    .update(payload)
+                    .eq('aluno_id', currentStudent.id)
+                    .eq('modulo_id', MODULE_ID)
+                    .select();
+
+                if (!updateError && (!updated || updated.length === 0)) {
+                    await _supabase.from('se_progresso').insert([payload]);
+                }
+            } catch (err) {
+                // Silencioso
+            }
+        }
 
         function startTimer() {
             if (timerInterval) clearInterval(timerInterval);
@@ -368,56 +370,6 @@
                 await saveProgressToSupabase(TOTAL_STEPS, 'concluido');
             }
         }
-
-        // LÓGICA DE PERSISTÊNCIA CORRIGIDA (SEM VIOLAÇÃO DE FOREIGN KEY E SEM 409)
-async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
-    if (!currentStudent || !currentStudent.id) return;
-
-    // 1. Garantir que o aluno exista na tabela 'se_alunos' para não violar a Foreign Key
-    try {
-        await _supabase.from('se_alunos').upsert({
-            id: currentStudent.id,
-            nome: currentStudent.nome || 'Aluno Demo',
-            turma: currentStudent.turma || 'Geral'
-        }, { onConflict: 'id' });
-    } catch (e) {
-        // Ignora caso a tabela se_alunos não permita inserção direta por anônimo
-    }
-
-    // 2. Tentar atualizar ou inserir o progresso no banco
-    const payload = {
-        aluno_id: currentStudent.id,
-        modulo_id: MODULE_ID,
-        etapa_atual: Number(stepNumber),
-        total_etapas: Number(TOTAL_STEPS),
-        status: status,
-        tempo_segundos: Number(secondsElapsed),
-        updated_at: new Date().toISOString()
-    };
-
-    try {
-        // Tenta update primeiro para evitar disparo de constraint violation no postgres
-        const { data: updated, error: updateError } = await _supabase
-            .from('se_progresso')
-            .update(payload)
-            .eq('aluno_id', currentStudent.id)
-            .eq('modulo_id', MODULE_ID)
-            .select();
-
-        // Se não atualizou nenhuma linha (registro novo), insere
-        if (!updateError && (!updated || updated.length === 0)) {
-            const { error: insertError } = await _supabase
-                .from('se_progresso')
-                .insert([payload]);
-
-            if (insertError) {
-                console.warn("Sincronização (modo convidado/offline ativado):", insertError.message);
-            }
-        }
-    } catch (err) {
-        // Captura exceção para manter a usabilidade limpa e sem travamentos
-    }
-}
     </script>
 </body>
 </html>
