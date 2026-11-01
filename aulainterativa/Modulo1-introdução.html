@@ -199,47 +199,72 @@
         let currentItemIndex = 0;
 
         // 1. CARREGAMENTO DE PROGRESSO
-        async function carregarProgressoExistente() {
-            if (!currentStudent || !currentStudent.id) {
-                renderStep(0);
-                return;
-            }
+        // CARREGAMENTO DE PROGRESSO REORGANIZADO E GARANTIDO
+async function carregarProgressoExistente() {
+    if (!currentStudent || !currentStudent.id) {
+        renderStep(0);
+        return;
+    }
 
-            // Tenta ler do localStorage primeiro (fallback instantâneo)
-            const localData = localStorage.getItem(`progresso_${MODULE_ID}`) || localStorage.getItem(`progresso_intro_hw_sw`);
+    let etapaEncontrada = 1;
+    let tempoEncontrado = 0;
+
+    // 1. Tenta carregar do Supabase primeiro (se for aluno autenticado real)
+    if (currentStudent.id !== DEFAULT_UUID_DEMO) {
+        try {
+            const { data, error } = await _supabase
+                .from('se_progresso')
+                .select('etapa_atual, tempo_segundos, status')
+                .eq('aluno_id', currentStudent.id)
+                .in('modulo_id', [MODULE_ID, 'intro_hw_sw', 'Modulo1-introducao'])
+                .maybeSingle();
+
+            if (data && !error) {
+                etapaEncontrada = Number(data.etapa_atual || 1);
+                tempoEncontrado = Number(data.tempo_segundos || 0);
+            }
+        } catch (err) {
+            console.warn("Aviso ao buscar progresso no banco:", err);
+        }
+    }
+
+    // 2. Fallback no localStorage (se não encontrou no banco ou for Aluno Demo)
+    if (etapaEncontrada === 1) {
+        const localKeys = [`progresso_${MODULE_ID}`, `progresso_Modulo1-introducao`, `progresso_intro_hw_sw`];
+        for (const key of localKeys) {
+            const localData = localStorage.getItem(key);
             if (localData) {
                 try {
                     const parsed = JSON.parse(localData);
-                    secondsElapsed = parsed.tempo_segundos || 0;
-                    const etapaSalva = Math.max(0, (parsed.etapa_atual || 1) - 1);
-                    currentStepIndex = Math.min(etapaSalva, TOTAL_STEPS - 1);
-                    totalXP = currentStepIndex * 25;
-                    document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+                    etapaEncontrada = Math.max(etapaEncontrada, Number(parsed.etapa_atual || 1));
+                    tempoEncontrado = Math.max(tempoEncontrado, Number(parsed.tempo_segundos || 0));
                 } catch (e) {}
             }
-
-            // Aluno real cadastrado no Supabase
-            if (currentStudent.id !== DEFAULT_UUID_DEMO) {
-                try {
-                    const { data, error } = await _supabase
-                        .from('se_progresso')
-                        .select('etapa_atual, tempo_segundos')
-                        .eq('aluno_id', currentStudent.id)
-                        .in('modulo_id', [MODULE_ID, 'intro_hw_sw', 'Modulo1-introducao'])
-                        .maybeSingle();
-
-                    if (data && !error) {
-                        secondsElapsed = data.tempo_segundos || secondsElapsed;
-                        const etapaSalva = Math.max(0, (data.etapa_atual || 1) - 1);
-                        currentStepIndex = Math.min(etapaSalva, TOTAL_STEPS - 1);
-                        totalXP = currentStepIndex * 25;
-                        document.getElementById('xp-counter').innerText = `${totalXP} XP`;
-                    }
-                } catch (err) {}
-            }
-
-            renderStep(currentStepIndex);
         }
+    }
+
+    // 3. Aplica o tempo acumulado
+    secondsElapsed = tempoEncontrado;
+
+    // 4. Converte a etapa do banco (1, 2, 3...) para o índice do array JS (0, 1, 2...)
+    // Se o progresso já foi concluído ou avançado, posiciona na etapa certa
+    let idxParaCarregar = etapaEncontrada - 1;
+
+    // Se a etapa salva for igual ao total (4) e o status for concluído, renderiza a última
+    if (idxParaCarregar >= TOTAL_STEPS) {
+        idxParaCarregar = TOTAL_STEPS - 1;
+    }
+
+    currentStepIndex = Math.max(0, idxParaCarregar);
+    totalXP = currentStepIndex * 25;
+
+    if (document.getElementById('xp-counter')) {
+        document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+    }
+
+    // 5. Renderiza a etapa correta recuperada do banco/localStorage
+    renderStep(currentStepIndex);
+}
 
         // 2. SALVAMENTO DE PROGRESSO BLINDADO (SUPABASE + LOCALSTORAGE)
         async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
