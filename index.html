@@ -238,12 +238,16 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let activeStudent = null;
+    const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
 
     document.addEventListener('DOMContentLoaded', async () => {
+      // 1. PRIMEIRO: Inicializa a sessão completamente
       await carregarSessaoReal();
+      
+      // 2. SEGUNDO: Busca as aulas no GitHub já sabendo quem é o aluno
       await varrerEExibirAulasGitHub();
 
-      // Gravação real no banco de dados ao salvar o perfil
+      // Atualizar perfil
       document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!activeStudent || !activeStudent.id) return;
@@ -266,16 +270,15 @@
         if (error) {
           alert("Erro ao salvar no banco: " + error.message);
         } else {
-          alert("Perfil atualizado no banco de dados com sucesso!");
+          alert("Perfil atualizado com sucesso!");
           await carregarSessaoReal();
         }
       });
 
-      // Alteração de senha direto no Supabase Auth
+      // Atualizar Senha
       document.getElementById('form-update-password')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const novaSenha = document.getElementById('profile-new-password').value;
-
         const { error } = await _supabase.auth.updateUser({ password: novaSenha });
 
         if (error) {
@@ -287,62 +290,64 @@
       });
     });
 
-    // CARREGA DADOS DO ALUNO REGISTRADO
+    // CARREGA DADOS DO ALUNO COM FALLBACK SEGURO
     async function carregarSessaoReal() {
-      const { data: { session } } = await _supabase.auth.getSession();
-      const urlParams = new URLSearchParams(window.location.search);
+      try {
+        const { data: { session } } = await _supabase.auth.getSession();
+        const urlParams = new URLSearchParams(window.location.search);
 
-      let userId = null;
-      let userEmail = '';
+        if (session && session.user) {
+          const user = session.user;
+          const { data: profile } = await _supabase
+            .from('profiles')
+            .select('*, turmas(nome)')
+            .eq('id', user.id)
+            .maybeSingle();
 
-      if (session && session.user) {
-        userId = session.user.id;
-        userEmail = session.user.email;
-      } else {
-        const saved = sessionStorage.getItem('active_student');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          userId = parsed.id;
-          userEmail = parsed.email || '';
-        } else if (urlParams.has('id')) {
-          userId = urlParams.get('id');
+          activeStudent = {
+            id: user.id,
+            email: user.email,
+            nome: profile?.nome_completo || user.user_metadata?.nome_completo || 'Aluno',
+            apelido: profile?.apelido || '',
+            turma: profile?.turmas?.nome || 'Geral',
+            foto_url: profile?.avatar_url || ''
+          };
+        } else {
+          const saved = sessionStorage.getItem('active_student');
+          if (saved) {
+            activeStudent = JSON.parse(saved);
+          } else {
+            activeStudent = {
+              id: urlParams.get('id') || DEFAULT_UUID_DEMO,
+              nome: urlParams.get('nome') || 'Aluno Demo',
+              turma: urlParams.get('turma') || 'Geral',
+              email: 'aluno@escola.com',
+              apelido: 'aluno_demo',
+              foto_url: ''
+            };
+          }
         }
+      } catch (e) {
+        activeStudent = { id: DEFAULT_UUID_DEMO, nome: 'Aluno Demo', turma: 'Geral', email: 'aluno@escola.com', apelido: 'aluno_demo' };
       }
-
-      if (!userId) return;
-
-      const { data: profile } = await _supabase
-        .from('profiles')
-        .select('*, turmas(nome)')
-        .eq('id', userId)
-        .maybeSingle();
-
-      activeStudent = {
-        id: userId,
-        email: userEmail || (profile ? profile.email : ''),
-        nome: profile?.nome_completo || urlParams.get('nome') || 'Aluno',
-        apelido: profile?.apelido || '',
-        turma: profile?.turmas?.nome || urlParams.get('turma') || 'Geral',
-        foto_url: profile?.avatar_url || ''
-      };
 
       sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
 
       const nomeExibicao = activeStudent.nome;
       const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
 
-      document.getElementById('student-display-name').innerText = nomeExibicao;
-      document.getElementById('student-display-class').innerText = activeStudent.turma;
+      if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
+      if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma;
 
-      document.getElementById('profile-header-name').innerText = nomeExibicao;
-      document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
-      document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
+      if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
+      if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
+      if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
 
-      document.getElementById('profile-name-input').value = nomeExibicao;
-      document.getElementById('profile-nickname-input').value = activeStudent.apelido;
-      document.getElementById('profile-email-input').value = activeStudent.email || '';
+      if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
+      if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
+      if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
 
-      if (activeStudent.foto_url) {
+      if (activeStudent.foto_url && document.getElementById('profile-avatar-url')) {
         document.getElementById('profile-avatar-url').value = activeStudent.foto_url;
         document.getElementById('profile-avatar-preview').src = activeStudent.foto_url;
       }
@@ -352,7 +357,7 @@
       if (url && url.startsWith('http')) document.getElementById('profile-avatar-preview').src = url;
     }
 
-    // BUSCA ATIVIDADES E MAPA DE PROGRESSO COMPATÍVEL COM SUPABASE E LOCALSTORAGE
+    // BUSCA ATIVIDADES E UNIFICA BUSCA NO SUPABASE E LOCALSTORAGE
     async function varrerEExibirAulasGitHub() {
       const grid = document.getElementById('grid-aulas-automaticas');
       if (!grid) return;
@@ -360,21 +365,23 @@
       try {
         let progressosMap = {};
 
-        // 1. Busca progresso registrado no Supabase
-        if (activeStudent && activeStudent.id) {
-          const { data: progressos } = await _supabase
-            .from('se_progresso')
-            .select('modulo_id, etapa_atual, total_etapas, status')
-            .eq('aluno_id', activeStudent.id);
+        // 1. Busca no Supabase para alunos cadastrados
+        if (activeStudent && activeStudent.id && activeStudent.id !== DEFAULT_UUID_DEMO) {
+          try {
+            const { data: progressos } = await _supabase
+              .from('se_progresso')
+              .select('modulo_id, etapa_atual, total_etapas, status')
+              .eq('aluno_id', activeStudent.id);
 
-          if (progressos) {
-            progressos.forEach(p => {
-              progressosMap[p.modulo_id] = p;
-            });
-          }
+            if (progressos) {
+              progressos.forEach(p => {
+                progressosMap[p.modulo_id] = p;
+              });
+            }
+          } catch (e) {}
         }
 
-        // 2. Busca lista de conteúdos na pasta aulainterativa do GitHub
+        // 2. Busca lista de arquivos do repositório no GitHub
         const res = await fetch('https://api.github.com/repos/thiagomgp/portal-do-aluno/contents/aulainterativa');
         const arquivos = await res.json();
 
@@ -386,22 +393,34 @@
         const arquivosHtml = arquivos.filter(f => f.name.endsWith('.html')).sort((a, b) => a.name.localeCompare(b.name));
 
         grid.innerHTML = arquivosHtml.map((file, index) => {
+          // Decodifica nomes com acento de URL encoding (ex: Modulo1-introdu%C3%A7%C3%A3o)
           const rawNameNoExt = decodeURIComponent(file.name.replace('.html', ''));
           const rawFileName = file.name.replace('.html', '');
-          
+
+          // Apelidos/aliases de identificação dos módulos
           let aliasId = rawNameNoExt;
           if (rawNameNoExt.toLowerCase().includes('introduc') || rawNameNoExt.toLowerCase().includes('modulo1')) {
-            aliasId = 'intro_hw_sw';
+            aliasId = 'Modulo1-introdução';
           } else if (rawNameNoExt.toLowerCase().includes('nuvem') || rawNameNoExt.toLowerCase().includes('modulo3')) {
-            aliasId = 'desafio_nuvem';
+            aliasId = 'Modulo3-desafio_nuvem';
           }
 
-          // Busca o progresso considerando aliases, nome decoded e nome raw
-          let prog = progressosMap[rawNameNoExt] || progressosMap[rawFileName] || progressosMap[aliasId] || progressosMap[file.name] || null;
+          // Tenta mapear o progresso usando todas as chaves possíveis
+          let prog = progressosMap[rawNameNoExt] || 
+                     progressosMap[rawFileName] || 
+                     progressosMap[aliasId] || 
+                     progressosMap['intro_hw_sw'] || 
+                     progressosMap['desafio_nuvem'] || null;
 
-          // Fallback para o localStorage se não encontrado no Supabase
+          // Se não encontrou no Supabase, busca no localStorage
           if (!prog) {
-            const chavesBusca = [`progresso_${rawNameNoExt}`, `progresso_${rawFileName}`, `progresso_${aliasId}`];
+            const chavesBusca = [
+              `progresso_${rawNameNoExt}`, 
+              `progresso_${rawFileName}`, 
+              `progresso_${aliasId}`, 
+              `progresso_intro_hw_sw`, 
+              `progresso_Modulo1-introducao`
+            ];
             for (const chave of chavesBusca) {
               const local = localStorage.getItem(chave);
               if (local) {
@@ -419,7 +438,7 @@
 
           if (prog) {
             const etapaAtual = Number(prog.etapa_atual || 0);
-            const totalEtapas = Number(prog.total_etapas || (aliasId === 'desafio_nuvem' ? 3 : 4));
+            const totalEtapas = Number(prog.total_etapas || 4);
 
             if (prog.status === 'concluido' || etapaAtual >= totalEtapas) {
               statusBadgeHTML = `<span class="text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full">✓ Concluído</span>`;
@@ -429,11 +448,9 @@
               subtextEtapa = `Etapa ${etapaAtual} de ${totalEtapas}`;
             } else {
               statusBadgeHTML = `<span class="text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700 px-2.5 py-0.5 rounded-full">Não iniciado</span>`;
-              subtextEtapa = `Ainda não iniciada`;
             }
           } else {
             statusBadgeHTML = `<span class="text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700 px-2.5 py-0.5 rounded-full">Não iniciado</span>`;
-            subtextEtapa = `Ainda não iniciada`;
           }
 
           return `
