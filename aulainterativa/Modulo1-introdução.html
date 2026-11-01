@@ -20,7 +20,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased">
 
-    <!-- SUPABASE & SESSÃO -->
+    <!-- SUPABASE & SESSÃO COM REGEX DE UUID VALIDADO -->
     <script>
         const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -29,6 +29,12 @@
         let currentStudent = null;
         const MODULE_ID = "intro_hw_sw";
         const TOTAL_STEPS = 4;
+        const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
+
+        function isUUIDValido(str) {
+            const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            return regex.test(str);
+        }
 
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -37,20 +43,27 @@
             if (saved) {
                 currentStudent = JSON.parse(saved);
             } else if (urlParams.has('id')) {
+                const rawId = urlParams.get('id');
                 currentStudent = {
-                    id: urlParams.get('id'),
+                    id: isUUIDValido(rawId) ? rawId : DEFAULT_UUID_DEMO,
                     nome: urlParams.get('nome') || 'Aluno',
                     turma: urlParams.get('turma') || 'Geral'
                 };
+            } else {
+                currentStudent = {
+                    id: DEFAULT_UUID_DEMO,
+                    nome: "Aluno Demo",
+                    turma: "Geral"
+                };
             }
 
-            if (currentStudent && currentStudent.nome) {
-                document.getElementById('student-name-display').innerText = currentStudent.nome;
-                document.getElementById('student-class-display').innerText = currentStudent.turma || "Geral";
-            } else {
-                document.getElementById('student-name-display').innerText = "Aluno Visitante";
-                document.getElementById('student-class-display').innerText = "Geral";
+            // Garante que o ID do estudante seja sempre um UUID válido
+            if (!isUUIDValido(currentStudent.id)) {
+                currentStudent.id = DEFAULT_UUID_DEMO;
             }
+
+            document.getElementById('student-name-display').innerText = currentStudent.nome || "Aluno";
+            document.getElementById('student-class-display').innerText = currentStudent.turma || "Geral";
 
             await carregarProgressoExistente();
             startTimer();
