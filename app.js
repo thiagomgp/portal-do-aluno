@@ -86,7 +86,6 @@ async function realizarRegistro(e) {
     }
 
     if (data.user) {
-      // Cria o perfil inicial do aluno no banco
       await supabase.from('profiles').insert([{
         id: data.user.id,
         nome_completo: nome,
@@ -96,7 +95,7 @@ async function realizarRegistro(e) {
 
       alert('Cadastro realizado! Sua conta aguarda aprovação pelo professor.');
       document.getElementById('register-form').reset();
-      toggleAuthMode('login');
+      if (typeof toggleAuthMode === 'function') toggleAuthMode('login');
     }
   } catch (err) {
     console.error('Erro ao cadastrar:', err);
@@ -164,14 +163,14 @@ async function verificarEstadoEEntrar(user) {
 }
 
 function atualizarCabecalhoUsuario(nomeTurma = 'Sem Turma') {
-  const userInfo = document.getElementById('user-info');
-  if (userInfo && alunoAtual) {
-    userInfo.innerHTML = `
-      <div class="flex items-center gap-3">
-        <span>👋 Olá, <strong class="text-emerald-400">${alunoAtual.apelido || alunoAtual.nome_completo}</strong> (${nomeTurma})</span>
-        <button onclick="fazerLogout()" class="text-xs bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white px-2.5 py-1 rounded transition">Sair</button>
-      </div>
-    `;
+  const nameEl = document.getElementById('student-display-name');
+  const classEl = document.getElementById('student-display-class');
+  
+  if (nameEl && alunoAtual) {
+    nameEl.innerText = alunoAtual.apelido || alunoAtual.nome_completo;
+  }
+  if (classEl) {
+    classEl.innerText = nomeTurma;
   }
 }
 
@@ -184,21 +183,25 @@ async function fazerLogout() {
 // ==========================================
 // 3. NAVEGAÇÃO ENTRE ABAS
 // ==========================================
-function navigate(tabName) {
-  const tabs = ['inicio', 'disciplinas', 'jogos', 'perfil'];
-  tabs.forEach(tab => {
-    document.getElementById(`tab-${tab}`)?.classList.toggle('hidden', tab !== tabName);
-    const elBtn = document.getElementById(`nav-btn-${tab}`);
-    if (elBtn) {
-      elBtn.className = tab === tabName
-        ? 'px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 text-slate-950 shadow-md transition'
-        : 'px-4 py-2 text-sm font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-900 rounded-lg transition';
+function mudarAbaPortal(aba) {
+  document.getElementById('secao-inicio')?.classList.toggle('hidden', aba !== 'inicio');
+  document.getElementById('secao-disciplinas')?.classList.toggle('hidden', aba !== 'disciplinas');
+  document.getElementById('secao-jogos')?.classList.toggle('hidden', aba !== 'jogos');
+  document.getElementById('secao-perfil')?.classList.toggle('hidden', aba !== 'perfil');
+
+  const abas = ['inicio', 'disciplinas', 'jogos', 'perfil'];
+  abas.forEach(a => {
+    const btn = document.getElementById(`btn-nav-${a}`);
+    if (btn) {
+      btn.className = a === aba
+        ? 'px-4 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 shadow transition flex items-center gap-2'
+        : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-2';
     }
   });
 
-  if (tabName === 'disciplinas') carregarDisciplinas();
-  if (tabName === 'jogos') carregarJogos();
-  if (tabName === 'perfil') renderizarPerfil();
+  if (aba === 'disciplinas') carregarDisciplinas();
+  if (aba === 'jogos') carregarJogos();
+  if (aba === 'perfil') renderizarPerfil();
 }
 
 // ==========================================
@@ -232,7 +235,7 @@ async function carregarAvisos() {
 }
 
 // ==========================================
-// 5. DISCIPLINAS & AULAS (DINÂMICAS)
+// 5. DISCIPLINAS & AULAS
 // ==========================================
 async function carregarDisciplinas() {
   if (!alunoAtual) return;
@@ -261,17 +264,16 @@ async function carregarDisciplinas() {
           <p class="text-xs text-slate-400 mt-1">${disc.descricao || 'Conteúdos da disciplina.'}</p>
         </div>
         
-        <div class="grid grid-cols-3 gap-2 mt-6">
-          <button onclick="abrirConteudo('${disc.id}', 'aula')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">🎬 Aulas</button>
-          <button onclick="abrirConteudo('${disc.id}', 'material')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📁 Materiais</button>
-          <button onclick="abrirConteudo('${disc.id}', 'prova')" class="bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📝 Provas</button>
+        <div class="flex flex-wrap gap-2 mt-6">
+          <button onclick="abrirConteudo('${disc.id}', 'aula')" class="w-32 bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">🎬 Aulas</button>
+          <button onclick="abrirConteudo('${disc.id}', 'material')" class="w-32 bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📁 Materiais</button>
+          <button onclick="abrirConteudo('${disc.id}', 'prova')" class="w-32 bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-slate-950 font-semibold py-2 px-1 rounded text-xs transition text-center">📝 Provas</button>
         </div>
       </div>
     `;
   }).join('');
 }
 
-// ABRIR MODAL COM LISTA DE AULAS / MATERIAIS / PROVAS (com diagnóstico de erros)
 async function abrirConteudo(disciplinaId, tipo) {
   const modal = document.getElementById('modal-conteudos');
   const tituloModal = document.getElementById('modal-conteudos-titulo');
@@ -279,13 +281,11 @@ async function abrirConteudo(disciplinaId, tipo) {
   if (!modal || !container || !alunoAtual) return;
 
   const titulos = { aula: '🎬 Aulas Disponíveis', material: '📁 Materiais de Estudo', prova: '📝 Avaliações e Provas' };
-  tituloModal.innerText = titulos[tipo] || 'Conteúdos';
+  if (tituloModal) tituloModal.innerText = titulos[tipo] || 'Conteúdos';
 
-  // Exibe mensagem de carregamento enquanto busca os dados
   container.innerHTML = '<p class="text-slate-400 text-xs py-4 text-center">Carregando conteúdos...</p>';
   modal.classList.remove('hidden');
 
-  // Busca do Banco de Dados os conteúdos cadastrados para a disciplina
   const { data: conteudos, error } = await supabase
     .from('conteudos_disciplina')
     .select('*')
@@ -294,13 +294,13 @@ async function abrirConteudo(disciplinaId, tipo) {
     .order('ordem', { ascending: true });
 
   if (error) {
-    console.error('Erro ao buscar conteúdos do Supabase:', error);
-    container.innerHTML = `<p class="text-rose-400 text-xs py-4 text-center">Erro de permissão ou banco: ${error.message}</p>`;
+    console.error('Erro ao buscar conteúdos:', error);
+    container.innerHTML = `<p class="text-rose-400 text-xs py-4 text-center">Erro: ${error.message}</p>`;
     return;
   }
 
   if (!conteudos || conteudos.length === 0) {
-    container.innerHTML = '<p class="text-slate-400 text-xs py-4 text-center">Nenhum recurso cadastrado para este tópico até o momento.</p>';
+    container.innerHTML = '<p class="text-slate-400 text-xs py-4 text-center">Nenhum recurso cadastrado para este tópico.</p>';
   } else {
     container.innerHTML = conteudos.map(item => `
       <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between hover:border-emerald-500/50 transition">
@@ -315,6 +315,7 @@ async function abrirConteudo(disciplinaId, tipo) {
     `).join('');
   }
 }
+
 function fecharModalConteudos() {
   document.getElementById('modal-conteudos')?.classList.add('hidden');
 }
@@ -338,7 +339,6 @@ function acessarRecurso(urlRecurso) {
 
   fecharModalConteudos();
   
-  // Abre o recurso ou redireciona
   if (urlRecurso.startsWith('http://') || urlRecurso.startsWith('https://')) {
     window.open(urlRecurso, '_blank');
   } else {
@@ -400,8 +400,8 @@ async function renderizarPerfil() {
     <div class="border-t border-slate-800 pt-4 space-y-3">
       <h4 class="font-semibold text-emerald-400 text-sm">👤 Alterar Dados Pessoais</h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <input type="text" id="novo-nome" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm" value="${alunoAtual.nome_completo || ''}">
-        <input type="text" id="novo-apelido" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm" value="${alunoAtual.apelido || ''}">
+        <input type="text" id="novo-nome" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm text-white" value="${alunoAtual.nome_completo || ''}">
+        <input type="text" id="novo-apelido" class="p-2 bg-slate-950 rounded border border-slate-800 text-sm text-white" value="${alunoAtual.apelido || ''}">
       </div>
       <button type="button" onclick="atualizarDadosPessoais()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-4 py-2 rounded text-xs">Guardar Dados</button>
     </div>
@@ -421,8 +421,8 @@ async function selecionarAvatarPredefinido(url) {
 }
 
 async function atualizarDadosPessoais() {
-  const novoNome = document.getElementById('novo-nome').value.trim();
-  const novoApelido = document.getElementById('novo-apelido').value.trim();
+  const novoNome = document.getElementById('novo-nome')?.value.trim();
+  const novoApelido = document.getElementById('novo-apelido')?.value.trim();
   if (!novoNome || !alunoAtual) return;
 
   await supabase.from('profiles').update({ nome_completo: novoNome, apelido: novoApelido }).eq('id', alunoAtual.id);
