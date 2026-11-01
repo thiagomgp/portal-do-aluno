@@ -33,7 +33,7 @@
 
       <div class="flex items-center gap-4">
         <div id="user-info-bar" class="text-xs text-slate-300 flex items-center gap-2">
-          <span>👋 Olá, <strong id="student-display-name" class="text-white">--</strong></span>
+          <span>👋 Olá, <strong id="student-display-name" class="text-white">Carregando...</strong></span>
           <span class="text-slate-600">|</span>
           <span id="student-display-class" class="text-slate-400">--</span>
         </div>
@@ -44,20 +44,20 @@
     </div>
   </header>
 
-  <!-- NAVEGAÇÃO PRINCIPAL -->
+  <!-- NAVEGAÇÃO -->
   <div class="bg-slate-900/60 border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 flex gap-2 py-2 overflow-x-auto">
       <button id="btn-nav-inicio" onclick="mudarAbaPortal('inicio')" class="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 shadow transition flex items-center gap-2">
-        <i class="fa-solid fa-house"></i> Início
+        <i class="fa-solid fa-house"></i> Início (Mural)
       </button>
-      <button id="btn-nav-aulas" onclick="mudarAbaPortal('aulas')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-2">
-        <i class="fa-solid fa-graduation-cap"></i> Aulas Interativas
+      <button id="btn-nav-disciplinas" onclick="mudarAbaPortal('disciplinas')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-2">
+        <i class="fa-solid fa-graduation-cap"></i> Disciplinas
       </button>
       <button id="btn-nav-jogos" onclick="mudarAbaPortal('jogos')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-2">
-        <i class="fa-solid fa-gamepad"></i> Jogos Educativos
+        <i class="fa-solid fa-gamepad"></i> Jogos
       </button>
       <button id="btn-nav-perfil" onclick="mudarAbaPortal('perfil')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-2">
-        <i class="fa-solid fa-user-gear"></i> Meu Perfil & Configurações
+        <i class="fa-solid fa-user-gear"></i> Perfil
       </button>
     </div>
   </div>
@@ -65,87 +65,105 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
 
-    <!-- SEÇÃO INÍCIO: SOMENTE MURAL DE NOTIFICAÇÕES/AVISOS -->
+    <!-- ABA 1: INÍCIO (MURAL DE AVISOS) -->
     <section id="secao-inicio" class="space-y-6">
       <div>
         <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-bullhorn text-emerald-400"></i>
-          <span>Mural de Recados & Avisos</span>
+          <span>Mural de Recados & Notificações</span>
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Acompanhe os comunicados e orientações da turma.</p>
+        <p class="text-xs text-slate-400 mt-1">Acompanhe avisos e atualizações enviadas pelos professores.</p>
       </div>
 
       <div class="space-y-4">
-        <!-- NOTIFICAÇÃO 1 -->
         <div class="bg-slate-900 border-l-4 border-emerald-500 border-y border-r border-slate-800 rounded-r-2xl p-5 shadow-lg space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-info"></i> Bem-vindo ao Semestre
+              <i class="fa-solid fa-circle-info"></i> Boas-vindas
             </span>
-            <span class="text-[10px] text-slate-500 font-mono">Hoje</span>
+            <span class="text-[10px] text-slate-500 font-mono">Aviso Fixo</span>
           </div>
-          <h3 class="text-sm font-bold text-white">Início das Atividades da Disciplina de Cultura Digital</h3>
+          <h3 class="text-sm font-bold text-white">Início dos Módulos Práticos</h3>
           <p class="text-xs text-slate-300 leading-relaxed">
-            As aulas interativas já estão disponíveis na aba "Aulas Interativas". Realize os módulos em sequência para garantir o registro do seu progresso.
-          </p>
-        </div>
-
-        <!-- NOTIFICAÇÃO 2 -->
-        <div class="bg-slate-900 border-l-4 border-amber-500 border-y border-r border-slate-800 rounded-r-2xl p-5 shadow-lg space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-triangle-exclamation"></i> Lembrete Importante
-            </span>
-            <span class="text-[10px] text-slate-500 font-mono">Geral</span>
-          </div>
-          <h3 class="text-sm font-bold text-white">Sincronização de Progresso</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Lembre-se de concluir todas as etapas de cada exercício para que sua nota e tempo de execução sejam contabilizados corretamente no banco de dados.
+            Acesse a aba <strong>Disciplinas</strong> e selecione a matéria <strong>Cultura Digital</strong> para visualizar e responder os exercícios interativos do semestre.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- SEÇÃO AULAS INTERATIVAS: SELEÇÃO DA DISCIPLINA + GRID DIRETO -->
-    <section id="secao-aulas" class="hidden space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-        <div>
-          <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Disciplina Selecionada</span>
-          <h2 class="text-xl font-extrabold text-white flex items-center gap-2 mt-0.5">
-            <i class="fa-solid fa-laptop-code text-emerald-400"></i>
-            <span>Cultura Digital</span>
-          </h2>
+    <!-- ABA 2: DISCIPLINAS (PADRÃO BNCC COM SELEÇÃO) -->
+    <section id="secao-disciplinas" class="hidden space-y-6">
+      <div>
+        <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-chalkboard-user text-emerald-400"></i>
+          <span>Minhas Disciplinas (BNCC)</span>
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Selecione uma disciplina para ver os módulos e aulas interativas.</p>
+      </div>
+
+      <!-- GRID DE CARDS DAS DISCIPLINAS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl hover:border-emerald-500/50 transition space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm">
+              CD
+            </div>
+            <div>
+              <h3 class="font-extrabold text-white text-base">Cultura Digital</h3>
+              <p class="text-[11px] text-slate-400">Conteúdos e Práticas de Tecnologia</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
+            <button onclick="filtrarVisaoDisciplina('aulas')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 py-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1 transition">
+              <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
+            </button>
+            <button onclick="alert('Materiais complementares estarão disponíveis em breve!')" class="bg-slate-950 hover:bg-slate-800 text-slate-400 border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1 transition">
+              <i class="fa-solid fa-folder text-xs"></i> Materiais
+            </button>
+            <button onclick="alert('Não há provas agendadas no momento.')" class="bg-slate-950 hover:bg-slate-800 text-slate-400 border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1 transition">
+              <i class="fa-solid fa-file-pen text-xs"></i> Provas
+            </button>
+          </div>
         </div>
       </div>
 
-      <div id="grid-aulas-automaticas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="col-span-full p-8 text-center text-slate-500 bg-slate-900 border border-slate-800 rounded-2xl">
-          <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-400 mb-2"></i>
-          <p class="text-xs">Carregando suas atividades e progressos...</p>
+      <!-- CONTAINER ONDE SÃO EXIBIDAS AS ATIVIDADES QUANDO "AULAS" É CLICADO -->
+      <div id="container-lista-aulas" class="pt-4 border-t border-slate-800 space-y-4">
+        <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-emerald-400"></i>
+          <span>Atividades Interativas Disponíveis</span>
+        </h3>
+        
+        <div id="grid-aulas-automaticas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="col-span-full p-8 text-center text-slate-500 bg-slate-900 border border-slate-800 rounded-2xl">
+            <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-400 mb-2"></i>
+            <p class="text-xs">Carregando atividades...</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- SEÇÃO JOGOS EDUCATIVOS: EM BRANCO / EM BREVE -->
+    <!-- ABA 3: JOGOS -->
     <section id="secao-jogos" class="hidden space-y-6">
       <div>
         <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-gamepad text-amber-400"></i>
           <span>Jogos Educativos</span>
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Atividades gamificadas para fixação de conhecimento.</p>
+        <p class="text-xs text-slate-400 mt-1">Jogos para fixação prática do aprendizado.</p>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center max-w-lg mx-auto space-y-3">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
         <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
           <i class="fa-solid fa-hourglass-half"></i>
         </div>
-        <h3 class="text-base font-bold text-white">Conteúdo em Breve</h3>
-        <p class="text-xs text-slate-400">Esta seção está em desenvolvimento e estará disponível em breve com novos jogos interativos.</p>
+        <h3 class="text-base font-bold text-white">Em Desenvolvimento</h3>
+        <p class="text-xs text-slate-400">Os jogos educativos serão liberados nos próximos módulos.</p>
       </div>
     </section>
 
-    <!-- SEÇÃO PERFIL -->
+    <!-- ABA 4: PERFIL (PUXANDO DADOS REAIS DO CADASTRO SUPABASE) -->
     <section id="secao-perfil" class="hidden max-w-2xl mx-auto space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
         
@@ -153,7 +171,7 @@
           <img id="profile-avatar-preview" src="https://api.dicebear.com/7.x/bottts/svg?seed=Aluno" alt="Avatar" class="w-16 h-16 rounded-full bg-slate-950 border-2 border-emerald-400 object-cover">
           <div>
             <h3 id="profile-header-name" class="text-lg font-bold text-white">--</h3>
-            <p id="profile-header-nickname" class="text-xs text-emerald-400 font-medium">@apelido</p>
+            <p id="profile-header-nickname" class="text-xs text-emerald-400 font-medium">@--</p>
             <p id="profile-header-email" class="text-xs text-slate-400 mt-0.5">--</p>
           </div>
         </div>
@@ -176,7 +194,7 @@
             <input type="url" id="profile-avatar-url" oninput="previewAvatarUrl(this.value)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="https://exemplo.com/foto.png">
           </div>
 
-          <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition">Guardar Dados</button>
+          <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition">Guardar Alterações</button>
         </form>
 
         <hr class="border-slate-800">
@@ -195,18 +213,24 @@
 
   </main>
 
-  <!-- SCRIPTS E LÓGICA DE INTEGRAÇÃO -->
+  <!-- LÓGICA E CONEXÃO COM O SUPABASE -->
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let activeStudent = null;
+    const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
+
+    function isUUIDValido(str) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      recuperarOuCriarSessaoAluno();
+      await carregarSessaoEPerfilReal();
       await varrerEExibirAulasGitHub();
 
+      // Atualização de Perfil no Supabase
       document.getElementById('form-update-profile').addEventListener('submit', async (e) => {
         e.preventDefault();
         const novoNome = document.getElementById('profile-name-input').value.trim();
@@ -222,67 +246,87 @@
         }).eq('id', activeStudent.id);
 
         if (error) {
-          alert("Erro ao atualizar: " + error.message);
+          alert("Erro ao atualizar perfil: " + error.message);
         } else {
           alert("Perfil atualizado com sucesso!");
-          if (novoNome) activeStudent.nome = novoNome;
+          activeStudent.nome = novoNome;
           activeStudent.apelido = novoApelido;
           if (novaFoto) activeStudent.foto_url = novaFoto;
           sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
-          recuperarOuCriarSessaoAluno();
+          await carregarSessaoEPerfilReal();
         }
       });
 
+      // Atualização de Senha
       document.getElementById('form-update-password').addEventListener('submit', async (e) => {
         e.preventDefault();
         const novaSenha = document.getElementById('profile-new-password').value;
         const { error } = await _supabase.auth.updateUser({ password: novaSenha });
-        if (error) alert("Erro: " + error.message);
+        if (error) alert("Erro ao trocar senha: " + error.message);
         else {
-          alert("Senha alterada!");
+          alert("Senha alterada com sucesso!");
           document.getElementById('profile-new-password').value = '';
         }
       });
     });
 
-    function recuperarOuCriarSessaoAluno() {
+    async function carregarSessaoEPerfilReal() {
       const urlParams = new URLSearchParams(window.location.search);
       const saved = sessionStorage.getItem('active_student');
 
+      let studentId = DEFAULT_UUID_DEMO;
+      let initialName = "Aluno Demo";
+      let initialTurma = "Geral";
+
       if (saved) {
-        activeStudent = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed.id) studentId = isUUIDValido(parsed.id) ? parsed.id : DEFAULT_UUID_DEMO;
+        if (parsed.nome) initialName = parsed.nome;
+        if (parsed.turma) initialTurma = parsed.turma;
       } else if (urlParams.has('id')) {
-        activeStudent = {
-          id: urlParams.get('id'),
-          nome: urlParams.get('nome') || 'Aluno',
-          turma: urlParams.get('turma') || 'Geral'
-        };
-        sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
-      } else {
-        // ID no formato UUID válido para evitar o Erro 400 no Supabase
-        activeStudent = {
-          id: "00000000-0000-0000-0000-000000000001",
-          nome: "Aluno Demo",
-          apelido: "aluno_demo",
-          turma: "Geral",
-          email: "aluno@escola.com"
-        };
-        sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
+        const rawId = urlParams.get('id');
+        studentId = isUUIDValido(rawId) ? rawId : DEFAULT_UUID_DEMO;
+        initialName = urlParams.get('nome') || 'Aluno';
+        initialTurma = urlParams.get('turma') || 'Geral';
       }
 
-      const nomeExibicao = activeStudent.nome || 'Aluno';
-      const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : '@sem_apelido';
+      activeStudent = { id: studentId, nome: initialName, turma: initialTurma };
 
-      document.getElementById('student-display-name').innerText = nomeExibicao;
+      // Consulta os dados REAIS no cadastro do Supabase (profiles)
+      try {
+        const { data: dbProfile } = await _supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', studentId)
+          .maybeSingle();
+
+        if (dbProfile) {
+          activeStudent.nome = dbProfile.nome_completo || dbProfile.nome || initialName;
+          activeStudent.apelido = dbProfile.apelido || '';
+          activeStudent.email = dbProfile.email || 'aluno@escola.com';
+          activeStudent.foto_url = dbProfile.foto_url || null;
+          activeStudent.turma = dbProfile.turma || initialTurma;
+        }
+      } catch (err) {
+        console.error("Erro ao buscar perfil do banco:", err);
+      }
+
+      sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
+
+      // Atualiza os elementos da tela com os dados do aluno
+      const nomeExibir = activeStudent.nome || 'Aluno';
+      const apelidoExibir = activeStudent.apelido ? `@${activeStudent.apelido}` : '@sem_apelido';
+
+      document.getElementById('student-display-name').innerText = nomeExibir;
       document.getElementById('student-display-class').innerText = activeStudent.turma || 'Geral';
-      
-      document.getElementById('profile-header-name').innerText = nomeExibicao;
-      document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
+
+      document.getElementById('profile-header-name').innerText = nomeExibir;
+      document.getElementById('profile-header-nickname').innerText = apelidoExibir;
       document.getElementById('profile-header-email').innerText = activeStudent.email || 'aluno@escola.com';
-      
-      document.getElementById('profile-name-input').value = nomeExibicao;
+
+      document.getElementById('profile-name-input').value = nomeExibir;
       document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
-      
+
       if (activeStudent.foto_url) {
         document.getElementById('profile-avatar-url').value = activeStudent.foto_url;
         document.getElementById('profile-avatar-preview').src = activeStudent.foto_url;
@@ -299,12 +343,12 @@
       try {
         let progressosMap = {};
         if (activeStudent && activeStudent.id) {
-          const { data: progressos, error } = await _supabase
+          const { data: progressos } = await _supabase
             .from('se_progresso')
             .select('modulo_id, etapa_atual, total_etapas, status')
             .eq('aluno_id', activeStudent.id);
 
-          if (progressos && !error) {
+          if (progressos) {
             progressos.forEach(p => {
               progressosMap[p.modulo_id] = p;
             });
@@ -315,7 +359,7 @@
         const arquivos = await res.json();
 
         if (!Array.isArray(arquivos)) {
-          grid.innerHTML = `<div class="col-span-full p-4 text-center text-rose-400 text-xs">Erro ao carregar pasta 'aulainterativa'.</div>`;
+          grid.innerHTML = `<div class="col-span-full p-4 text-center text-rose-400 text-xs">Nenhum arquivo encontrado na pasta das aulas.</div>`;
           return;
         }
 
@@ -323,17 +367,12 @@
 
         grid.innerHTML = arquivosHtml.map((file, index) => {
           const moduloId = file.name.replace('.html', '');
-          
           let prog = progressosMap[moduloId] || progressosMap[file.name] || null;
           if (!prog && moduloId.includes('introduc')) {
             prog = progressosMap['intro_hw_sw'];
           }
 
-          let tituloFormatted = moduloId
-            .replace(/_/g, ' ')
-            .replace(/-/g, ' ')
-            .toUpperCase();
-
+          let tituloFormatted = moduloId.replace(/_/g, ' ').replace(/-/g, ' ').toUpperCase();
           let statusBadgeHTML = '';
           let subtextEtapa = 'Ainda não iniciada';
 
@@ -381,26 +420,32 @@
         }).join('');
 
       } catch (err) {
-        console.error("Erro na varredura:", err);
-        grid.innerHTML = `<div class="col-span-full p-4 text-center text-rose-400 text-xs">Erro ao varrer arquivos do portal.</div>`;
+        console.error("Erro ao carregar lista de aulas:", err);
       }
     }
 
     function acessarModulo(caminhoArquivo) {
-      if (activeStudent) {
+      if (activeStudent && activeStudent.id) {
         window.location.href = `${caminhoArquivo}?id=${encodeURIComponent(activeStudent.id)}&nome=${encodeURIComponent(activeStudent.nome)}&turma=${encodeURIComponent(activeStudent.turma || '')}`;
       } else {
         window.location.href = caminhoArquivo;
       }
     }
 
+    function filtrarVisaoDisciplina(tipo) {
+      if (tipo === 'aulas') {
+        const el = document.getElementById('container-lista-aulas');
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
     function mudarAbaPortal(aba) {
       document.getElementById('secao-inicio').classList.toggle('hidden', aba !== 'inicio');
-      document.getElementById('secao-aulas').classList.toggle('hidden', aba !== 'aulas');
+      document.getElementById('secao-disciplinas').classList.toggle('hidden', aba !== 'disciplinas');
       document.getElementById('secao-jogos').classList.toggle('hidden', aba !== 'jogos');
       document.getElementById('secao-perfil').classList.toggle('hidden', aba !== 'perfil');
 
-      const abas = ['inicio', 'aulas', 'jogos', 'perfil'];
+      const abas = ['inicio', 'disciplinas', 'jogos', 'perfil'];
       abas.forEach(a => {
         const btn = document.getElementById(`btn-nav-${a}`);
         if (btn) {
