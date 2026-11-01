@@ -52,8 +52,8 @@
             <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
               <th class="p-3">Aluno</th>
               <th class="p-3">Módulo / Lição</th>
-              <th class="p-3">Data de Início</th>
-              <th class="p-3">Data de Conclusão / Acesso</th>
+              <th class="p-3">Progresso / Etapas</th>
+              <th class="p-3">Data do Acesso</th>
               <th class="p-3">Tempo Dedicado</th>
               <th class="p-3 text-center">Status</th>
             </tr>
@@ -71,7 +71,7 @@
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
           🔍 Histórico Completo do Aluno
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Filtre a turma e o aluno para analisar todas as tarefas iniciadas, mesmo as não concluídas.</p>
+        <p class="text-xs text-slate-400 mt-1">Filtre a turma e o aluno para analisar todas as tarefas iniciadas.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
@@ -101,10 +101,9 @@
             <thead>
               <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
                 <th class="p-3">Módulo / Atividade</th>
-                <th class="p-3">Data de Início</th>
-                <th class="p-3">Data de Conclusão</th>
-                <th class="p-3">Tempo Efetivo</th>
-                <th class="p-3">Pontuação</th>
+                <th class="p-3">Última Atualização</th>
+                <th class="p-3">Tempo Dedicado</th>
+                <th class="p-3">Progresso</th>
                 <th class="p-3 text-center">Status</th>
               </tr>
             </thead>
@@ -196,34 +195,49 @@
       </div>
     </section>
 
-    <!-- SECÇÃO 5: ENVIAR AVISO -->
-    <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
-      <h2 class="text-lg font-bold text-indigo-400">📢 Publicar Aviso no Mural</h2>
-      <form id="form-aviso" class="space-y-4">
+    <!-- SECÇÃO 5: ENVIAR E GERENCIAR AVISOS DO MURAL -->
+    <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+      <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">📢 Mural de Avisos</h2>
+      
+      <form id="form-aviso" class="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+        <input type="hidden" id="aviso-id-edicao" value="">
+        <h3 id="titulo-form-aviso" class="text-xs font-bold text-indigo-300 uppercase">Publicar Novo Aviso</h3>
+        
         <div>
           <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Título</label>
-          <input type="text" id="aviso-titulo" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500" required>
+          <input type="text" id="aviso-titulo" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" required>
         </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Destino</label>
-            <select id="aviso-tipo" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white">
+            <select id="aviso-tipo" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white text-sm">
               <option value="turma">Toda a Turma</option>
             </select>
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Selecione a Turma</label>
-            <select id="aviso-turma" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white">
+            <select id="aviso-turma" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white text-sm">
               <!-- Turmas aqui -->
             </select>
           </div>
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Mensagem</label>
-          <textarea id="aviso-mensagem" rows="3" class="w-full p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500" required></textarea>
+          <textarea id="aviso-mensagem" rows="3" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" required></textarea>
         </div>
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-lg transition">Publicar Aviso</button>
+        <div class="flex gap-2">
+          <button type="submit" id="btn-salvar-aviso" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-lg transition text-xs">Publicar Aviso</button>
+          <button type="button" id="btn-cancelar-edicao" onclick="cancelarEdicaoAviso()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-lg transition text-xs">Cancelar Edição</button>
+        </div>
       </form>
+
+      <div>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Avisos Publicados</h3>
+        <div id="lista-avisos-publicados" class="space-y-3">
+          <!-- Lista de avisos com botões de Editar e Excluir -->
+        </div>
+      </div>
     </section>
 
   </main>
@@ -239,6 +253,7 @@
 
     let listaTurmasGlobal = [];
     let listaDisciplinasGlobal = [];
+    let listaAvisosGlobal = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       inicializarDados();
@@ -273,24 +288,43 @@
         }
       });
 
-      // Publicar Aviso
+      // Publicar / Editar Aviso
       document.getElementById('form-aviso').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const idAviso = document.getElementById('aviso-id-edicao').value;
         const titulo = document.getElementById('aviso-titulo').value;
         const mensagem = document.getElementById('aviso-mensagem').value;
         const turmaId = document.getElementById('aviso-turma').value;
 
-        const { error } = await supabase.from('avisos').insert([{
-          titulo: titulo,
-          mensagem: mensagem,
-          tipo: 'turma',
-          turma_id: turmaId
-        }]);
+        if (idAviso) {
+          // Atualiza aviso existente
+          const { error } = await supabase.from('avisos').update({
+            titulo: titulo,
+            mensagem: mensagem,
+            turma_id: turmaId
+          }).eq('id', idAviso);
 
-        if (error) alert('Erro ao publicar aviso: ' + error.message);
-        else {
-          alert('Aviso publicado com sucesso!');
-          document.getElementById('form-aviso').reset();
+          if (error) alert('Erro ao atualizar aviso: ' + error.message);
+          else {
+            alert('Aviso atualizado com sucesso!');
+            cancelarEdicaoAviso();
+            carregarAvisosMural();
+          }
+        } else {
+          // Cria novo aviso
+          const { error } = await supabase.from('avisos').insert([{
+            titulo: titulo,
+            mensagem: mensagem,
+            tipo: 'turma',
+            turma_id: turmaId
+          }]);
+
+          if (error) alert('Erro ao publicar aviso: ' + error.message);
+          else {
+            alert('Aviso publicado com sucesso!');
+            document.getElementById('form-aviso').reset();
+            carregarAvisosMural();
+          }
         }
       });
     });
@@ -301,9 +335,9 @@
       await carregarTurmasEDisciplinas();
       await carregarAlunos();
       await carregarRelatorioProgresso();
+      await carregarAvisosMural();
     }
 
-    // ALTERNA ENTRE AS GUIAS DE ACOMPANHAMENTO
     function mudarGuiaAcompanhamento(guia) {
       document.getElementById('guia-ultimas').classList.toggle('hidden', guia !== 'ultimas');
       document.getElementById('guia-aluno').classList.toggle('hidden', guia !== 'aluno');
@@ -317,46 +351,38 @@
         : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2';
     }
 
-    // 1. CARREGAR AS 10 ÚLTIMAS ATUALIZAÇÕES
+    // 1. CARREGAR AS 10 ÚLTIMAS ATUALIZAÇÕES (Tratando se_progresso para evitar Erro 404)
     async function carregarRelatorioProgresso() {
       const tabela = document.getElementById('tabela-relatorio-progresso');
       if (!tabela) return;
 
-      tabela.innerHTML = '<tr><td colspan="6" class="p-4 text-slate-500 text-center">Buscando 10 últimas atualizações...</td></tr>';
+      tabela.innerHTML = '<tr><td colspan="6" class="p-4 text-slate-500 text-center">Buscando atualizações recentes...</td></tr>';
 
-      // Tenta buscar da tabela principal 'desempenho'
-      let { data: registos, error } = await supabase
-        .from('desempenho')
+      // Busca diretamente da tabela 'se_progresso' onde estão gravados os avanços
+      const { data: registos, error } = await supabase
+        .from('se_progresso')
         .select('*, profiles(nome_completo, apelido)')
-        .order('created_at', { ascending: false })
+        .order('updated_at', { ascending: false })
         .limit(10);
 
-      // Fallback para 'se_progresso' caso a tabela 'desempenho' esteja vazia
       if (error || !registos || registos.length === 0) {
-        const fallback = await supabase
-          .from('se_progresso')
-          .select('*, profiles(nome_completo)')
-          .order('updated_at', { ascending: false })
-          .limit(10);
-        registos = fallback.data || [];
-      }
-
-      if (!registos || registos.length === 0) {
         tabela.innerHTML = '<tr><td colspan="6" class="p-4 text-slate-500 text-center">Nenhum registro de atividade encontrado.</td></tr>';
         return;
       }
 
       tabela.innerHTML = registos.map(r => {
         const nome = r.profiles ? (r.profiles.apelido || r.profiles.nome_completo) : 'Aluno';
-        const modulo = r.modulo_id || 'Atividade';
-        const inicio = r.data_inicio ? new Date(r.data_inicio).toLocaleString('pt-BR') : new Date(r.created_at).toLocaleString('pt-BR');
-        const conclusao = r.data_conclusao ? new Date(r.data_conclusao).toLocaleString('pt-BR') : new Date(r.updated_at || r.created_at).toLocaleString('pt-BR');
+        const modulo = r.modulo_id || 'Módulo 1';
         
+        // Trata data do banco sem gerar Invalid Date
+        const dataAcesso = r.updated_at ? new Date(r.updated_at).toLocaleString('pt-BR') : 'Recente';
+        
+        const porcentagem = Math.round(((r.etapa_atual || 1) / (r.total_etapas || 4)) * 100);
         const min = Math.floor((r.tempo_segundos || 0) / 60);
         const seg = (r.tempo_segundos || 0) % 60;
         const tempoStr = `${min}m ${seg < 10 ? '0' : ''}${seg}s`;
 
-        const statusLabel = r.concluido || r.status === 'concluido'
+        const statusLabel = r.status === 'concluido' || porcentagem >= 100
           ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">✓ Concluído</span>`
           : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">⏳ Em Andamento</span>`;
 
@@ -364,8 +390,10 @@
           <tr class="hover:bg-slate-950/40 transition">
             <td class="p-3 font-semibold text-slate-200">${nome}</td>
             <td class="p-3 text-indigo-300 font-medium">${modulo}</td>
-            <td class="p-3 text-slate-400">${inicio}</td>
-            <td class="p-3 text-slate-400">${conclusao}</td>
+            <td class="p-3">
+              <span class="text-xs text-slate-300 font-bold">${r.etapa_atual || 1}/${r.total_etapas || 4} (${porcentagem}%)</span>
+            </td>
+            <td class="p-3 text-slate-400">${dataAcesso}</td>
             <td class="p-3 font-mono text-cyan-400">${tempoStr}</td>
             <td class="p-3 text-center">${statusLabel}</td>
           </tr>
@@ -402,7 +430,7 @@
         alunos.map(a => `<option value="${a.id}">${a.nome_completo} (${a.apelido || 'Sem apelido'})</option>`).join('');
     }
 
-    // 3. CARREGAR HISTÓRICO COMPLETO DO ALUNO SELECIONADO
+    // 3. CARREGAR HISTÓRICO INDIVIDUAL DO ALUNO
     async function carregarHistoricoAlunoEspecifico() {
       const alunoId = document.getElementById('filtro-aluno-especifico').value;
       const container = document.getElementById('container-historico-detalhado');
@@ -416,54 +444,99 @@
       const selectAluno = document.getElementById('filtro-aluno-especifico');
       document.getElementById('nome-aluno-detalhe').innerText = selectAluno.options[selectAluno.selectedIndex].text;
       container.classList.remove('hidden');
-      tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">Buscando histórico completo do aluno...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Buscando histórico do aluno...</td></tr>';
 
       const { data: historico } = await supabase
-        .from('desempenho')
+        .from('se_progresso')
         .select('*')
         .eq('aluno_id', alunoId)
-        .order('created_at', { ascending: false });
+        .order('updated_at', { ascending: false });
 
       if (!historico || historico.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">Nenhuma tarefa registrada para este aluno.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Nenhuma tarefa registrada para este aluno.</td></tr>';
         document.getElementById('resumo-stats-aluno').innerHTML = '';
         return;
       }
 
-      let totalXP = 0;
-      let totalConcluidas = 0;
-
       tbody.innerHTML = historico.map(item => {
-        totalXP += (item.xp || 0);
-        if (item.concluido) totalConcluidas++;
-
-        const inicio = item.data_inicio ? new Date(item.data_inicio).toLocaleString('pt-BR') : new Date(item.created_at).toLocaleString('pt-BR');
-        const conclusao = item.concluido && item.data_conclusao ? new Date(item.data_conclusao).toLocaleString('pt-BR') : '<span class="text-slate-600">Pendente</span>';
-
+        const dataAcesso = item.updated_at ? new Date(item.updated_at).toLocaleString('pt-BR') : 'Recente';
         const min = Math.floor((item.tempo_segundos || 0) / 60);
         const seg = (item.tempo_segundos || 0) % 60;
         const duracaoStr = `${min}m ${seg < 10 ? '0' : ''}${seg}s`;
+        const porcentagem = Math.round(((item.etapa_atual || 1) / (item.total_etapas || 4)) * 100);
 
-        const statusBadge = item.concluido
+        const statusBadge = item.status === 'concluido' || porcentagem >= 100
           ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">✓ Concluído</span>`
           : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">⏳ Em Andamento</span>`;
 
         return `
           <tr class="hover:bg-slate-950/40 transition">
-            <td class="p-3 font-bold text-white">${item.modulo_id}</td>
-            <td class="p-3 text-slate-400">${inicio}</td>
-            <td class="p-3 text-slate-400">${conclusao}</td>
+            <td class="p-3 font-bold text-white">${item.modulo_id || 'Módulo'}</td>
+            <td class="p-3 text-slate-400">${dataAcesso}</td>
             <td class="p-3 font-mono text-cyan-400">${duracaoStr}</td>
-            <td class="p-3 font-bold text-amber-400">${item.xp || 0} XP</td>
+            <td class="p-3 text-slate-300 font-bold">${item.etapa_atual || 1}/${item.total_etapas || 4} (${porcentagem}%)</td>
             <td class="p-3 text-center">${statusBadge}</td>
           </tr>
         `;
       }).join('');
+    }
 
-      document.getElementById('resumo-stats-aluno').innerHTML = `
-        <span class="bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-amber-400 font-bold">${totalXP} XP</span>
-        <span class="bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-emerald-400 font-bold">${totalConcluidas} / ${historico.length} Concluídas</span>
-      `;
+    // 4. GESTÃO DE AVISOS (LISTAR, EDITAR E EXCLUIR)
+    async function carregarAvisosMural() {
+      const container = document.getElementById('lista-avisos-publicados');
+      const { data: avisos } = await supabase.from('avisos').select('*, turmas(nome)').order('created_at', { ascending: false });
+
+      listaAvisosGlobal = avisos || [];
+
+      if (!avisos || avisos.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500">Nenhum aviso publicado no mural.</p>';
+        return;
+      }
+
+      container.innerHTML = avisos.map(a => `
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-start">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-indigo-400 text-sm">${a.titulo}</span>
+              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">${a.turmas ? a.turmas.nome : 'Todas as Turmas'}</span>
+            </div>
+            <p class="text-xs text-slate-300">${a.mensagem}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="prepararEdicaoAviso('${a.id}')" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded transition">Editar</button>
+            <button onclick="excluirAviso('${a.id}')" class="text-xs bg-rose-950 hover:bg-rose-900 text-rose-400 border border-rose-800 px-2.5 py-1 rounded transition">Excluir</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function prepararEdicaoAviso(id) {
+      const aviso = listaAvisosGlobal.find(a => a.id === id);
+      if (!aviso) return;
+
+      document.getElementById('aviso-id-edicao').value = aviso.id;
+      document.getElementById('aviso-titulo').value = aviso.titulo;
+      document.getElementById('aviso-mensagem').value = aviso.mensagem;
+      if (aviso.turma_id) document.getElementById('aviso-turma').value = aviso.turma_id;
+
+      document.getElementById('titulo-form-aviso').innerText = "Editar Aviso Exigido";
+      document.getElementById('btn-salvar-aviso').innerText = "Salvar Alterações";
+      document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
+    }
+
+    function cancelarEdicaoAviso() {
+      document.getElementById('aviso-id-edicao').value = '';
+      document.getElementById('form-aviso').reset();
+      document.getElementById('titulo-form-aviso').innerText = "Publicar Novo Aviso";
+      document.getElementById('btn-salvar-aviso').innerText = "Publicar Aviso";
+      document.getElementById('btn-cancelar-edicao').classList.add('hidden');
+    }
+
+    async function excluirAviso(id) {
+      if (!confirm('Excluir este aviso do mural?')) return;
+      const { error } = await supabase.from('avisos').delete().eq('id', id);
+      if (error) alert('Erro ao excluir aviso: ' + error.message);
+      else carregarAvisosMural();
     }
 
     async function carregarTurmas() {
@@ -477,9 +550,6 @@
 
       if (!turmas || turmas.length === 0) {
         container.innerHTML = '<p class="text-xs text-slate-500">Nenhuma turma cadastrada.</p>';
-        selectAviso.innerHTML = '<option value="">Crie uma turma...</option>';
-        selectVincular.innerHTML = '<option value="">Crie uma turma...</option>';
-        filtroTurma.innerHTML = '<option value="">Crie uma turma...</option>';
         return;
       }
 
@@ -501,10 +571,7 @@
       const selectVincular = document.getElementById('select-vincular-disciplina');
       listaDisciplinasGlobal = disciplinas || [];
 
-      if (!disciplinas || disciplinas.length === 0) {
-        selectVincular.innerHTML = '<option value="">Cadastre uma disciplina primeiro...</option>';
-        return;
-      }
+      if (!disciplinas || disciplinas.length === 0) return;
 
       selectVincular.innerHTML = '<option value="">Selecione a Disciplina...</option>' + 
         disciplinas.map(d => `<option value="${d.id}">${d.nome} (${d.codigo_bncc || 'BNCC'})</option>`).join('');
@@ -520,7 +587,7 @@
       }
 
       const { error } = await supabase.from('turma_disciplinas').insert([{ turma_id: turmaId, disciplina_id: disciplinaId }]);
-      if (error) alert('Erro ao vincular (ou disciplina já vinculada): ' + error.message);
+      if (error) alert('Erro ao vincular: ' + error.message);
       else {
         alert('Disciplina atribuída com sucesso!');
         carregarTurmasEDisciplinas();
@@ -529,10 +596,7 @@
 
     async function carregarTurmasEDisciplinas() {
       const container = document.getElementById('container-turmas-disciplinas');
-      if (!listaTurmasGlobal.length) {
-        container.innerHTML = '<p class="text-xs text-slate-500 col-span-full">Nenhuma turma cadastrada.</p>';
-        return;
-      }
+      if (!listaTurmasGlobal.length) return;
 
       const { data: vínculos } = await supabase.from('turma_disciplinas').select('id, turma_id, disciplinas(id, nome, codigo_bncc)');
 
