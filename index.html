@@ -114,7 +114,7 @@
           </div>
 
           <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
-            <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
+            <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="w-28 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition shadow">
               <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
             </button>
             <button id="btn-sub-materiais" onclick="selecionarSubAbaDisciplina('materiais')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
@@ -127,8 +127,8 @@
         </div>
       </div>
 
-      <div id="painel-conteudo-disciplina" class="hidden pt-4 space-y-4 border-t border-slate-800">
-        <div id="sub-conteudo-aulas" class="hidden space-y-4">
+      <div id="painel-conteudo-disciplina" class="pt-4 space-y-4 border-t border-slate-800">
+        <div id="sub-conteudo-aulas" class="space-y-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
             <i class="fa-solid fa-list-check"></i> Atividades Interativas Disponíveis
           </h3>
@@ -241,13 +241,10 @@
     const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // 1. PRIMEIRO: Inicializa a sessão completamente
       await carregarSessaoReal();
-      
-      // 2. SEGUNDO: Busca as aulas no GitHub já sabendo quem é o aluno
       await varrerEExibirAulasGitHub();
 
-      // Atualizar perfil
+      // Form Perfil
       document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!activeStudent || !activeStudent.id) return;
@@ -275,7 +272,7 @@
         }
       });
 
-      // Atualizar Senha
+      // Form Senha
       document.getElementById('form-update-password')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const novaSenha = document.getElementById('profile-new-password').value;
@@ -290,7 +287,6 @@
       });
     });
 
-    // CARREGA DADOS DO ALUNO COM FALLBACK SEGURO
     async function carregarSessaoReal() {
       try {
         const { data: { session } } = await _supabase.auth.getSession();
@@ -357,7 +353,6 @@
       if (url && url.startsWith('http')) document.getElementById('profile-avatar-preview').src = url;
     }
 
-    // BUSCA ATIVIDADES E UNIFICA BUSCA NO SUPABASE E LOCALSTORAGE
     async function varrerEExibirAulasGitHub() {
       const grid = document.getElementById('grid-aulas-automaticas');
       if (!grid) return;
@@ -365,12 +360,11 @@
       try {
         let progressosMap = {};
 
-        // 1. Busca no Supabase para alunos cadastrados
         if (activeStudent && activeStudent.id && activeStudent.id !== DEFAULT_UUID_DEMO) {
           try {
             const { data: progressos } = await _supabase
               .from('se_progresso')
-              .select('modulo_id, etapa_atual, total_etapas, status')
+              .select('*')
               .eq('aluno_id', activeStudent.id);
 
             if (progressos) {
@@ -381,7 +375,6 @@
           } catch (e) {}
         }
 
-        // 2. Busca lista de arquivos do repositório no GitHub
         const res = await fetch('https://api.github.com/repos/thiagomgp/portal-do-aluno/contents/aulainterativa');
         const arquivos = await res.json();
 
@@ -393,33 +386,28 @@
         const arquivosHtml = arquivos.filter(f => f.name.endsWith('.html')).sort((a, b) => a.name.localeCompare(b.name));
 
         grid.innerHTML = arquivosHtml.map((file, index) => {
-          // Decodifica nomes com acento de URL encoding (ex: Modulo1-introdu%C3%A7%C3%A3o)
           const rawNameNoExt = decodeURIComponent(file.name.replace('.html', ''));
           const rawFileName = file.name.replace('.html', '');
 
-          // Apelidos/aliases de identificação dos módulos
           let aliasId = rawNameNoExt;
           if (rawNameNoExt.toLowerCase().includes('introduc') || rawNameNoExt.toLowerCase().includes('modulo1')) {
             aliasId = 'Modulo1-introdução';
-          } else if (rawNameNoExt.toLowerCase().includes('nuvem') || rawNameNoExt.toLowerCase().includes('modulo3')) {
-            aliasId = 'Modulo3-desafio_nuvem';
           }
 
-          // Tenta mapear o progresso usando todas as chaves possíveis
           let prog = progressosMap[rawNameNoExt] || 
                      progressosMap[rawFileName] || 
                      progressosMap[aliasId] || 
                      progressosMap['intro_hw_sw'] || 
-                     progressosMap['desafio_nuvem'] || null;
+                     progressosMap['hardware_software'] || null;
 
-          // Se não encontrou no Supabase, busca no localStorage
           if (!prog) {
             const chavesBusca = [
               `progresso_${rawNameNoExt}`, 
               `progresso_${rawFileName}`, 
               `progresso_${aliasId}`, 
               `progresso_intro_hw_sw`, 
-              `progresso_Modulo1-introducao`
+              `progresso_Modulo1-introducao`,
+              `progresso_hardware_software`
             ];
             for (const chave of chavesBusca) {
               const local = localStorage.getItem(chave);
@@ -496,9 +484,13 @@
       const painel = document.getElementById('painel-conteudo-disciplina');
       if (painel) painel.classList.remove('hidden');
 
-      document.getElementById('sub-conteudo-aulas')?.classList.toggle('hidden', subAba !== 'aulas');
-      document.getElementById('sub-conteudo-materiais')?.classList.toggle('hidden', subAba !== 'materiais');
-      document.getElementById('sub-conteudo-provas')?.classList.toggle('hidden', subAba !== 'provas');
+      const subAulas = document.getElementById('sub-conteudo-aulas');
+      const subMateriais = document.getElementById('sub-conteudo-materiais');
+      const subProvas = document.getElementById('sub-conteudo-provas');
+
+      if (subAulas) subAulas.classList.toggle('hidden', subAba !== 'aulas');
+      if (subMateriais) subMateriais.classList.toggle('hidden', subAba !== 'materiais');
+      if (subProvas) subProvas.classList.toggle('hidden', subAba !== 'provas');
 
       const btnAulas = document.getElementById('btn-sub-aulas');
       const btnMateriais = document.getElementById('btn-sub-materiais');
@@ -527,6 +519,10 @@
             : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-2';
         }
       });
+
+      if (aba === 'disciplinas') {
+        selecionarSubAbaDisciplina('aulas');
+      }
     }
 
     async function fazerLogout() {
