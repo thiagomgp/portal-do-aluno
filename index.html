@@ -104,7 +104,7 @@
       <!-- GRID COMPACTA DE DISCIPLINAS -->
       <div id="lista-disciplinas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         
-        <!-- CARD DA DISCIPLINA COMPACTO (max-w-md evita esticar) -->
+        <!-- CARD DA DISCIPLINA COMPACTO -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 max-w-md">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
@@ -116,7 +116,7 @@
             </div>
           </div>
 
-          <!-- BOTÕES COM TAMANHO PADRONIZADO (w-28) -->
+          <!-- BOTÕES COM TAMANHO PADRONIZADO -->
           <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
             <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
               <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
@@ -132,7 +132,7 @@
 
       </div>
 
-      <!-- PAINEL DE CONTEÚDOS (INICIA OCULTO) -->
+      <!-- PAINEL DE CONTEÚDOS -->
       <div id="painel-conteudo-disciplina" class="hidden pt-4 space-y-4 border-t border-slate-800">
         
         <!-- SUB-CONTEÚDO: AULAS INTERATIVAS -->
@@ -215,6 +215,11 @@
           </div>
 
           <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">E-mail de Acesso:</label>
+            <input type="email" id="profile-email-input" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="aluno@escola.com">
+          </div>
+
+          <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">URL da Foto de Perfil:</label>
             <input type="url" id="profile-avatar-url" oninput="previewAvatarUrl(this.value)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="https://exemplo.com/foto.png">
           </div>
@@ -258,11 +263,14 @@
         e.preventDefault();
         const novoNome = document.getElementById('profile-name-input').value.trim();
         const novoApelido = document.getElementById('profile-nickname-input').value.trim();
+        const novoEmail = document.getElementById('profile-email-input').value.trim();
         const novaFoto = document.getElementById('profile-avatar-url').value.trim();
 
         if (novoNome) activeStudent.nome = novoNome;
         activeStudent.apelido = novoApelido;
+        if (novoEmail) activeStudent.email = novoEmail;
         if (novaFoto) activeStudent.foto_url = novaFoto;
+
         sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
 
         alert("Perfil atualizado!");
@@ -304,16 +312,18 @@
 
       const nomeExibicao = activeStudent.nome || 'Aluno Demo';
       const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : '@aluno_demo';
+      const emailExibicao = activeStudent.email || 'aluno@escola.com';
 
       if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
       if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || 'Geral';
       
       if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
       if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
-      if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'aluno@escola.com';
+      if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = emailExibicao;
       
       if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
       if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || 'aluno_demo';
+      if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = emailExibicao;
 
       if (activeStudent.foto_url && document.getElementById('profile-avatar-url')) {
         document.getElementById('profile-avatar-url').value = activeStudent.foto_url;
@@ -331,19 +341,36 @@
 
       try {
         let progressosMap = {};
-        if (activeStudent && activeStudent.id) {
-          const { data: progressos } = await _supabase
-            .from('se_progresso')
-            .select('modulo_id, etapa_atual, total_etapas, status')
-            .eq('aluno_id', activeStudent.id);
 
-          if (progressos) {
-            progressos.forEach(p => {
-              progressosMap[p.modulo_id] = p;
-            });
-          }
+        // 1. TENTA LER DO SUPABASE PARA ALUNOS AUTENTICADOS REAIS
+        if (activeStudent && activeStudent.id && activeStudent.id !== DEFAULT_UUID_DEMO) {
+          try {
+            const { data: progressos } = await _supabase
+              .from('se_progresso')
+              .select('modulo_id, etapa_atual, total_etapas, status')
+              .eq('aluno_id', activeStudent.id);
+
+            if (progressos) {
+              progressos.forEach(p => {
+                progressosMap[p.modulo_id] = p;
+              });
+            }
+          } catch(e) {}
         }
 
+        // 2. LEITURA NO LOCALSTORAGE PARA O ALUNO DEMO / MODULO LOCAL
+        const modulosAtivos = ['intro_hw_sw', 'desafio_nuvem', 'Modulo1-introducao', 'Modulo3-desafio_nuvem'];
+        modulosAtivos.forEach(modId => {
+          const localData = localStorage.getItem(`progresso_${modId}`);
+          if (localData) {
+            try {
+              const p = JSON.parse(localData);
+              progressosMap[modId] = p;
+            } catch(e) {}
+          }
+        });
+
+        // 3. BUSCA MÓDULOS NO REPOSITÓRIO GITHUB
         const res = await fetch('https://api.github.com/repos/thiagomgp/portal-do-aluno/contents/aulainterativa');
         const arquivos = await res.json();
 
@@ -360,6 +387,8 @@
           let moduloKey = rawNameNoExt;
           if (rawNameNoExt.toLowerCase().includes('introduc') || rawNameNoExt.toLowerCase().includes('modulo1')) {
             moduloKey = 'intro_hw_sw';
+          } else if (rawNameNoExt.toLowerCase().includes('nuvem') || rawNameNoExt.toLowerCase().includes('modulo3')) {
+            moduloKey = 'desafio_nuvem';
           }
 
           let prog = progressosMap[moduloKey] || progressosMap[rawNameNoExt] || progressosMap[file.name] || null;
@@ -369,8 +398,8 @@
           let subtextEtapa = 'Ainda não iniciada';
 
           if (prog) {
-            const etapaAtual = prog.etapa_atual || 0;
-            const totalEtapas = prog.total_etapas || 4;
+            const etapaAtual = Number(prog.etapa_atual || 0);
+            const totalEtapas = Number(prog.total_etapas || (moduloKey === 'desafio_nuvem' ? 3 : 4));
 
             if (prog.status === 'concluido' || etapaAtual >= totalEtapas) {
               statusBadgeHTML = `<span class="text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full">✓ Concluído</span>`;
@@ -406,7 +435,7 @@
               </div>
 
               <button onclick="acessarModulo('aulainterativa/${file.name}')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
-                <span>${prog && prog.status === 'concluido' ? 'Revisar Atividade' : 'Iniciar Atividade'}</span>
+                <span>${prog && (prog.status === 'concluido' || prog.etapa_atual > 0) ? 'Continuar / Revisar' : 'Iniciar Atividade'}</span>
                 <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
@@ -427,7 +456,6 @@
     }
 
     function selecionarSubAbaDisciplina(subAba) {
-      // Revela o painel de conteúdos ao clicar
       const painel = document.getElementById('painel-conteudo-disciplina');
       if (painel) painel.classList.remove('hidden');
 
