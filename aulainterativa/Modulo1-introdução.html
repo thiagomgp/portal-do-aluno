@@ -247,40 +247,38 @@
 
         // 2. SALVAMENTO DE PROGRESSO BLINDADO
         async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
-            if (!currentStudent || !currentStudent.id) return;
+    if (!currentStudent || !currentStudent.id) return;
 
-            const payload = {
-                aluno_id: currentStudent.id,
-                modulo_id: MODULE_ID,
-                etapa_atual: Number(stepNumber),
-                total_etapas: Number(TOTAL_STEPS),
-                status: status,
-                tempo_segundos: Number(secondsElapsed),
-                updated_at: new Date().toISOString()
-            };
+    const payload = {
+        aluno_id: currentStudent.id,
+        modulo_id: MODULE_ID, // 'intro_hw_sw'
+        etapa_atual: Number(stepNumber),
+        total_etapas: Number(TOTAL_STEPS),
+        status: status,
+        tempo_segundos: Number(secondsElapsed),
+        updated_at: new Date().toISOString()
+    };
 
-            // Aluno Demo: grava no localStorage e não dispara chamada HTTP
-            if (currentStudent.id === DEFAULT_UUID_DEMO) {
-                localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
-                return;
-            }
+    // 1. Grava no localStorage do navegador
+    localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
+    localStorage.setItem(`progresso_Modulo1-introducao`, JSON.stringify(payload));
 
-            // Aluno cadastrado no Supabase
-            try {
-                const { data: updated, error: updateError } = await _supabase
-                    .from('se_progresso')
-                    .update(payload)
-                    .eq('aluno_id', currentStudent.id)
-                    .eq('modulo_id', MODULE_ID)
-                    .select();
+    // 2. Se for o ID de teste/demo, não envia requisição ao banco
+    if (currentStudent.id === DEFAULT_UUID_DEMO) return;
 
-                if (!updateError && (!updated || updated.length === 0)) {
-                    await _supabase.from('se_progresso').insert([payload]);
-                }
-            } catch (err) {
-                // Silencioso
-            }
+    // 3. Para alunos reais cadastrados, realiza o UPSERT direto no Supabase
+    try {
+        const { error } = await _supabase
+            .from('se_progresso')
+            .upsert(payload, { onConflict: 'aluno_id,modulo_id' });
+
+        if (error) {
+            console.warn("Aviso ao salvar progresso no banco:", error.message);
         }
+    } catch (err) {
+        console.error("Exceção na sincronização:", err);
+    }
+}
 
         function startTimer() {
             if (timerInterval) clearInterval(timerInterval);
