@@ -240,37 +240,44 @@
     let activeStudent = null;
     const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!activeStudent || !activeStudent.id || activeStudent.id === DEFAULT_UUID_DEMO) {
+    alert("Modo demonstração: alterações não são salvas no banco.");
+    return;
+  }
+
+  const novoNome = document.getElementById('profile-name-input').value.trim();
+  const novoApelido = document.getElementById('profile-nickname-input').value.trim();
+  const novaFoto = document.getElementById('profile-avatar-url').value.trim();
+
+  const updates = {
+    nome_completo: novoNome || activeStudent.nome,
+    apelido: novoApelido,
+    avatar_url: novaFoto,
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    const { error } = await _supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', activeStudent.id);
+
+    if (error) {
+      alert("Erro ao salvar no banco: " + error.message);
+    } else {
+      alert("Perfil atualizado com sucesso!");
+      activeStudent.nome = updates.nome_completo;
+      activeStudent.apelido = updates.apelido;
+      activeStudent.foto_url = updates.avatar_url;
+      sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
       await carregarSessaoReal();
-      await varrerEExibirAulasGitHub();
-
-      // Form Perfil
-      document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!activeStudent || !activeStudent.id) return;
-
-        const novoNome = document.getElementById('profile-name-input').value.trim();
-        const novoApelido = document.getElementById('profile-nickname-input').value.trim();
-        const novaFoto = document.getElementById('profile-avatar-url').value.trim();
-
-        const updates = {
-          nome_completo: novoNome || activeStudent.nome,
-          apelido: novoApelido,
-          avatar_url: novaFoto
-        };
-
-        const { error } = await _supabase
-          .from('profiles')
-          .update(updates)
-          .eq('id', activeStudent.id);
-
-        if (error) {
-          alert("Erro ao salvar no banco: " + error.message);
-        } else {
-          alert("Perfil atualizado com sucesso!");
-          await carregarSessaoReal();
-        }
-      });
+    }
+  } catch (err) {
+    console.error("Exceção ao atualizar perfil:", err);
+  }
+});
 
       // Form Senha
       document.getElementById('form-update-password')?.addEventListener('submit', async (e) => {
@@ -287,67 +294,101 @@
       });
     });
 
-    async function carregarSessaoReal() {
-      try {
-        const { data: { session } } = await _supabase.auth.getSession();
-        const urlParams = new URLSearchParams(window.location.search);
+    // CARREGA DADOS DO ALUNO REAL COM CONSULTA DIRETA À TABELA PROFILES
+async function carregarSessaoReal() {
+  let studentId = null;
 
-        if (session && session.user) {
-          const user = session.user;
-          const { data: profile } = await _supabase
-            .from('profiles')
-            .select('*, turmas(nome)')
-            .eq('id', user.id)
-            .maybeSingle();
+  // 1. Tenta pegar a sessão ativa armazenada no sessionStorage ou URL
+  const saved = sessionStorage.getItem('active_student');
+  const urlParams = new URLSearchParams(window.location.search);
 
-          activeStudent = {
-            id: user.id,
-            email: user.email,
-            nome: profile?.nome_completo || user.user_metadata?.nome_completo || 'Aluno',
-            apelido: profile?.apelido || '',
-            turma: profile?.turmas?.nome || 'Geral',
-            foto_url: profile?.avatar_url || ''
-          };
-        } else {
-          const saved = sessionStorage.getItem('active_student');
-          if (saved) {
-            activeStudent = JSON.parse(saved);
-          } else {
-            activeStudent = {
-              id: urlParams.get('id') || DEFAULT_UUID_DEMO,
-              nome: urlParams.get('nome') || 'Aluno Demo',
-              turma: urlParams.get('turma') || 'Geral',
-              email: 'aluno@escola.com',
-              apelido: 'aluno_demo',
-              foto_url: ''
-            };
-          }
-        }
-      } catch (e) {
-        activeStudent = { id: DEFAULT_UUID_DEMO, nome: 'Aluno Demo', turma: 'Geral', email: 'aluno@escola.com', apelido: 'aluno_demo' };
+  if (saved) {
+    try {
+      activeStudent = JSON.parse(saved);
+      studentId = activeStudent.id;
+    } catch (e) {}
+  } else if (urlParams.has('id')) {
+    studentId = urlParams.get('id');
+    activeStudent = {
+      id: studentId,
+      nome: urlParams.get('nome') || 'Aluno',
+      turma: urlParams.get('turma') || 'Geral'
+    };
+  }
+
+  // Fallback para sessão do Supabase Auth se existir
+  if (!studentId || studentId === DEFAULT_UUID_DEMO) {
+    try {
+      const { data: { session } } = await _supabase.auth.getSession();
+      if (session && session.user) {
+        studentId = session.user.id;
+        activeStudent = { id: studentId, email: session.user.email };
       }
+    } catch (e) {}
+  }
 
-      sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
+  // Se for um UUID válido e não for o aluno Demo, busca dados frescos no Supabase
+  if (studentId && studentId !== DEFAULT_UUID_DEMO) {
+    try {
+      const { data: profile, error } = await _supabase
+        .from('profiles')
+        .select('*, turmas(nome)')
+        .eq('id', studentId)
+        .maybeSingle();
 
-      const nomeExibicao = activeStudent.nome;
-      const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
-
-      if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
-      if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma;
-
-      if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
-      if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
-      if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
-
-      if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
-      if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
-      if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
-
-      if (activeStudent.foto_url && document.getElementById('profile-avatar-url')) {
-        document.getElementById('profile-avatar-url').value = activeStudent.foto_url;
-        document.getElementById('profile-avatar-preview').src = activeStudent.foto_url;
+      if (profile && !error) {
+        activeStudent = {
+          id: profile.id,
+          nome: profile.nome_completo || activeStudent?.nome || 'Aluno',
+          apelido: profile.apelido || '',
+          email: profile.email || activeStudent?.email || 'aluno@escola.com',
+          turma: profile.turmas?.nome || activeStudent?.turma || 'Geral',
+          foto_url: profile.avatar_url || ''
+        };
       }
+    } catch (err) {
+      console.warn("Aviso ao carregar perfil do Supabase:", err);
     }
+  }
+
+  // Se ainda assim não houver aluno definido, define como Demo
+  if (!activeStudent) {
+    activeStudent = {
+      id: DEFAULT_UUID_DEMO,
+      nome: "Aluno Demo",
+      turma: "Geral",
+      email: "aluno@escola.com",
+      apelido: "aluno_demo",
+      foto_url: ""
+    };
+  }
+
+  sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
+
+  // Atualização da Interface
+  const nomeExibicao = activeStudent.nome || "Aluno";
+  const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
+
+  if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
+  if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Geral";
+
+  if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
+  if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
+  if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
+
+  if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
+  if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
+  if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
+
+  if (document.getElementById('profile-avatar-url')) {
+    document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
+  }
+  if (document.getElementById('profile-avatar-preview')) {
+    document.getElementById('profile-avatar-preview').src = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
+      ? activeStudent.foto_url 
+      : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
+  }
+}
 
     function previewAvatarUrl(url) {
       if (url && url.startsWith('http')) document.getElementById('profile-avatar-preview').src = url;
