@@ -32,7 +32,7 @@
         let currentStudent = null;
         const MODULE_ID = "teclado_atalhos";
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             // Recupera o aluno logado via URL ou sessionStorage
             const urlParams = new URLSearchParams(window.location.search);
             const saved = sessionStorage.getItem('active_student');
@@ -55,16 +55,46 @@
                 document.getElementById('student-class-display').innerText = "Geral";
             }
 
-            // Registra imediatamente a entrada no módulo
-            salvarProgressoAoVivo(1, 'em_andamento');
+            // CARREGA O PROGRESSO SALVO NO SUPABASE ANTES DE INICIAR A INTERFACE
+            await carregarProgressoSalvo();
         });
+
+        async function carregarProgressoSalvo() {
+            if (!currentStudent || !currentStudent.id) return;
+
+            try {
+                const { data, error } = await _supabase
+                    .from('se_progresso')
+                    .select('etapa_atual, tempo_segundos, status')
+                    .eq('aluno_id', currentStudent.id)
+                    .eq('modulo_id', MODULE_ID)
+                    .maybeSingle();
+
+                if (data && !error) {
+                    // Restaura o tempo de estudo anterior
+                    secondsElapsed = data.tempo_segundos || 0;
+                    
+                    // Converte a etapa do banco (base 1) para o índice do array LESSON_STEPS (base 0)
+                    const etapaSalvaIndex = Math.max(0, (data.etapa_atual || 1) - 1);
+                    currentStepIndex = etapaSalvaIndex;
+
+                    // Recalcula o XP acumulado das etapas anteriores concluídas
+                    totalXP = 0;
+                    for (let i = 0; i < currentStepIndex; i++) {
+                        totalXP += LESSON_STEPS[i].xp;
+                    }
+                    document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+                }
+            } catch (err) {
+                console.error("Erro ao carregar progresso anterior:", err);
+            }
+        }
 
         // Função para atualizar progresso no Supabase em tempo real
         async function salvarProgressoAoVivo(etapaAtual, status = 'em_andamento') {
             if (!currentStudent || !currentStudent.id) return;
 
             try {
-                // Atualiza na tabela 'se_progresso' (usada no painel principal)
                 await _supabase.from('se_progresso').upsert({
                     aluno_id: currentStudent.id,
                     modulo_id: MODULE_ID,
@@ -259,7 +289,8 @@
 
         window.onload = function() {
             startTimer();
-            renderStep(0);
+            // Renderiza a etapa recuperada do Supabase (currentStepIndex)
+            renderStep(currentStepIndex);
         };
 
         function startTimer() {
