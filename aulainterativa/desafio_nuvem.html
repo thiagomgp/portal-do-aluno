@@ -3,27 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cultura Digital - Desafio 02: Agente de Nuvem</title>
+  <title>Cultura Digital - Módulo 3: Agente de Nuvem</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { 
-            sans: ['Inter', 'sans-serif'], 
-            mono: ['JetBrains Mono', 'monospace'] 
-          }
+          fontFamily: { sans: ['Roboto', 'sans-serif'] }
         }
       }
     }
   </script>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased">
+<body class="bg-[#131314] text-[#e3e2e6] font-sans min-h-screen flex flex-col justify-between antialiased select-none">
 
-  <!-- SUPABASE & CONTEXTO INICIAL -->
+  <!-- SUPABASE & SESSAO -->
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -80,7 +77,7 @@
           document.getElementById('xp-counter').innerText = `${totalXP} XP`;
         }
       } catch (err) {
-        console.error("Erro ao carregar progresso anterior:", err);
+        console.error("Erro ao carregar progresso:", err);
       }
     }
 
@@ -103,17 +100,17 @@
     }
   </script>
 
-  <!-- CABEÇALHO -->
-  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
+  <!-- CABEÇALHO DA ATIVIDADE -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
         <div class="flex items-center space-x-3">
-          <a href="javascript:history.back()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 p-2.5 rounded-xl font-bold transition flex items-center justify-center">
+          <a href="javascript:history.back()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl font-bold transition flex items-center justify-center border border-slate-700">
             <i class="fa-solid fa-arrow-left"></i>
           </a>
           <div>
             <h1 class="font-bold text-lg text-white leading-tight">
-              Cultura Digital <span class="text-xs bg-cyan-500/20 text-cyan-400 font-medium px-2 py-0.5 rounded border border-cyan-500/30">Desafio 02</span>
+              Cultura Digital <span class="text-xs bg-cyan-500/20 text-cyan-400 font-medium px-2 py-0.5 rounded border border-cyan-500/30">Módulo 3</span>
             </h1>
             <p class="text-xs text-slate-400">Agente de Nuvem: Organização no Drive & Comunicação no Gmail</p>
           </div>
@@ -121,7 +118,7 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
-        <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs text-slate-300">
+        <div class="flex items-center gap-2 bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-lg text-xs text-slate-300">
           <i class="fa-solid fa-user-graduate text-cyan-400"></i>
           <span id="student-name-display" class="font-bold">--</span>
           <span class="text-slate-600">|</span>
@@ -129,18 +126,18 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <div class="bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400 flex items-center gap-1.5">
+          <div class="bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400 flex items-center gap-1.5">
             <i class="fa-solid fa-trophy text-amber-400"></i>
             <span id="xp-counter">0 XP</span>
           </div>
-          <div class="bg-slate-900/80 border border-slate-700/80 px-3 py-1.5 rounded-lg text-xs font-semibold text-cyan-400 flex items-center gap-1.5">
+          <div class="bg-slate-950/80 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold text-cyan-400 flex items-center gap-1.5">
             <i class="fa-solid fa-clock"></i>
             <span id="timer-display">00:00</span>
           </div>
         </div>
       </div>
     </div>
-    <div class="w-full bg-slate-900 h-1.5">
+    <div class="w-full bg-slate-950 h-1.5">
       <div id="top-progress-bar" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 w-0 transition-all duration-500"></div>
     </div>
   </header>
@@ -148,19 +145,19 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
     
-    <!-- PAINEL ESQUERDO: INSTRUÇÕES DA MISSAO -->
-    <section class="lg:col-span-4 bg-slate-800 border border-slate-700 rounded-2xl flex flex-col shadow-xl overflow-hidden h-full min-h-[580px]">
-      <div class="p-4 bg-slate-800/90 border-b border-slate-700/80 flex items-center justify-between">
+    <!-- PAINEL ESQUERDO: INSTRUÇÕES -->
+    <section class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col shadow-xl overflow-hidden h-full min-h-[580px]">
+      <div class="p-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
         <div>
           <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Tarefa <span id="current-step-num">1</span> de 3</span>
           <h2 id="step-title" class="text-lg font-bold text-white">Carregando Instruções...</h2>
         </div>
-        <span id="step-badge" class="text-xs bg-slate-700 text-slate-300 font-medium px-2 py-1 rounded-md">Simulador</span>
+        <span id="step-badge" class="text-xs bg-slate-800 text-slate-300 font-medium px-2 py-1 rounded-md border border-slate-700">Simulador</span>
       </div>
 
       <div class="p-5 flex-1 overflow-y-auto space-y-4 text-slate-300 text-xs sm:text-sm leading-relaxed" id="step-content"></div>
 
-      <div class="p-4 bg-slate-800 border-t border-slate-700 flex items-center justify-between gap-3">
+      <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-3">
         <div id="step-feedback" class="text-xs font-medium flex items-center gap-1.5 text-slate-400">
           <i class="fa-solid fa-circle-info"></i> Execute a tarefa no simulador.
         </div>
@@ -171,17 +168,17 @@
       </div>
     </section>
 
-    <!-- PAINEL DIREITO: AMBIENTE SIMULADO (GOOGLE DRIVE / GMAIL) -->
-    <section class="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full min-h-[580px] p-4">
-      <div id="simulated-environment" class="flex-1 flex flex-col bg-slate-900 rounded-xl overflow-hidden border border-slate-800">
+    <!-- PAINEL DIREITO: AMBIENTE SIMULADO DRIVE / GMAIL -->
+    <section class="lg:col-span-8 bg-[#131314] border border-[#282a2c] rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full min-h-[580px]">
+      <div id="simulated-environment" class="flex-1 flex flex-col bg-[#131314]">
         <!-- O Simulador é renderizado aqui dinamicamente -->
       </div>
     </section>
   </main>
 
   <!-- MODAL DE CONCLUSÃO -->
-  <div id="completion-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6 text-center">
+  <div id="completion-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6 text-center">
       <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-2xl">
         <i class="fa-solid fa-cloud"></i>
       </div>
@@ -190,7 +187,7 @@
         <h3 class="text-2xl font-extrabold text-white mt-1">Sua Vida Digital Foi Organizada</h3>
         <p class="text-slate-300 text-sm mt-2">Você aprendeu a estruturar diretórios no Drive, personalizar seu e-mail e compactar arquivos para envio seguro.</p>
       </div>
-      <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 text-xs text-left space-y-2">
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs text-left space-y-2">
         <div class="flex justify-between"><span class="text-slate-400">Aluno:</span> <strong id="res-name" class="text-white">--</strong></div>
         <div class="flex justify-between"><span class="text-slate-400">Tempo de Conclusão:</span> <strong id="res-time" class="text-cyan-400">--</strong></div>
         <div class="flex justify-between"><span class="text-slate-400">Pontuação Total:</span> <strong id="res-xp" class="text-amber-400">-- XP</strong></div>
@@ -201,7 +198,7 @@
     </div>
   </div>
 
-  <!-- MOTOR DE LÓGICA E INTERAÇÕES DA AULA -->
+  <!-- MOTOR DE LÓGICA DA AULA -->
   <script>
     const LESSON_STEPS = [
       {
@@ -210,14 +207,14 @@
         badge: "Organização de Arquivos",
         content: `
           <p class="font-semibold text-white">Criando Pastas de Estudos no Drive:</p>
-          <p>Para manter sua vida escolar organizada na nuvem, você deve criar uma pasta principal chamada <strong class="text-cyan-400">EDU_DIGITAL_2026</strong>.</p>
-          <p class="mt-2 text-slate-300">Dentro da pasta principal, você criará subpastas para suas matérias (ex: <strong>Matemática</strong> e <strong>Português</strong>).</p>
-          <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg text-xs space-y-1 mt-3">
+          <p>Para manter sua vida escolar organizada na nuvem, crie uma pasta principal chamada <strong class="text-cyan-400">EDU_DIGITAL_2026</strong>.</p>
+          <p class="mt-2 text-slate-300">Dentro dela, você criará subpastas para suas matérias (ex: <strong>Matemática</strong> e <strong>Português</strong>).</p>
+          <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs space-y-1 mt-3">
             <p class="text-amber-400 font-bold">📋 Instruções do Simulador:</p>
             <ol class="list-decimal list-inside space-y-1 text-slate-300">
-              <li>Clique em <strong>"+ Novo"</strong> $\rightarrow$ <strong>"Nova Pasta"</strong>.</li>
+              <li>Clique no botão <strong>"+ Novo"</strong>.</li>
               <li>Digite <code class="text-cyan-300 font-mono">EDU_DIGITAL_2026</code> e confirme.</li>
-              <li>Dê um duplo clique para entrar na pasta criada.</li>
+              <li>Clique na pasta para entrar nela.</li>
               <li>Crie pelo menos duas subpastas: <code class="text-cyan-300 font-mono">Matemática</code> e <code class="text-cyan-300 font-mono">Português</code>.</li>
             </ol>
           </div>
@@ -231,14 +228,13 @@
         badge: "Comunicação Profissional",
         content: `
           <p class="font-semibold text-white">Assinatura de E-mail Automática:</p>
-          <p>A assinatura de e-mail evita que você precise digitar seu nome, turma e escola toda vez que enviar uma mensagem para um professor ou colega.</p>
-          <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg text-xs space-y-1 mt-3">
+          <p>A assinatura de e-mail evita que você precise digitar seu nome e turma toda vez que enviar uma mensagem.</p>
+          <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs space-y-1 mt-3">
             <p class="text-amber-400 font-bold">📋 Instruções do Simulador:</p>
             <ol class="list-decimal list-inside space-y-1 text-slate-300">
-              <li>No simulador do Gmail ao lado, clique no ícone de <strong>Engrenagem (Configurações)</strong>.</li>
-              <li>Localize o campo <strong>"Assinatura"</strong>.</li>
-              <li>Digite seu nome e turma (ex: <i>Atenciosamente, Aluno Teste - Turma 81</i>).</li>
-              <li>Clique no botão <strong>"Salvar Alterações"</strong> no rodapé.</li>
+              <li>No simulador do Gmail ao lado, clique em <strong>"Configurações"</strong>.</li>
+              <li>Digite seu nome e turma na caixa de texto.</li>
+              <li>Clique em <strong>"Salvar Alterações"</strong>.</li>
             </ol>
           </div>
         `,
@@ -251,14 +247,13 @@
         badge: "Compactação & Envio",
         content: `
           <p class="font-semibold text-white">Enviar Tarefas Compactadas:</p>
-          <p>Quando enviamos vários arquivos de uma vez, compactá-los em formato <strong class="text-cyan-400">.zip</strong> economiza espaço e organiza o envio.</p>
-          <div class="bg-slate-900 border border-slate-700 p-3 rounded-lg text-xs space-y-1 mt-3">
+          <p>Compactar arquivos em formato <strong class="text-cyan-400">.zip</strong> economiza espaço e organiza envios com múltiplos documentos.</p>
+          <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs space-y-1 mt-3">
             <p class="text-amber-400 font-bold">📋 Instruções do Simulador:</p>
             <ol class="list-decimal list-inside space-y-1 text-slate-300">
-              <li>Clique em <strong>"Compactar Trabalhos (.zip)"</strong> no assistente.</li>
-              <li>Abra a tela do Gmail clicando em <strong>"Escrever"</strong>.</li>
-              <li>Anexe o arquivo <code class="text-cyan-300 font-mono">Trabalhos_2026.zip</code> criado.</li>
-              <li>Digite o e-mail do professor (<code class="text-cyan-300 font-mono">professor@escola.edu.br</code>) e clique em <strong>"Enviar"</strong>.</li>
+              <li>Clique em <strong>"Compactar Trabalhos (.zip)"</strong>.</li>
+              <li>Confira o e-mail do professor e o anexo.</li>
+              <li>Clique em <strong>"Enviar E-mail"</strong>.</li>
             </ol>
           </div>
         `,
@@ -272,10 +267,9 @@
     let secondsElapsed = 0;
     let timerInterval = null;
 
-    // Estado do Simulador Drive & Gmail
     let driveState = {
       currentFolder: 'root',
-      folders: [], // { name: string, parent: string }
+      folders: [],
       subfoldersCreated: 0
     };
     let signatureSaved = false;
@@ -330,38 +324,38 @@
       const isInsideMainFolder = driveState.currentFolder === 'EDU_DIGITAL_2026';
 
       container.innerHTML = `
-        <div class="bg-slate-900 h-full flex flex-col text-slate-200">
+        <div class="bg-[#131314] h-full flex flex-col text-[#e3e2e6]">
           <!-- Barra Superior Drive -->
-          <div class="p-3 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+          <div class="p-3 bg-[#1e1f20] border-b border-[#282a2c] flex justify-between items-center">
             <div class="flex items-center gap-2">
-              <i class="fa-solid fa-hard-drive text-amber-400 text-lg"></i>
-              <span class="font-bold text-sm text-white">Simulador Google Drive</span>
+              <i class="fa-solid fa-hard-drive text-[#8ab4f8] text-lg"></i>
+              <span class="font-bold text-sm text-white">Google Drive Simulado</span>
               <span class="text-xs text-slate-400 font-mono">/ ${driveState.currentFolder}</span>
             </div>
-            ${isInsideMainFolder ? `<button onclick="driveState.currentFolder = 'root'; renderDriveSimulator(document.getElementById('simulated-environment'))" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-1 rounded">⬅ Voltar para Meu Drive</button>` : ''}
+            ${isInsideMainFolder ? `<button onclick="driveState.currentFolder = 'root'; renderDriveSimulator(document.getElementById('simulated-environment'))" class="text-xs bg-[#282a2c] hover:bg-[#37393b] text-[#8ab4f8] px-3 py-1 rounded-full border border-[#37393b]">⬅ Voltar ao Meu Drive</button>` : ''}
           </div>
 
-          <div class="flex flex-1">
+          <div class="flex flex-1 overflow-hidden">
             <!-- Barra Lateral -->
-            <div class="w-48 bg-slate-950 p-3 border-r border-slate-800 space-y-3">
-              <button onclick="promptCriarPastaDrive()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center gap-2 transition">
-                <i class="fa-solid fa-plus text-cyan-400"></i> Novo
+            <div class="w-48 bg-[#131314] p-3 border-r border-[#282a2c] space-y-3">
+              <button onclick="promptCriarPastaDrive()" class="w-full bg-[#282a2c] hover:bg-[#37393b] border border-[#37393b] text-white font-medium py-2.5 px-3 rounded-2xl text-xs flex items-center justify-center gap-2 transition">
+                <i class="fa-solid fa-plus text-[#8ab4f8]"></i> + Novo
               </button>
               <div class="text-xs space-y-1 text-slate-400">
-                <div class="p-2 bg-slate-900 rounded font-bold text-cyan-400 flex items-center gap-2">
+                <div class="p-2 bg-[#004a77] rounded-full font-bold text-[#c2e7ff] flex items-center gap-2">
                   <i class="fa-solid fa-folder"></i> Meu Drive
                 </div>
               </div>
             </div>
 
             <!-- Área de Arquivos -->
-            <div class="flex-1 p-4">
+            <div class="flex-1 p-4 overflow-y-auto">
               <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                ${isInsideMainFolder ? 'Subpastas das Matérias em EDU_DIGITAL_2026:' : 'Pastas no Meu Drive:'}
+                ${isInsideMainFolder ? 'Subpastas em EDU_DIGITAL_2026:' : 'Pastas no Meu Drive:'}
               </h4>
               
               <div id="drive-files-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <!-- Pastas renderizadas dinamicamente -->
+                <!-- Pastas dinamicas -->
               </div>
             </div>
           </div>
@@ -378,14 +372,17 @@
       const currentFolders = driveState.folders.filter(f => f.parent === driveState.currentFolder);
 
       if (currentFolders.length === 0) {
-        grid.innerHTML = `<p class="col-span-3 text-xs text-slate-500 italic">Nenhuma pasta criada neste local ainda. Clique em "+ Novo".</p>`;
+        grid.innerHTML = `<p class="col-span-3 text-xs text-slate-500 italic p-2">Nenhuma pasta criada neste local. Clique em "+ Novo".</p>`;
         return;
       }
 
       grid.innerHTML = currentFolders.map(f => `
-        <div ${f.name === 'EDU_DIGITAL_2026' ? `ondblclick="entrarPastaDrive('${f.name}')"` : ''} class="p-3 bg-slate-800 border border-slate-700 hover:border-cyan-500 rounded-xl flex items-center gap-2 cursor-pointer transition select-none">
-          <i class="fa-solid fa-folder text-amber-400 text-xl"></i>
-          <span class="text-xs font-semibold text-slate-200 truncate">${f.name}</span>
+        <div onclick="${f.name === 'EDU_DIGITAL_2026' ? `entrarPastaDrive('${f.name}')` : ''}" class="p-3 bg-[#1e1f20] border border-[#282a2c] hover:border-[#8ab4f8] rounded-xl flex items-center justify-between cursor-pointer transition select-none">
+          <div class="flex items-center gap-2 truncate">
+            <i class="fa-solid fa-folder text-[#8ab4f8] text-lg"></i>
+            <span class="text-xs font-semibold text-white truncate">${f.name}</span>
+          </div>
+          ${f.name === 'EDU_DIGITAL_2026' ? `<span class="text-[10px] bg-[#004a77] text-[#c2e7ff] px-2 py-0.5 rounded-full">Abrir</span>` : ''}
         </div>
       `).join('');
     }
@@ -398,14 +395,17 @@
 
       if (driveState.currentFolder === 'root') {
         if (nomeTrim === 'EDU_DIGITAL_2026') {
-          driveState.folders.push({ name: 'EDU_DIGITAL_2026', parent: 'root' });
-          alert("Pasta principal 'EDU_DIGITAL_2026' criada! Dê um duplo clique nela para abrir e criar as subpastas.");
+          // Garante que adiciona a pasta principal apenas uma vez
+          if (!driveState.folders.some(f => f.name === 'EDU_DIGITAL_2026')) {
+            driveState.folders.push({ name: 'EDU_DIGITAL_2026', parent: 'root' });
+          }
+          alert("Pasta 'EDU_DIGITAL_2026' criada! Clique nela para entrar e criar as subpastas.");
           renderDriveFoldersGrid();
         } else {
           alert("Nome incorreto! O nome da pasta principal deve ser exatamente: EDU_DIGITAL_2026");
         }
       } else if (driveState.currentFolder === 'EDU_DIGITAL_2026') {
-        driveState.folders.push({ name: 'EDU_DIGITAL_2026', parent: 'root' });
+        // CORRIGIDO: Adiciona somente a subpasta sem duplicar a pasta pai
         driveState.folders.push({ name: nomeTrim, parent: 'EDU_DIGITAL_2026' });
         driveState.subfoldersCreated++;
         renderDriveFoldersGrid();
@@ -424,25 +424,25 @@
     // --- SIMULADOR 2: GMAIL ASSINATURA ---
     function renderGmailSignatureSimulator(container) {
       container.innerHTML = `
-        <div class="bg-slate-900 h-full flex flex-col text-slate-200">
-          <div class="p-3 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+        <div class="bg-[#131314] h-full flex flex-col text-[#e3e2e6]">
+          <div class="p-3 bg-[#1e1f20] border-b border-[#282a2c] flex justify-between items-center">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-envelope text-rose-400 text-lg"></i>
               <span class="font-bold text-sm text-white">Simulador Gmail - Configurações</span>
             </div>
-            <button onclick="salvarAssinaturaGmail()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-1.5 rounded transition">
+            <button onclick="salvarAssinaturaGmail()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition">
               💾 Salvar Alterações
             </button>
           </div>
 
           <div class="p-6 space-y-4 flex-1 overflow-y-auto">
-            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-              <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Configuração de Assinatura Automática</h4>
-              <p class="text-xs text-slate-400">Esta assinatura será anexada no final de todas as mensagens enviadas.</p>
+            <div class="bg-[#1e1f20] p-4 rounded-xl border border-[#282a2c] space-y-3">
+              <h4 class="text-xs font-bold text-[#8ab4f8] uppercase tracking-wider">Configuração de Assinatura Automática</h4>
+              <p class="text-xs text-slate-400">Esta assinatura será anexada automaticamente em seus e-mails.</p>
               
               <div>
                 <label class="block text-xs font-medium text-slate-300 mb-1">Texto da Assinatura:</label>
-                <textarea id="gmail-signature-input" rows="4" placeholder="Ex: Atenciosamente, [Seu Nome] - Turma 81" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 font-sans text-xs focus:outline-none focus:border-cyan-500"></textarea>
+                <textarea id="gmail-signature-input" rows="4" placeholder="Ex: Atenciosamente, Aluno Silva - Turma 81" class="w-full p-3 bg-[#131314] border border-[#37393b] rounded-lg text-white font-sans text-xs focus:outline-none focus:border-[#8ab4f8]"></textarea>
               </div>
             </div>
           </div>
@@ -464,33 +464,33 @@
     // --- SIMULADOR 3: ANEXO ZIP E ENVIO ---
     function renderZipSendSimulator(container) {
       container.innerHTML = `
-        <div class="bg-slate-900 h-full flex flex-col text-slate-200 p-4 space-y-4">
-          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+        <div class="bg-[#131314] h-full flex flex-col text-[#e3e2e6] p-4 space-y-4">
+          <div class="bg-[#1e1f20] p-4 rounded-xl border border-[#282a2c] flex justify-between items-center">
             <div>
-              <h4 class="text-xs font-bold text-cyan-400 uppercase">1. Gerador de Arquivo Compactado</h4>
-              <p class="text-xs text-slate-400">Compacte a pasta com seus trabalhos escolares.</p>
+              <h4 class="text-xs font-bold text-cyan-400 uppercase">1. Compactador de Trabalhos</h4>
+              <p class="text-xs text-slate-400">Gere um arquivo .zip com suas atividades.</p>
             </div>
             <button id="btn-create-zip" onclick="gerarZipSimulado()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3 py-2 rounded-lg transition flex items-center gap-1.5">
               <i class="fa-solid fa-file-zipper"></i> Compactar Trabalhos (.zip)
             </button>
           </div>
 
-          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex-1 flex flex-col justify-between space-y-3">
+          <div class="bg-[#1e1f20] p-4 rounded-xl border border-[#282a2c] flex-1 flex flex-col justify-between space-y-3">
             <div>
               <h4 class="text-xs font-bold text-rose-400 uppercase mb-2">2. Formulário de Envio do Gmail</h4>
               
               <div class="space-y-2">
                 <div>
                   <label class="block text-[10px] text-slate-400 uppercase">Para:</label>
-                  <input type="email" id="email-to" value="professor@escola.edu.br" class="w-full p-2 bg-slate-900 border border-slate-700 rounded text-xs text-white" readonly>
+                  <input type="email" id="email-to" value="professor@escola.edu.br" class="w-full p-2 bg-[#131314] border border-[#37393b] rounded text-xs text-white" readonly>
                 </div>
                 <div>
                   <label class="block text-[10px] text-slate-400 uppercase">Assunto:</label>
-                  <input type="text" id="email-subject" value="Envio de Atividades - EDU_DIGITAL_2026" class="w-full p-2 bg-slate-900 border border-slate-700 rounded text-xs text-white">
+                  <input type="text" id="email-subject" value="Envio de Atividades - EDU_DIGITAL_2026" class="w-full p-2 bg-[#131314] border border-[#37393b] rounded text-xs text-white">
                 </div>
                 <div>
                   <label class="block text-[10px] text-slate-400 uppercase">Anexos:</label>
-                  <div id="attached-files" class="p-2 bg-slate-900 border border-slate-800 rounded text-xs text-slate-500 italic">
+                  <div id="attached-files" class="p-2 bg-[#131314] border border-[#37393b] rounded text-xs text-slate-500 italic">
                     Nenhum arquivo anexado.
                   </div>
                 </div>
@@ -508,20 +508,20 @@
     function gerarZipSimulado() {
       zipCreated = true;
       document.getElementById('attached-files').innerHTML = `
-        <span class="inline-flex items-center gap-1.5 bg-slate-800 border border-slate-700 text-cyan-300 font-mono px-2 py-1 rounded">
+        <span class="inline-flex items-center gap-1.5 bg-[#282a2c] border border-[#37393b] text-cyan-300 font-mono px-2 py-1 rounded">
           <i class="fa-solid fa-file-zipper text-amber-400"></i> Trabalhos_2026.zip
         </span>
       `;
-      alert("Arquivo Trabalhos_2026.zip gerado e anexado à mensagem com sucesso!");
+      alert("Arquivo Trabalhos_2026.zip gerado e anexado!");
     }
 
     function enviarEmailSimulado() {
       if (!zipCreated) {
-        alert("Por favor, clique primeiro em 'Compactar Trabalhos (.zip)' para anexar o arquivo antes de enviar!");
+        alert("Por favor, clique primeiro em 'Compactar Trabalhos (.zip)' para anexar o arquivo!");
         return;
       }
 
-      alert("E-mail enviado com sucesso com o anexo compactado!");
+      alert("E-mail enviado com sucesso!");
       unlockNextStep();
     }
 
@@ -570,7 +570,7 @@
             concluido: true
           }]);
         } catch (e) {
-          console.error("Erro ao salvar finalização no Supabase:", e);
+          console.error("Erro ao salvar finalização:", e);
         }
       }
 
