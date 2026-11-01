@@ -25,24 +25,59 @@
 
     <!-- SUPABASE & CONTEXTO INICIAL -->
     <script>
-        const SUPABASE_URL = "https://pnybenlfazdjgqnyuypn.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_2pzNR2UAF2-jfiXQDqrA3w_lwFryik0";
+        const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         let currentStudent = null;
         const MODULE_ID = "teclado_atalhos";
 
         window.addEventListener('DOMContentLoaded', () => {
+            // Recupera o aluno logado via URL ou sessionStorage
+            const urlParams = new URLSearchParams(window.location.search);
             const saved = sessionStorage.getItem('active_student');
+            
             if (saved) {
                 currentStudent = JSON.parse(saved);
+            } else if (urlParams.has('id')) {
+                currentStudent = {
+                    id: urlParams.get('id'),
+                    nome: urlParams.get('nome') || 'Aluno',
+                    turma: urlParams.get('turma') || 'Geral'
+                };
+            }
+
+            if (currentStudent && currentStudent.nome) {
                 document.getElementById('student-name-display').innerText = currentStudent.nome;
-                document.getElementById('student-class-display').innerText = currentStudent.turma;
+                document.getElementById('student-class-display').innerText = currentStudent.turma || "Geral";
             } else {
                 document.getElementById('student-name-display').innerText = "Aluno Visitante";
                 document.getElementById('student-class-display').innerText = "Geral";
             }
+
+            // Registra imediatamente a entrada no módulo
+            salvarProgressoAoVivo(1, 'em_andamento');
         });
+
+        // Função para atualizar progresso no Supabase em tempo real
+        async function salvarProgressoAoVivo(etapaAtual, status = 'em_andamento') {
+            if (!currentStudent || !currentStudent.id) return;
+
+            try {
+                // Atualiza na tabela 'se_progresso' (usada no painel principal)
+                await _supabase.from('se_progresso').upsert({
+                    aluno_id: currentStudent.id,
+                    modulo_id: MODULE_ID,
+                    etapa_atual: etapaAtual,
+                    total_etapas: 4,
+                    tempo_segundos: secondsElapsed,
+                    status: status,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'aluno_id,modulo_id' });
+            } catch (err) {
+                console.error("Erro ao sincronizar progresso:", err);
+            }
+        }
     </script>
 
     <!-- CABEÇALHO COESO -->
@@ -252,6 +287,7 @@
             document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-info"></i> Conclua a atividade ao lado.`;
 
             loadInteractiveArea(step);
+            salvarProgressoAoVivo(step.id, 'em_andamento');
         }
 
         function loadInteractiveArea(step) {
@@ -428,6 +464,9 @@
             document.getElementById('res-time').innerText = timeStr;
             document.getElementById('res-xp').innerText = `${totalXP} XP`;
 
+            // Marca o progresso como CONCLUÍDO
+            await salvarProgressoAoVivo(4, 'concluido');
+
             if (currentStudent && currentStudent.id) {
                 try {
                     await _supabase.from('desempenho').insert([{
@@ -438,7 +477,7 @@
                         concluido: true
                     }]);
                 } catch (e) {
-                    console.error("Erro ao salvar no Supabase:", e);
+                    console.error("Erro ao salvar finalização no Supabase:", e);
                 }
             }
 
