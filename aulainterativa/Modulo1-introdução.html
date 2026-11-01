@@ -29,7 +29,7 @@
         let currentStudent = null;
         const MODULE_ID = "Modulo1-introdução";
         const TOTAL_STEPS = 4;
-        const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
+        const DEFAULT_UUID_TESTE = "659ebb95-7f24-4e4f-91ec-2248ae3a4bc0";
 
         function isUUIDValido(str) {
             return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -40,24 +40,28 @@
             const saved = sessionStorage.getItem('active_student');
             
             if (saved) {
-                currentStudent = JSON.parse(saved);
-            } else if (urlParams.has('id')) {
-                const rawId = urlParams.get('id');
-                currentStudent = {
-                    id: isUUIDValido(rawId) ? rawId : DEFAULT_UUID_DEMO,
-                    nome: urlParams.get('nome') || 'Aluno Demo',
-                    turma: urlParams.get('turma') || 'Geral'
-                };
-            } else {
-                currentStudent = {
-                    id: DEFAULT_UUID_DEMO,
-                    nome: "Aluno Demo",
-                    turma: "Geral"
-                };
+                try { currentStudent = JSON.parse(saved); } catch(e){}
+            } 
+            
+            if (!currentStudent || !currentStudent.id) {
+                if (urlParams.has('id')) {
+                    const rawId = urlParams.get('id');
+                    currentStudent = {
+                        id: isUUIDValido(rawId) ? rawId : DEFAULT_UUID_TESTE,
+                        nome: urlParams.get('nome') || 'teste teste',
+                        turma: urlParams.get('turma') || 'Geral'
+                    };
+                } else {
+                    currentStudent = {
+                        id: DEFAULT_UUID_TESTE,
+                        nome: "teste teste",
+                        turma: "Geral"
+                    };
+                }
             }
 
             if (!isUUIDValido(currentStudent.id)) {
-                currentStudent.id = DEFAULT_UUID_DEMO;
+                currentStudent.id = DEFAULT_UUID_TESTE;
             }
 
             document.getElementById('student-name-display').innerText = currentStudent.nome || "Aluno";
@@ -198,7 +202,6 @@
         let timerInterval = null;
         let currentItemIndex = 0;
 
-        // 1. CARREGAMENTO RESISTENTE A ERROS DE BANCO
         async function carregarProgressoExistente() {
             if (!currentStudent || !currentStudent.id) {
                 renderStep(0);
@@ -208,25 +211,23 @@
             let etapaEncontrada = 1;
             let tempoEncontrado = 0;
 
-            if (currentStudent.id !== DEFAULT_UUID_DEMO) {
-                try {
-                    const { data, error } = await _supabase
-                        .from('se_progresso')
-                        .select('etapa_atual, tempo_segundos, status')
-                        .eq('aluno_id', currentStudent.id)
-                        .in('modulo_id', [MODULE_ID, 'intro_hw_sw', 'Modulo1-introducao', 'hardware_software']);
+            try {
+                const { data, error } = await _supabase
+                    .from('se_progresso')
+                    .select('etapa_atual, tempo_segundos, status')
+                    .eq('aluno_id', currentStudent.id)
+                    .in('modulo_id', [MODULE_ID, 'intro_hw_sw', 'Modulo1-introducao', 'hardware_software']);
 
-                    if (data && data.length > 0 && !error) {
-                        const registroMaisRecente = data[0];
-                        etapaEncontrada = Number(registroMaisRecente.etapa_atual || 1);
-                        tempoEncontrado = Number(registroMaisRecente.tempo_segundos || 0);
-                    }
-                } catch (err) {
-                    console.warn("Aviso ao buscar progresso no banco:", err);
+                if (data && data.length > 0 && !error) {
+                    const registroMaisRecente = data[0];
+                    etapaEncontrada = Number(registroMaisRecente.etapa_atual || 1);
+                    tempoEncontrado = Number(registroMaisRecente.tempo_segundos || 0);
                 }
+            } catch (err) {
+                console.warn("Aviso ao buscar progresso no banco:", err);
             }
 
-            // Fallback no LocalStorage se não encontrou no Supabase
+            // Fallback via LocalStorage se não encontrar registro no banco
             if (etapaEncontrada === 1) {
                 const localKeys = [`progresso_${MODULE_ID}`, `progresso_Modulo1-introducao`, `progresso_intro_hw_sw`, `progresso_hardware_software`];
                 for (const key of localKeys) {
@@ -258,7 +259,6 @@
             renderStep(currentStepIndex);
         }
 
-        // 2. GRAVAÇÃO BLINDADA COM VERIFICAÇÃO SELETIVA
         async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
             if (!currentStudent || !currentStudent.id) return;
 
@@ -272,23 +272,19 @@
                 updated_at: new Date().toISOString()
             };
 
-            // Guarda em Redundância Local
+            // Guarda em Redundância Local sob múltiplos aliases para leitura rápida no Portal
             localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
             localStorage.setItem(`progresso_Modulo1-introducao`, JSON.stringify(payload));
             localStorage.setItem(`progresso_intro_hw_sw`, JSON.stringify(payload));
 
-            if (currentStudent.id === DEFAULT_UUID_DEMO) return;
-
             try {
-                // Checa primeiro se o registro já existe para o aluno
-                const { data: existente } = await _supabase
+                // Tenta gravar via upsert indicando as colunas de conflito
+                const { error } = await _supabase
                     .from('se_progresso')
-                    .select('id')
-                    .eq('aluno_id', currentStudent.id)
-                    .eq('modulo_id', MODULE_ID)
-                    .maybeSingle();
+                    .upsert(payload, { onConflict: 'aluno_id,modulo_id' });
 
-                if (existente && existente.id) {
+                // Se retornar erro 409 (falta de UNIQUE key), faz UPDATE como fallback
+                if (error && (error.code === '23505' || error.status === 409)) {
                     await _supabase
                         .from('se_progresso')
                         .update({
@@ -298,14 +294,11 @@
                             tempo_segundos: Number(secondsElapsed),
                             updated_at: new Date().toISOString()
                         })
-                        .eq('id', existente.id);
-                } else {
-                    await _supabase
-                        .from('se_progresso')
-                        .insert([payload]);
+                        .eq('aluno_id', payload.aluno_id)
+                        .eq('modulo_id', MODULE_ID);
                 }
             } catch (err) {
-                console.error("Erro ao salvar progresso:", err);
+                console.error("Erro ao sincronizar progresso:", err);
             }
         }
 
