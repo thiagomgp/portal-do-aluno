@@ -18,7 +18,7 @@
         }
     </script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased select-none">
 
     <!-- SUPABASE & TRATAMENTO DA SESSÃO -->
     <script>
@@ -198,81 +198,73 @@
         let timerInterval = null;
         let currentItemIndex = 0;
 
-        // 1. CARREGAMENTO DE PROGRESSO
-        // CARREGAMENTO DE PROGRESSO REORGANIZADO E GARANTIDO
-async function carregarProgressoExistente() {
-    if (!currentStudent || !currentStudent.id) {
-        renderStep(0);
-        return;
-    }
-
-    let etapaEncontrada = 1;
-    let tempoEncontrado = 0;
-
-    // 1. Tenta carregar do Supabase primeiro (se for aluno autenticado real)
-    if (currentStudent.id !== DEFAULT_UUID_DEMO) {
-        try {
-            const { data, error } = await _supabase
-                .from('se_progresso')
-                .select('etapa_atual, tempo_segundos, status')
-                .eq('aluno_id', currentStudent.id)
-                .in('modulo_id', [MODULE_ID, 'intro_hw_sw', 'Modulo1-introducao'])
-                .maybeSingle();
-
-            if (data && !error) {
-                etapaEncontrada = Number(data.etapa_atual || 1);
-                tempoEncontrado = Number(data.tempo_segundos || 0);
+        // 1. CARREGAMENTO DE PROGRESSO CORRIGIDO
+        async function carregarProgressoExistente() {
+            if (!currentStudent || !currentStudent.id) {
+                renderStep(0);
+                return;
             }
-        } catch (err) {
-            console.warn("Aviso ao buscar progresso no banco:", err);
-        }
-    }
 
-    // 2. Fallback no localStorage (se não encontrou no banco ou for Aluno Demo)
-    if (etapaEncontrada === 1) {
-        const localKeys = [`progresso_${MODULE_ID}`, `progresso_Modulo1-introducao`, `progresso_intro_hw_sw`];
-        for (const key of localKeys) {
-            const localData = localStorage.getItem(key);
-            if (localData) {
+            let etapaEncontrada = 1;
+            let tempoEncontrado = 0;
+
+            if (currentStudent.id !== DEFAULT_UUID_DEMO) {
                 try {
-                    const parsed = JSON.parse(localData);
-                    etapaEncontrada = Math.max(etapaEncontrada, Number(parsed.etapa_atual || 1));
-                    tempoEncontrado = Math.max(tempoEncontrado, Number(parsed.tempo_segundos || 0));
-                } catch (e) {}
+                    const { data, error } = await _supabase
+                        .from('se_progresso')
+                        .select('etapa_atual, tempo_segundos, status')
+                        .eq('aluno_id', currentStudent.id)
+                        .in('modulo_id', [MODULE_ID, 'intro_hw_sw', 'Modulo1-introducao'])
+                        .maybeSingle();
+
+                    if (data && !error) {
+                        etapaEncontrada = Number(data.etapa_atual || 1);
+                        tempoEncontrado = Number(data.tempo_segundos || 0);
+                    }
+                } catch (err) {
+                    console.warn("Aviso ao buscar progresso no banco:", err);
+                }
             }
+
+            if (etapaEncontrada === 1) {
+                const localKeys = [`progresso_${MODULE_ID}`, `progresso_Modulo1-introducao`, `progresso_intro_hw_sw`];
+                for (const key of localKeys) {
+                    const localData = localStorage.getItem(key);
+                    if (localData) {
+                        try {
+                            const parsed = JSON.parse(localData);
+                            etapaEncontrada = Math.max(etapaEncontrada, Number(parsed.etapa_atual || 1));
+                            tempoEncontrado = Math.max(tempoEncontrado, Number(parsed.tempo_segundos || 0));
+                        } catch (e) {}
+                    }
+                }
+            }
+
+            secondsElapsed = tempoEncontrado;
+
+            // Corrige o mapeamento de etapas (Etapa 1 -> Índice 0, Etapa 2 -> Índice 1...)
+            let idxParaCarregar = Math.max(0, etapaEncontrada - 1);
+            if (idxParaCarregar >= TOTAL_STEPS) {
+                idxParaCarregar = TOTAL_STEPS - 1;
+            }
+
+            currentStepIndex = idxParaCarregar;
+            totalXP = currentStepIndex * 25;
+
+            if (document.getElementById('xp-counter')) {
+                document.getElementById('xp-counter').innerText = `${totalXP} XP`;
+            }
+
+            renderStep(currentStepIndex);
         }
-    }
 
-    // 3. Aplica o tempo acumulado
-    secondsElapsed = tempoEncontrado;
-
-    // 4. Converte a etapa do banco (1, 2, 3...) para o índice do array JS (0, 1, 2...)
-    // Se o progresso já foi concluído ou avançado, posiciona na etapa certa
-    let idxParaCarregar = etapaEncontrada - 1;
-
-    // Se a etapa salva for igual ao total (4) e o status for concluído, renderiza a última
-    if (idxParaCarregar >= TOTAL_STEPS) {
-        idxParaCarregar = TOTAL_STEPS - 1;
-    }
-
-    currentStepIndex = Math.max(0, idxParaCarregar);
-    totalXP = currentStepIndex * 25;
-
-    if (document.getElementById('xp-counter')) {
-        document.getElementById('xp-counter').innerText = `${totalXP} XP`;
-    }
-
-    // 5. Renderiza a etapa correta recuperada do banco/localStorage
-    renderStep(currentStepIndex);
-}
-
-        // 2. SALVAMENTO DE PROGRESSO BLINDADO (SUPABASE + LOCALSTORAGE)
+        // 2. SALVAMENTO DE PROGRESSO BLINDADO
         async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
             if (!currentStudent || !currentStudent.id) return;
 
             const payload = {
                 aluno_id: currentStudent.id,
-                modulo_id: MODULE_ID, // 'Modulo1-introdução'
+                modulo_id: MODULE_ID,
                 etapa_atual: Number(stepNumber),
                 total_etapas: Number(TOTAL_STEPS),
                 status: status,
@@ -280,23 +272,17 @@ async function carregarProgressoExistente() {
                 updated_at: new Date().toISOString()
             };
 
-            // 1. Grava no localStorage para redundância local
+            // Guarda em múltiplos nomes para garantir compatibilidade
             localStorage.setItem(`progresso_${MODULE_ID}`, JSON.stringify(payload));
             localStorage.setItem(`progresso_Modulo1-introducao`, JSON.stringify(payload));
             localStorage.setItem(`progresso_intro_hw_sw`, JSON.stringify(payload));
 
-            // 2. Se for o ID de teste/demo, encerra sem chamar o banco
             if (currentStudent.id === DEFAULT_UUID_DEMO) return;
 
-            // 3. Upsert real no Supabase
             try {
-                const { error } = await _supabase
+                await _supabase
                     .from('se_progresso')
                     .upsert(payload, { onConflict: 'aluno_id,modulo_id' });
-
-                if (error) {
-                    console.warn("Aviso ao salvar no banco:", error.message);
-                }
             } catch (err) {
                 console.error("Exceção na gravação:", err);
             }
@@ -372,11 +358,14 @@ async function carregarProgressoExistente() {
         }
 
         function unlockNextStep() {
-            totalXP += LESSON_STEPS[currentStepIndex].xp;
+            totalXP = (currentStepIndex + 1) * 25;
             document.getElementById('xp-counter').innerText = `${totalXP} XP`;
             document.getElementById('next-btn').disabled = false;
             document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Desafio concluído! Clique em Próximo Tópico.`;
-            saveProgressToSupabase(currentStepIndex + 1);
+            
+            // Salva o avanço da etapa atual (Etapa 1 concluída -> Salva etapa 2 em andamento)
+            const proximaEtapa = Math.min(TOTAL_STEPS, currentStepIndex + 2);
+            saveProgressToSupabase(proximaEtapa, currentStepIndex + 1 >= TOTAL_STEPS ? 'concluido' : 'em_andamento');
         }
 
         async function nextStep() {
