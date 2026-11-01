@@ -287,7 +287,7 @@
       });
     });
 
-    // CARREGA DADOS DO ALUNO REGISTRADO (OBTÉM E-MAIL REAL DA AUTH.USERS E PROFILE DO BANCO)
+    // CARREGA DADOS DO ALUNO REGISTRADO
     async function carregarSessaoReal() {
       const { data: { session } } = await _supabase.auth.getSession();
       const urlParams = new URLSearchParams(window.location.search);
@@ -311,7 +311,6 @@
 
       if (!userId) return;
 
-      // Busca o perfil cadastrado no Supabase
       const { data: profile } = await _supabase
         .from('profiles')
         .select('*, turmas(nome)')
@@ -353,6 +352,7 @@
       if (url && url.startsWith('http')) document.getElementById('profile-avatar-preview').src = url;
     }
 
+    // BUSCA ATIVIDADES E MAPA DE PROGRESSO COMPATÍVEL COM SUPABASE E LOCALSTORAGE
     async function varrerEExibirAulasGitHub() {
       const grid = document.getElementById('grid-aulas-automaticas');
       if (!grid) return;
@@ -360,6 +360,7 @@
       try {
         let progressosMap = {};
 
+        // 1. Busca progresso registrado no Supabase
         if (activeStudent && activeStudent.id) {
           const { data: progressos } = await _supabase
             .from('se_progresso')
@@ -373,6 +374,7 @@
           }
         }
 
+        // 2. Busca lista de conteúdos na pasta aulainterativa do GitHub
         const res = await fetch('https://api.github.com/repos/thiagomgp/portal-do-aluno/contents/aulainterativa');
         const arquivos = await res.json();
 
@@ -384,16 +386,32 @@
         const arquivosHtml = arquivos.filter(f => f.name.endsWith('.html')).sort((a, b) => a.name.localeCompare(b.name));
 
         grid.innerHTML = arquivosHtml.map((file, index) => {
-          const rawNameNoExt = file.name.replace('.html', '');
+          const rawNameNoExt = decodeURIComponent(file.name.replace('.html', ''));
+          const rawFileName = file.name.replace('.html', '');
           
-          let moduloKey = rawNameNoExt;
+          let aliasId = rawNameNoExt;
           if (rawNameNoExt.toLowerCase().includes('introduc') || rawNameNoExt.toLowerCase().includes('modulo1')) {
-            moduloKey = 'intro_hw_sw';
+            aliasId = 'intro_hw_sw';
           } else if (rawNameNoExt.toLowerCase().includes('nuvem') || rawNameNoExt.toLowerCase().includes('modulo3')) {
-            moduloKey = 'desafio_nuvem';
+            aliasId = 'desafio_nuvem';
           }
 
-          let prog = progressosMap[moduloKey] || progressosMap[rawNameNoExt] || progressosMap[file.name] || null;
+          // Busca o progresso considerando aliases, nome decoded e nome raw
+          let prog = progressosMap[rawNameNoExt] || progressosMap[rawFileName] || progressosMap[aliasId] || progressosMap[file.name] || null;
+
+          // Fallback para o localStorage se não encontrado no Supabase
+          if (!prog) {
+            const chavesBusca = [`progresso_${rawNameNoExt}`, `progresso_${rawFileName}`, `progresso_${aliasId}`];
+            for (const chave of chavesBusca) {
+              const local = localStorage.getItem(chave);
+              if (local) {
+                try {
+                  prog = JSON.parse(local);
+                  break;
+                } catch (e) {}
+              }
+            }
+          }
 
           let tituloFormatted = rawNameNoExt.replace(/_/g, ' ').replace(/-/g, ' ').toUpperCase();
           let statusBadgeHTML = '';
@@ -401,7 +419,7 @@
 
           if (prog) {
             const etapaAtual = Number(prog.etapa_atual || 0);
-            const totalEtapas = Number(prog.total_etapas || (moduloKey === 'desafio_nuvem' ? 3 : 4));
+            const totalEtapas = Number(prog.total_etapas || (aliasId === 'desafio_nuvem' ? 3 : 4));
 
             if (prog.status === 'concluido' || etapaAtual >= totalEtapas) {
               statusBadgeHTML = `<span class="text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full">✓ Concluído</span>`;
