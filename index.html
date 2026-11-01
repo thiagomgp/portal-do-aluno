@@ -101,37 +101,42 @@
         <p class="text-xs text-slate-400 mt-1">Selecione uma opção dentro da disciplina para ver o conteúdo.</p>
       </div>
 
-      <!-- CARD DA DISCIPLINA COM BOTÕES DE LARGURA PADRONIZADA -->
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm">
-            CD
+      <!-- GRID COMPACTA DE DISCIPLINAS -->
+      <div id="lista-disciplinas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- CARD DA DISCIPLINA COMPACTO (max-w-md evita esticar) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 max-w-md">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+              CD
+            </div>
+            <div>
+              <h3 class="font-extrabold text-white text-base">Cultura Digital</h3>
+              <p class="text-[11px] text-slate-400">Conteúdos e Práticas de Tecnologia</p>
+            </div>
           </div>
-          <div>
-            <h3 class="font-extrabold text-white text-base">Cultura Digital</h3>
-            <p class="text-[11px] text-slate-400">Conteúdos e Práticas de Tecnologia</p>
+
+          <!-- BOTÕES COM TAMANHO PADRONIZADO (w-28) -->
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
+            <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
+            </button>
+            <button id="btn-sub-materiais" onclick="selecionarSubAbaDisciplina('materiais')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-folder text-xs"></i> Materiais
+            </button>
+            <button id="btn-sub-provas" onclick="selecionarSubAbaDisciplina('provas')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-file-pen text-xs"></i> Provas
+            </button>
           </div>
         </div>
 
-        <!-- BOTÕES COM TAMANHO PADRONIZADO (w-32) -->
-        <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
-          <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="w-32 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition">
-            <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
-          </button>
-          <button id="btn-sub-materiais" onclick="selecionarSubAbaDisciplina('materiais')" class="w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
-            <i class="fa-solid fa-folder text-xs"></i> Materiais
-          </button>
-          <button id="btn-sub-provas" onclick="selecionarSubAbaDisciplina('provas')" class="w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
-            <i class="fa-solid fa-file-pen text-xs"></i> Provas
-          </button>
-        </div>
       </div>
 
-      <!-- PAINEL DE CONTEÚDOS -->
-      <div id="painel-conteudo-disciplina" class="pt-2 space-y-4">
+      <!-- PAINEL DE CONTEÚDOS (INICIA OCULTO) -->
+      <div id="painel-conteudo-disciplina" class="hidden pt-4 space-y-4 border-t border-slate-800">
         
         <!-- SUB-CONTEÚDO: AULAS INTERATIVAS -->
-        <div id="sub-conteudo-aulas" class="space-y-4">
+        <div id="sub-conteudo-aulas" class="hidden space-y-4">
           <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
             <i class="fa-solid fa-list-check"></i> Atividades Interativas Disponíveis
           </h3>
@@ -422,6 +427,10 @@
     }
 
     function selecionarSubAbaDisciplina(subAba) {
+      // Revela o painel de conteúdos ao clicar
+      const painel = document.getElementById('painel-conteudo-disciplina');
+      if (painel) painel.classList.remove('hidden');
+
       document.getElementById('sub-conteudo-aulas')?.classList.toggle('hidden', subAba !== 'aulas');
       document.getElementById('sub-conteudo-materiais')?.classList.toggle('hidden', subAba !== 'materiais');
       document.getElementById('sub-conteudo-provas')?.classList.toggle('hidden', subAba !== 'provas');
@@ -430,23 +439,12 @@
       const btnMateriais = document.getElementById('btn-sub-materiais');
       const btnProvas = document.getElementById('btn-sub-provas');
 
-      if (btnAulas) {
-        btnAulas.className = subAba === 'aulas'
-          ? 'w-32 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
-          : 'w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
-      }
+      const estiloAtivo = 'w-28 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition shadow';
+      const estiloInativo = 'w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
 
-      if (btnMateriais) {
-        btnMateriais.className = subAba === 'materiais'
-          ? 'w-32 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
-          : 'w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
-      }
-
-      if (btnProvas) {
-        btnProvas.className = subAba === 'provas'
-          ? 'w-32 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition'
-          : 'w-32 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
-      }
+      if (btnAulas) btnAulas.className = subAba === 'aulas' ? estiloAtivo : estiloInativo;
+      if (btnMateriais) btnMateriais.className = subAba === 'materiais' ? estiloAtivo : estiloInativo;
+      if (btnProvas) btnProvas.className = subAba === 'provas' ? estiloAtivo : estiloInativo;
     }
 
     function mudarAbaPortal(aba) {
