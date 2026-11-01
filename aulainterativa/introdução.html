@@ -7,17 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
-                extend: { fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } }
+                extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } }
             }
         }
     </script>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased">
 
+    <!-- SUPABASE & SESSÃO -->
     <script>
         const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -29,26 +30,25 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const urlId = urlParams.get('id');
-            const urlNome = urlParams.get('nome');
-            const urlTurma = urlParams.get('turma');
+            const saved = sessionStorage.getItem('active_student');
+            
+            if (saved) {
+                currentStudent = JSON.parse(saved);
+            } else if (urlParams.has('id')) {
+                currentStudent = {
+                    id: urlParams.get('id'),
+                    nome: urlParams.get('nome') || 'Aluno',
+                    turma: urlParams.get('turma') || 'Geral'
+                };
+            }
 
-            if (urlId && urlNome) {
-                currentStudent = { id: urlId, nome: urlNome, turma: urlTurma || 'Geral' };
-                sessionStorage.setItem('active_student', JSON.stringify(currentStudent));
+            if (currentStudent && currentStudent.nome) {
+                document.getElementById('student-name-display').innerText = currentStudent.nome;
+                document.getElementById('student-class-display').innerText = currentStudent.turma || "Geral";
             } else {
-                const saved = sessionStorage.getItem('active_student');
-                if (saved) currentStudent = JSON.parse(saved);
+                document.getElementById('student-name-display').innerText = "Aluno Visitante";
+                document.getElementById('student-class-display').innerText = "Geral";
             }
-
-            if (!currentStudent || !currentStudent.id) {
-                alert("Identifique-se no Portal Principal antes de iniciar!");
-                window.location.href = "../index.html";
-                return;
-            }
-
-            document.getElementById('student-name-display').innerText = currentStudent.nome;
-            document.getElementById('student-class-display').innerText = currentStudent.turma;
 
             await carregarProgressoExistente();
             startTimer();
@@ -59,7 +59,7 @@
     <header class="bg-slate-900 border-b border-emerald-500/20 sticky top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
-                <a href="javascript:window.close();" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl font-bold transition">
+                <a href="javascript:history.back();" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2.5 rounded-xl font-bold transition">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <div>
@@ -129,7 +129,7 @@
             </div>
             <h3 class="text-2xl font-extrabold text-white">Módulo Concluído!</h3>
             <p class="text-slate-300 text-sm">Você concluiu com sucesso todos os tópicos deste módulo.</p>
-            <button onclick="window.close();" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-sm">Concluir e Sair</button>
+            <button onclick="history.back()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-sm">Concluir e Voltar</button>
         </div>
     </div>
 
@@ -139,7 +139,7 @@
                 id: 1,
                 title: "Arquitetura: Hardware, Software e Firmware",
                 badge: "Teoria & Análise",
-                content: `<p class="font-semibold text-white">1. Hardware:</p><p>Componentes físicos tangíveis.</p><p class="font-semibold text-white mt-2">2. Software:</p><p>Instruções lógicas.</p>`,
+                content: `<p class="font-semibold text-white">1. Hardware:</p><p>Componentes físicos tangíveis do computador.</p><p class="font-semibold text-white mt-2">2. Software:</p><p>Instruções lógicas e programas.</p>`,
                 xp: 25,
                 items: [
                     { name: "Controlador de barramento PCIe", answer: "Hardware", options: ["Hardware", "Software"] },
@@ -150,7 +150,7 @@
                 id: 2,
                 title: "Periféricos e Topologia I/O",
                 badge: "Fluxo de Dados",
-                content: `<p class="font-semibold text-white">Dispositivos de Entrada e Saída:</p><p>Capturam ou traduzem a informação.</p>`,
+                content: `<p class="font-semibold text-white">Dispositivos de Entrada e Saída:</p><p>Capturam ou traduzem dados para o usuário ou processador.</p>`,
                 xp: 25,
                 items: [
                     { name: "Mesa Digitalizadora", answer: "Entrada", options: ["Entrada", "Saída"] },
@@ -161,7 +161,7 @@
                 id: 3,
                 title: "Licenças CC & GPL",
                 badge: "Ética",
-                content: `<p class="font-semibold text-white">Creative Commons x GPL:</p><p>Licenciamento aberto de mídia vs software.</p>`,
+                content: `<p class="font-semibold text-white">Creative Commons x GPL:</p><p>Licenciamento aberto de mídia vs software livre.</p>`,
                 xp: 25,
                 items: [
                     { name: "Código do Kernel Linux", answer: "GNU / GPL", options: ["Creative Commons (CC)", "GNU / GPL"] }
@@ -171,7 +171,7 @@
                 id: 4,
                 title: "Consolidação e Diagnóstico",
                 badge: "Avaliação",
-                content: `<p class="font-semibold text-white">Revisão Final:</p><p>Responda para finalizar.</p>`,
+                content: `<p class="font-semibold text-white">Revisão Final:</p><p>Responda para finalizar o módulo de introdução.</p>`,
                 xp: 25,
                 items: [
                     { name: "Driver Wi-Fi", answer: "Software", options: ["Hardware", "Software"] }
@@ -192,26 +192,25 @@
             }
 
             try {
-                const { data: progresso } = await _supabase
+                const { data, error } = await _supabase
                     .from('se_progresso')
                     .select('*')
                     .eq('aluno_id', currentStudent.id)
                     .eq('modulo_id', MODULE_ID)
                     .maybeSingle();
 
-                if (progresso && progresso.etapa_atual > 0) {
-                    currentStepIndex = Math.min(progresso.etapa_atual, TOTAL_STEPS - 1);
-                    secondsElapsed = progresso.tempo_segundos || 0;
+                if (data && !error) {
+                    secondsElapsed = data.tempo_segundos || 0;
+                    const etapaSalva = Math.max(0, (data.etapa_atual || 1) - 1);
+                    currentStepIndex = Math.min(etapaSalva, TOTAL_STEPS - 1);
                     totalXP = currentStepIndex * 25;
 
                     document.getElementById('xp-counter').innerText = `${totalXP} XP`;
-                    renderStep(currentStepIndex);
-                } else {
-                    renderStep(0);
                 }
             } catch (err) {
                 console.error("Erro ao carregar progresso:", err);
-                renderStep(0);
+            } finally {
+                renderStep(currentStepIndex);
             }
         }
 
@@ -233,14 +232,14 @@
             document.getElementById('step-badge').innerText = step.badge;
             document.getElementById('step-content').innerHTML = step.content;
 
-            const progressPercent = (index / LESSON_STEPS.length) * 100;
+            const progressPercent = ((index + 1) / LESSON_STEPS.length) * 100;
             document.getElementById('top-progress-bar').style.width = `${progressPercent}%`;
 
             document.getElementById('next-btn').disabled = true;
             document.getElementById('step-feedback').innerHTML = `<i class="fa-solid fa-circle-info"></i> Responda aos itens ao lado.`;
 
             loadCurrentItem();
-            saveProgressToSupabase(index);
+            saveProgressToSupabase(index + 1);
         }
 
         function loadCurrentItem() {
@@ -301,25 +300,22 @@
                 clearInterval(timerInterval);
                 document.getElementById('top-progress-bar').style.width = '100%';
                 document.getElementById('completion-modal').classList.remove('hidden');
-                await saveProgressToSupabase(TOTAL_STEPS);
+                await saveProgressToSupabase(TOTAL_STEPS, 'concluido');
             }
         }
 
-        async function saveProgressToSupabase(stepNumber) {
+        async function saveProgressToSupabase(stepNumber, status = 'em_andamento') {
             if (!currentStudent || !currentStudent.id) return;
             try {
-                const isCompleted = stepNumber >= TOTAL_STEPS;
-                const payload = {
+                await _supabase.from('se_progresso').upsert({
                     aluno_id: currentStudent.id,
                     modulo_id: MODULE_ID,
-                    etapa_atual: Number(stepNumber),
-                    total_etapas: Number(TOTAL_STEPS),
-                    status: isCompleted ? 'concluido' : 'em_andamento',
-                    tempo_segundos: Number(secondsElapsed),
+                    etapa_atual: stepNumber,
+                    total_etapas: TOTAL_STEPS,
+                    status: status,
+                    tempo_segundos: secondsElapsed,
                     updated_at: new Date().toISOString()
-                };
-
-                await _supabase.from('se_progresso').upsert(payload, { onConflict: 'aluno_id, modulo_id' });
+                }, { onConflict: 'aluno_id,modulo_id' });
             } catch (err) {
                 console.error("Erro ao salvar progresso:", err);
             }
