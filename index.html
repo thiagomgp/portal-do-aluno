@@ -72,7 +72,7 @@
           <i class="fa-solid fa-bullhorn text-emerald-400"></i>
           <span>Mural de Recados & Notificações</span>
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Acompanhe comunicados importantes e informações das disciplinas.</p>
+        <p class="text-xs text-slate-400 mt-1">Acompanhe comunicados importantes da disciplina.</p>
       </div>
 
       <div class="space-y-4">
@@ -85,7 +85,7 @@
           </div>
           <h3 class="text-sm font-bold text-white">Bem-vindo ao Portal de Cultura Digital</h3>
           <p class="text-xs text-slate-300 leading-relaxed">
-            Navegue até a aba <strong>Disciplinas</strong> e selecione os botões de <strong>Aulas</strong>, <strong>Materiais</strong> ou <strong>Provas</strong> para acessar os respectivos tópicos de aprendizagem.
+            Navegue até a aba <strong>Disciplinas</strong> e selecione o botão <strong>Aulas</strong> para realizar os módulos práticos.
           </p>
         </div>
       </div>
@@ -98,7 +98,7 @@
           <i class="fa-solid fa-chalkboard-user text-emerald-400"></i>
           <span>Minhas Disciplinas (BNCC)</span>
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Selecione uma opção dentro da disciplina para visualizar o conteúdo.</p>
+        <p class="text-xs text-slate-400 mt-1">Selecione uma opção dentro da disciplina para ver o conteúdo.</p>
       </div>
 
       <!-- CARD DA DISCIPLINA -->
@@ -113,7 +113,7 @@
           </div>
         </div>
 
-        <!-- BOTÕES DE SELEÇÃO DA DISCIPLINA -->
+        <!-- BOTÕES DE SELEÇÃO INTERNA -->
         <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 max-w-md">
           <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition">
             <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
@@ -127,7 +127,7 @@
         </div>
       </div>
 
-      <!-- PAINEL DINÂMICO DE CONTEÚDOS QUE MUDA DE ACORDO COM A SELEÇÃO -->
+      <!-- PAINEL DE CONTEÚDOS -->
       <div id="painel-conteudo-disciplina" class="pt-2 space-y-4">
         
         <!-- SUB-CONTEÚDO: AULAS INTERATIVAS -->
@@ -143,35 +143,35 @@
           </div>
         </div>
 
-        <!-- SUB-CONTEÚDO: MATERIAIS COMPLEMENTARES -->
+        <!-- SUB-CONTEÚDO: MATERIAIS -->
         <div id="sub-conteudo-materiais" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
           <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
             <i class="fa-solid fa-folder-open"></i>
           </div>
           <h4 class="text-sm font-bold text-white">Materiais Didáticos & Apostilas</h4>
-          <p class="text-xs text-slate-400">Nenhum material em PDF anexado no momento para esta disciplina.</p>
+          <p class="text-xs text-slate-400">Nenhum material em PDF anexado no momento.</p>
         </div>
 
-        <!-- SUB-CONTEÚDO: PROVAS E AVALIAÇÕES -->
+        <!-- SUB-CONTEÚDO: PROVAS -->
         <div id="sub-conteudo-provas" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
           <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
             <i class="fa-solid fa-file-signature"></i>
           </div>
           <h4 class="text-sm font-bold text-white">Avaliações & Testes Práticos</h4>
-          <p class="text-xs text-slate-400">Não há exames ou provas pendentes agendadas nesta disciplina.</p>
+          <p class="text-xs text-slate-400">Não há provas ou testes pendentes agendados.</p>
         </div>
 
       </div>
     </section>
 
-    <!-- SEÇÃO 3: JOGOS EDUCATIVOS -->
+    <!-- SEÇÃO 3: JOGOS -->
     <section id="secao-jogos" class="hidden space-y-6">
       <div>
         <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-gamepad text-amber-400"></i>
           <span>Jogos Educativos</span>
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Jogos e simulações para fixação prática do aprendizado.</p>
+        <p class="text-xs text-slate-400 mt-1">Jogos interativos de aprendizagem.</p>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center max-w-md mx-auto space-y-3">
@@ -179,11 +179,11 @@
           <i class="fa-solid fa-hourglass-half"></i>
         </div>
         <h3 class="text-base font-bold text-white">Conteúdo em Breve</h3>
-        <p class="text-xs text-slate-400">Esta seção estará disponível nos próximos módulos.</p>
+        <p class="text-xs text-slate-400">Esta área estará liberada em breve.</p>
       </div>
     </section>
 
-    <!-- SEÇÃO 4: PERFIL (DADOS GENÉRICOS DE CADASTRO) -->
+    <!-- SEÇÃO 4: PERFIL -->
     <section id="secao-perfil" class="hidden max-w-2xl mx-auto space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
         
@@ -233,7 +233,7 @@
 
   </main>
 
-  <!-- SCRIPTS E LÓGICA DE SESSÃO -->
+  <!-- SCRIPTS E LÓGICA DE SESSÃO DA PÁGINA -->
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -250,7 +250,7 @@
       recuperarOuCriarSessaoAluno();
       await varrerEExibirAulasGitHub();
 
-      document.getElementById('form-update-profile').addEventListener('submit', async (e) => {
+      document.getElementById('form-update-profile').addEventListener('submit', (e) => {
         e.preventDefault();
         const novoNome = document.getElementById('profile-name-input').value.trim();
         const novoApelido = document.getElementById('profile-nickname-input').value.trim();
@@ -350,13 +350,17 @@
         const arquivosHtml = arquivos.filter(f => f.name.endsWith('.html')).sort((a, b) => a.name.localeCompare(b.name));
 
         grid.innerHTML = arquivosHtml.map((file, index) => {
-          const moduloId = file.name.replace('.html', '');
-          let prog = progressosMap[moduloId] || progressosMap[file.name] || null;
-          if (!prog && moduloId.includes('introduc')) {
-            prog = progressosMap['intro_hw_sw'];
+          const rawNameNoExt = file.name.replace('.html', '');
+          
+          // MAPEAMENTO UNIFICADO DE CHAVES ENTRE NOME DO ARQUIVO E BANCO SUPABASE
+          let moduloKey = rawNameNoExt;
+          if (rawNameNoExt.toLowerCase().includes('introduc') || rawNameNoExt.toLowerCase().includes('modulo1')) {
+            moduloKey = 'intro_hw_sw';
           }
 
-          let tituloFormatted = moduloId.replace(/_/g, ' ').replace(/-/g, ' ').toUpperCase();
+          let prog = progressosMap[moduloKey] || progressosMap[rawNameNoExt] || progressosMap[file.name] || null;
+
+          let tituloFormatted = rawNameNoExt.replace(/_/g, ' ').replace(/-/g, ' ').toUpperCase();
           let statusBadgeHTML = '';
           let subtextEtapa = 'Ainda não iniciada';
 
@@ -372,9 +376,11 @@
               subtextEtapa = `Etapa ${etapaAtual} de ${totalEtapas}`;
             } else {
               statusBadgeHTML = `<span class="text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700 px-2.5 py-0.5 rounded-full">Não iniciado</span>`;
+              subtextEtapa = `Ainda não iniciada`;
             }
           } else {
             statusBadgeHTML = `<span class="text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700 px-2.5 py-0.5 rounded-full">Não iniciado</span>`;
+            subtextEtapa = `Ainda não iniciada`;
           }
 
           return `
@@ -404,7 +410,7 @@
         }).join('');
 
       } catch (err) {
-        console.error("Erro na busca de aulas:", err);
+        console.error("Erro ao carregar lista de aulas:", err);
       }
     }
 
@@ -416,7 +422,6 @@
       }
     }
 
-    // CONTROLE DAS SUB-ABAS INTERNAS DA DISCIPLINA (AULAS / MATERIAIS / PROVAS)
     function selecionarSubAbaDisciplina(subAba) {
       document.getElementById('sub-conteudo-aulas').classList.toggle('hidden', subAba !== 'aulas');
       document.getElementById('sub-conteudo-materiais').classList.toggle('hidden', subAba !== 'materiais');
@@ -435,7 +440,6 @@
         : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
     }
 
-    // CONTROLE DAS ABAS PRINCIPAIS DO PORTAL
     function mudarAbaPortal(aba) {
       document.getElementById('secao-inicio').classList.toggle('hidden', aba !== 'inicio');
       document.getElementById('secao-disciplinas').classList.toggle('hidden', aba !== 'disciplinas');
