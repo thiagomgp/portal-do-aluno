@@ -271,7 +271,7 @@ async function carregarDisciplinas() {
   }).join('');
 }
 
-// ABRIR MODAL COM LISTA DE AULAS / MATERIAIS / PROVAS (totalmente dinâmico do banco)
+// ABRIR MODAL COM LISTA DE AULAS / MATERIAIS / PROVAS (com diagnóstico de erros)
 async function abrirConteudo(disciplinaId, tipo) {
   const modal = document.getElementById('modal-conteudos');
   const tituloModal = document.getElementById('modal-conteudos-titulo');
@@ -281,6 +281,10 @@ async function abrirConteudo(disciplinaId, tipo) {
   const titulos = { aula: '🎬 Aulas Disponíveis', material: '📁 Materiais de Estudo', prova: '📝 Avaliações e Provas' };
   tituloModal.innerText = titulos[tipo] || 'Conteúdos';
 
+  // Exibe mensagem de carregamento enquanto busca os dados
+  container.innerHTML = '<p class="text-slate-400 text-xs py-4 text-center">Carregando conteúdos...</p>';
+  modal.classList.remove('hidden');
+
   // Busca do Banco de Dados os conteúdos cadastrados para a disciplina
   const { data: conteudos, error } = await supabase
     .from('conteudos_disciplina')
@@ -289,7 +293,13 @@ async function abrirConteudo(disciplinaId, tipo) {
     .eq('tipo', tipo)
     .order('ordem', { ascending: true });
 
-  if (error || !conteudos || conteudos.length === 0) {
+  if (error) {
+    console.error('Erro ao buscar conteúdos do Supabase:', error);
+    container.innerHTML = `<p class="text-rose-400 text-xs py-4 text-center">Erro de permissão ou banco: ${error.message}</p>`;
+    return;
+  }
+
+  if (!conteudos || conteudos.length === 0) {
     container.innerHTML = '<p class="text-slate-400 text-xs py-4 text-center">Nenhum recurso cadastrado para este tópico até o momento.</p>';
   } else {
     container.innerHTML = conteudos.map(item => `
@@ -304,10 +314,7 @@ async function abrirConteudo(disciplinaId, tipo) {
       </div>
     `).join('');
   }
-
-  modal.classList.remove('hidden');
 }
-
 function fecharModalConteudos() {
   document.getElementById('modal-conteudos')?.classList.add('hidden');
 }
