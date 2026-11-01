@@ -1,28 +1,39 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Google Drive - Cultura Digital</title>
+  <title>Meu Drive - Google Drive</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       suppressWarning: true,
       theme: {
         extend: {
-          fontFamily: { sans: ['Roboto', 'sans-serif'] }
+          fontFamily: { sans: ['Roboto', 'sans-serif'] },
+          colors: {
+            driveDarkBg: '#131314',
+            driveHeaderBg: '#131314',
+            driveSidebarBg: '#131314',
+            driveSurfaceBg: '#1e1f20',
+            driveHoverBg: '#282a2c',
+            driveActiveBg: '#004a77',
+            driveActiveText: '#c2e7ff',
+            driveTextMuted: '#c4c7c5',
+            driveBlueAccent: '#a8c7fa'
+          }
         }
       }
     }
   </script>
 </head>
-<body class="bg-[#131314] text-[#e3e2e6] font-sans min-h-screen flex flex-col justify-between antialiased select-none">
+<body class="bg-[#131314] text-[#e3e2e6] font-sans h-screen flex flex-col justify-between overflow-hidden select-none">
 
-  <!-- SUPABASE & SESSÃO -->
+  <!-- SUPABASE & SESSÃO DO ALUNOS -->
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -46,7 +57,7 @@
       }
 
       if (currentStudent && currentStudent.nome) {
-        document.getElementById('student-name-display').innerText = currentStudent.nome;
+        document.getElementById('student-name-header').innerText = currentStudent.nome;
         document.getElementById('user-avatar-letter').innerText = currentStudent.nome.charAt(0).toUpperCase();
       }
       await carregarProgressoSalvo();
@@ -78,174 +89,202 @@
     }
   </script>
 
-  <!-- BARRA SUPERIOR IDÊNTICA AO GOOGLE DRIVE NO CHROME -->
-  <header class="h-16 px-4 flex items-center justify-between border-b border-[#282a2c] bg-[#131314]">
+  <!-- 1. BARRA SUPERIOR (HEADER RÉRPLICA CHROME / GOOGLE DRIVE) -->
+  <header class="h-16 px-4 flex items-center justify-between border-b border-[#282a2c] bg-[#131314] shrink-0">
     <div class="flex items-center gap-3 w-60">
-      <a href="javascript:history.back()" class="p-2 hover:bg-[#282a2c] rounded-full text-[#c4c7c5] transition" title="Voltar ao Portal">
+      <a href="javascript:history.back()" class="p-2 hover:bg-[#282a2c] rounded-full text-[#c4c7c5] transition" title="Voltar ao Portal do Aluno">
         <i class="fa-solid fa-arrow-left"></i>
       </a>
-      <div class="flex items-center gap-2">
-        <svg class="w-8 h-8" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l3.85-6.65c.8-1.4 1.2-2.95 1.2-4.5h-27.5l13.75 23.8z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.45-1.2h-18.6c-1.55 0-3.1.4-4.45 1.2z" fill="#00832d"/><path d="m59.8 50h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.45 1.2h50.9c1.55 0 3.1-.4 4.45-1.2z" fill="#2684fc"/><path d="m73.4 21.2-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+      <div class="flex items-center gap-2 cursor-pointer">
+        <svg class="w-8 h-8" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l3.85-6.65c.8-1.4 1.2-2.95 1.2-4.5h-27.5l13.75 23.8z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.45-1.2h-18.6c-1.55 0-3.1.4-4.45 1.2z" fill="#00832d"/><path d="m59.8 50h-32.3l-13.75 23.8c1.35 0 3.1-.4 4.45-1.2z" fill="#2684fc"/><path d="m73.4 21.2-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.5c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
         <span class="text-xl font-medium text-[#e3e2e6]">Drive</span>
       </div>
     </div>
 
-    <!-- CAMPO DE BUSCA -->
+    <!-- CAMPO DE PESQUISA -->
     <div class="flex-1 max-w-2xl px-4">
       <div class="bg-[#282a2c] text-[#c4c7c5] flex items-center px-4 py-2.5 rounded-full border border-transparent focus-within:bg-[#1e1f20] focus-within:border-[#8ab4f8]">
-        <i class="fa-solid fa-magnifying-glass mr-3"></i>
+        <i class="fa-solid fa-magnifying-glass mr-3 text-sm"></i>
         <input type="text" placeholder="Pesquise no Drive" class="bg-transparent w-full text-sm outline-none text-white placeholder-[#c4c7c5]">
+        <i class="fa-solid fa-sliders text-sm ml-2 cursor-pointer hover:text-white"></i>
       </div>
     </div>
 
-    <!-- AVATAR DO USUÁRIO -->
+    <!-- BOTÕES DE SUPORTE E PERFIL DO USUÁRIO -->
     <div class="flex items-center gap-3">
-      <div class="bg-[#1e1f20] px-3 py-1.5 rounded-full text-xs text-amber-300 border border-amber-500/30 flex items-center gap-2">
-        <i class="fa-solid fa-user-graduate"></i>
-        <span id="student-name-display" class="font-bold">Aluno</span>
+      <div class="flex items-center gap-1 text-[#c4c7c5]">
+        <button class="p-2 hover:bg-[#282a2c] rounded-full"><i class="fa-regular fa-circle-question text-lg"></i></button>
+        <button class="p-2 hover:bg-[#282a2c] rounded-full"><i class="fa-solid fa-gear text-lg"></i></button>
       </div>
-      <div id="user-avatar-letter" class="w-9 h-9 rounded-full bg-[#004a77] border border-[#a8c7fa] flex items-center justify-center font-bold text-white text-sm">
+
+      <div class="h-6 w-[1px] bg-[#282a2c]"></div>
+
+      <div class="flex items-center gap-2 bg-[#1e1f20] px-3 py-1.5 rounded-full text-xs text-amber-300 border border-amber-500/30">
+        <i class="fa-solid fa-user-graduate"></i>
+        <span id="student-name-header" class="font-bold">Aluno</span>
+      </div>
+
+      <div id="user-avatar-letter" class="w-8 h-8 rounded-full bg-[#004a77] border border-[#a8c7fa] flex items-center justify-center font-bold text-white text-xs">
         A
       </div>
     </div>
   </header>
 
-  <!-- CORPO DA INTERFACE DO DRIVE -->
+  <!-- 2. CORPO PRINCIPAL DO DRIVE -->
   <main class="flex-1 flex overflow-hidden">
     
-    <!-- BARRA LATERAL ESQUERDA -->
-    <aside class="w-64 bg-[#131314] p-3 flex flex-col justify-between border-r border-[#282a2c]">
+    <!-- BARRA LATERAL ESQUERDA COMPLETA -->
+    <aside class="w-60 bg-[#131314] p-3 flex flex-col justify-between border-r border-[#282a2c] shrink-0">
       <div class="space-y-4">
-        <button onclick="promptCriarPastaDrive()" class="bg-[#37393b] hover:bg-[#444746] text-[#e3e2e6] font-medium py-3.5 px-5 rounded-2xl text-sm flex items-center gap-3 shadow-md transition">
+        <!-- BOTÃO NOVO FIEL AO GOOGLE DRIVE REAL -->
+        <button onclick="promptCriarPastaDrive()" class="bg-[#37393b] hover:bg-[#444746] text-[#e3e2e6] font-medium py-3.5 px-5 rounded-2xl text-sm flex items-center gap-3 shadow-md transition w-36">
           <i class="fa-solid fa-plus text-xl text-[#a8c7fa]"></i>
-          <span>Novo</span>
+          <span class="font-medium text-sm">Novo</span>
         </button>
 
-        <nav class="space-y-1 text-sm">
-          <div class="flex items-center gap-3 px-4 py-2.5 rounded-full bg-[#004a77] text-[#c2e7ff] font-medium cursor-pointer">
-            <i class="fa-solid fa-user"></i> Pessoal
+        <nav class="space-y-0.5 text-xs">
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-regular fa-user text-sm"></i> <span>Pessoal</span>
           </div>
-          <div class="flex items-center gap-3 px-4 py-2.5 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
-            <i class="fa-solid fa-hard-drive"></i> Meu Drive
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-solid fa-diagram-project text-sm"></i> <span>Projetos</span>
           </div>
-          <div class="flex items-center gap-3 px-4 py-2.5 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
-            <i class="fa-solid fa-user-group"></i> Compartilhados comigo
+
+          <div id="nav-meu-drive" class="flex items-center gap-3 px-4 py-2 rounded-full bg-[#004a77] text-[#c2e7ff] font-medium cursor-pointer">
+            <i class="fa-solid fa-hard-drive text-sm"></i> <span>Meu Drive</span>
           </div>
-          <div class="flex items-center gap-3 px-4 py-2.5 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
-            <i class="fa-solid fa-clock"></i> Recentes
+
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-solid fa-laptop text-sm"></i> <span>Computadores</span>
           </div>
-          <div class="flex items-center gap-3 px-4 py-2.5 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
-            <i class="fa-solid fa-trash-can"></i> Lixeira
+
+          <div class="my-2 border-t border-[#282a2c]"></div>
+
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-solid fa-user-group text-sm"></i> <span>Compartilhados comigo</span>
+          </div>
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-regular fa-clock text-sm"></i> <span>Recentes</span>
+          </div>
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-regular fa-star text-sm"></i> <span>Com estrela</span>
+          </div>
+
+          <div class="my-2 border-t border-[#282a2c]"></div>
+
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-regular fa-circle-exclamation text-sm"></i> <span>Spam</span>
+          </div>
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-regular fa-trash-can text-sm"></i> <span>Lixeira</span>
+          </div>
+          <div class="flex items-center gap-3 px-4 py-2 rounded-full text-[#c4c7c5] hover:bg-[#282a2c] cursor-pointer">
+            <i class="fa-solid fa-cloud text-sm"></i> <span>Armazenamento</span>
           </div>
         </nav>
       </div>
 
-      <div class="px-4 py-3 space-y-2 text-xs text-[#c4c7c5] border-t border-[#282a2c]">
-        <div class="flex justify-between">
-          <span>Armazenamento</span>
-          <span>9,5 GB de 15 GB</span>
+      <!-- WIDGET ARMAZENAMENTO -->
+      <div class="px-3 py-2 space-y-2 text-[11px] text-[#c4c7c5] border-t border-[#282a2c]">
+        <div>9,5 GB de 15 GB usados</div>
+        <div class="w-full bg-[#282a2c] h-1 rounded-full overflow-hidden">
+          <div class="bg-[#8ab4f8] h-full w-[63%]"></div>
         </div>
-        <div class="w-full bg-[#282a2c] h-1.5 rounded-full overflow-hidden">
-          <div class="bg-[#8ab4f8] h-full w-[60%]"></div>
-        </div>
+        <button class="w-full mt-1 border border-[#37393b] hover:bg-[#282a2c] py-1.5 rounded-full text-[#8ab4f8] font-medium text-xs transition">
+          Comprar mais armazenamento
+        </button>
       </div>
     </aside>
 
-    <!-- ÁREA PRINCIPAL -->
-    <section class="flex-1 p-6 overflow-y-auto space-y-6">
+    <!-- ÁREA PRINCIPAL DO CONTEÚDO -->
+    <section class="flex-1 flex flex-col overflow-hidden bg-[#131314] px-6 pt-3 pb-6 space-y-4">
       
-      <!-- INSTRUÇÃO INTEGRADA -->
-      <div class="bg-[#1e1f20] border border-[#37393b] p-4 rounded-2xl flex justify-between items-center">
-        <div>
-          <span class="text-xs font-bold text-[#8ab4f8] uppercase tracking-wider">Desafio 02: Agente de Nuvem</span>
-          <h3 id="current-task-title" class="text-base font-bold text-white mt-0.5">1. Crie a Pasta 'EDU_DIGITAL_2026'</h3>
-          <p id="current-task-desc" class="text-xs text-[#c4c7c5] mt-1">Clique no botão <strong class="text-white">+ Novo</strong> na barra lateral e digite exatamente <code class="text-amber-300 font-mono">EDU_DIGITAL_2026</code>.</p>
+      <!-- BANNER DISCRETO DE TAREFA / INSTRUÇÕES PARA O ALUNO -->
+      <div class="bg-[#1e1f20] border border-[#37393b] p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center font-bold text-xs">
+            3
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-[#8ab4f8] uppercase tracking-wider">Desafio 02: Agente de Nuvem</span>
+              <span id="task-badge-step" class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded border border-amber-500/30">Etapa 1 de 3</span>
+            </div>
+            <h3 id="task-title-text" class="text-sm font-bold text-white mt-0.5">1. Estrutura Principal no Google Drive</h3>
+            <p id="task-desc-text" class="text-xs text-[#c4c7c5]">Clique no botão <strong class="text-white">+ Novo</strong> no menu esquerdo e crie a pasta principal <code class="text-amber-300 font-mono font-bold">EDU_DIGITAL_2026</code>.</p>
+          </div>
         </div>
-        <div id="task-badge" class="bg-amber-500/20 text-amber-300 text-xs px-3 py-1 rounded-full font-bold border border-amber-500/30">
-          Etapa 1/3
+
+        <button onclick="promptCriarPastaDrive()" class="bg-[#004a77] hover:bg-[#005b92] text-[#c2e7ff] text-xs font-bold px-4 py-2 rounded-xl transition border border-[#8ab4f8]/30">
+          + Criar Pasta
+        </button>
+      </div>
+
+      <!-- TÍTULO MEU DRIVE & FILTROS (EXATO DO PRINT REAL) -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <h2 id="folder-breadcrumb" class="text-xl font-medium text-white flex items-center gap-2">
+            <span>Meu Drive</span>
+            <i class="fa-solid fa-caret-down text-xs text-[#c4c7c5]"></i>
+          </h2>
+
+          <div class="flex items-center gap-2 text-[#c4c7c5] text-sm">
+            <button class="p-1.5 bg-[#004a77] text-[#c2e7ff] rounded-lg border border-[#8ab4f8]/30"><i class="fa-solid fa-list"></i></button>
+            <button class="p-1.5 hover:bg-[#282a2c] rounded-lg"><i class="fa-solid fa-border-all"></i></button>
+            <button class="p-1.5 hover:bg-[#282a2c] rounded-lg"><i class="fa-solid fa-circle-info"></i></button>
+          </div>
+        </div>
+
+        <!-- BARRA DE FILTROS REAL DO DRIVE (GEMINI, TIPO, PESSOAS...) -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <button class="bg-[#1e1f20] hover:bg-[#282a2c] border border-[#37393b] text-[#8ab4f8] px-3 py-1.5 rounded-lg flex items-center gap-2 font-medium">
+            <i class="fa-solid fa-sparkles text-xs"></i> Pedir ao Gemini
+          </button>
+          <button class="bg-[#1e1f20] hover:bg-[#282a2c] border border-[#37393b] text-[#c4c7c5] px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+            Tipo <i class="fa-solid fa-caret-down text-[10px]"></i>
+          </button>
+          <button class="bg-[#1e1f20] hover:bg-[#282a2c] border border-[#37393b] text-[#c4c7c5] px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+            Pessoas <i class="fa-solid fa-caret-down text-[10px]"></i>
+          </button>
+          <button class="bg-[#1e1f20] hover:bg-[#282a2c] border border-[#37393b] text-[#c4c7c5] px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+            Modificado <i class="fa-solid fa-caret-down text-[10px]"></i>
+          </button>
+          <button class="bg-[#1e1f20] hover:bg-[#282a2c] border border-[#37393b] text-[#c4c7c5] px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+            Fonte <i class="fa-solid fa-caret-down text-[10px]"></i>
+          </button>
         </div>
       </div>
 
-      <!-- PASTAS SUGERIDAS (RÉPLICA DA SUA IMAGEM) -->
-      <div>
-        <h4 class="text-xs font-bold text-[#c4c7c5] mb-3">Pastas sugeridas</h4>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-          <div class="bg-[#1e1f20] border border-[#282a2c] p-3 rounded-xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5 truncate">
-              <i class="fa-solid fa-folder text-white text-lg"></i>
-              <span class="text-xs font-medium text-white truncate">hamachi</span>
-            </div>
-          </div>
-          <div class="bg-[#1e1f20] border border-[#282a2c] p-3 rounded-xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5 truncate">
-              <i class="fa-solid fa-folder text-white text-lg"></i>
-              <span class="text-xs font-medium text-white truncate">Escola</span>
-            </div>
-          </div>
-          <div class="bg-[#1e1f20] border border-[#282a2c] p-3 rounded-xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5 truncate">
-              <i class="fa-solid fa-folder text-white text-lg"></i>
-              <span class="text-xs font-medium text-white truncate">psicologia</span>
-            </div>
-          </div>
-          <div class="bg-[#1e1f20] border border-[#282a2c] p-3 rounded-xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5 truncate">
-              <i class="fa-solid fa-folder text-white text-lg"></i>
-              <span class="text-xs font-medium text-white truncate">documentos uteis</span>
-            </div>
-          </div>
-          <div class="bg-[#1e1f20] border border-[#282a2c] p-3 rounded-xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5 truncate">
-              <i class="fa-solid fa-folder text-white text-lg"></i>
-              <span class="text-xs font-medium text-white truncate">livros</span>
-            </div>
-          </div>
-          <div class="bg-[#1e1f20] border border-[#282a2c] p-3 rounded-xl flex items-center justify-between">
-            <div class="flex items-center gap-2.5 truncate">
-              <i class="fa-solid fa-folder text-white text-lg"></i>
-              <span class="text-xs font-medium text-white truncate">fotos</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ARQUIVOS CRIADOS -->
-      <div>
-        <div class="flex justify-between items-center mb-3">
-          <h4 class="text-xs font-bold text-[#c4c7c5]">Arquivos e Pastas no Seu Diretório</h4>
-          <span id="current-location-display" class="text-xs font-mono text-[#8ab4f8]">Local: / Meu Drive</span>
-        </div>
-
-        <div class="bg-[#1e1f20] border border-[#282a2c] rounded-2xl overflow-hidden">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr class="border-b border-[#282a2c] text-[#c4c7c5]">
-                <th class="p-3">Nome</th>
-                <th class="p-3">Proprietário</th>
-                <th class="p-3">Local</th>
-              </tr>
-            </thead>
-            <tbody id="drive-tbody" class="divide-y divide-[#282a2c]">
-              <tr>
-                <td colspan="3" class="p-4 text-center text-[#c4c7c5]">Nenhuma pasta criada neste local. Clique em "+ Novo".</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- TABELA DE ARQUIVOS REAL DO DRIVE (RÉPLICA DO PRINT) -->
+      <div class="flex-1 overflow-y-auto border-t border-[#282a2c] pt-2">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="text-[#c4c7c5] border-b border-[#282a2c] font-medium select-none">
+              <th class="py-2 px-3">Nome <i class="fa-solid fa-arrow-up text-[10px] text-[#8ab4f8]"></i></th>
+              <th class="py-2 px-3">Proprietário</th>
+              <th class="py-2 px-3">Data da modificação</th>
+              <th class="py-2 px-3">Tamanho do arquivo</th>
+              <th class="py-2 px-3 text-right"></th>
+            </tr>
+          </thead>
+          <tbody id="drive-files-tbody" class="divide-y divide-[#1e1f20] text-[#e3e2e6]">
+            <!-- Os arquivos/pastas reais e criados pelo aluno aparecem aqui -->
+          </tbody>
+        </table>
       </div>
 
     </section>
   </main>
 
-  <!-- MODAL DE CONCLUSÃO -->
+  <!-- MODAL FINAL DE CONCLUÍDO -->
   <div id="completion-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#1e1f20] border border-[#37393b] rounded-2xl max-w-md w-full p-6 text-center space-y-5">
-      <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl">
+    <div class="bg-[#1e1f20] border border-[#37393b] rounded-2xl max-w-md w-full p-6 text-center space-y-5 shadow-2xl">
+      <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl">
         <i class="fa-solid fa-cloud-arrow-up"></i>
       </div>
       <div>
-        <h3 class="text-xl font-bold text-white">Desafio Concluído!</h3>
-        <p class="text-xs text-[#c4c7c5] mt-1">Você organizou com sucesso sua estrutura no Google Drive.</p>
+        <h3 class="text-xl font-bold text-white">Desafio Concluído com Sucesso!</h3>
+        <p class="text-xs text-[#c4c7c5] mt-1">Sua estrutura de diretórios foi criada no Google Drive simulado.</p>
       </div>
       <button onclick="window.history.back()" class="w-full bg-[#8ab4f8] hover:bg-[#abc7ff] text-slate-950 font-bold py-3 rounded-xl text-xs transition">
         Voltar ao Portal de Lições
@@ -255,11 +294,34 @@
 
   <script>
     let currentFolder = 'root';
-    let userFolders = [];
     let currentStep = 1;
     let secondsElapsed = 0;
 
+    // LISTA DE ARQUIVOS PRÉ-EXISTENTES DO SEU DRIVE REAL (RÉPLICA DO SEU PRINT)
+    const initialDriveItems = [
+      { name: 'cerveja e afins', isFolder: true, owner: 'eu', date: '29 de mar. de 2019 eu', parent: 'root' },
+      { name: 'documentos uteis', isFolder: true, owner: 'eu', date: '21 de ago. de 2025 eu', parent: 'root' },
+      { name: 'Escola', isFolder: true, owner: 'eu', date: '25 de out. eu', parent: 'root' },
+      { name: 'fotos', isFolder: true, owner: 'eu', date: '25 de out. eu', parent: 'root' },
+      { name: 'hamachi', isFolder: true, owner: 'eu', date: '29 de set. de 2017 eu', parent: 'root' },
+      { name: 'livros', isFolder: true, owner: 'eu', date: '6 de ago. de 2019 eu', parent: 'root' },
+      { name: 'matematica ana', isFolder: true, owner: 'eu', date: '18 de mai. de 2018 eu', parent: 'root' },
+      { name: 'plataforma de provas', isFolder: true, owner: 'eu', date: '12 de abr. eu', parent: 'root' },
+      { name: 'projeto de historias', isFolder: true, owner: 'eu', date: '27 de jul. eu', parent: 'root' },
+      { name: 'psicologia', isFolder: true, owner: 'eu', date: '25 de out. eu', parent: 'root' },
+      { name: 'receitas', isFolder: true, owner: 'eu', date: '16 de set. de 2019 eu', parent: 'root' },
+      { name: 'servidor de minecraft', isFolder: true, owner: 'eu', date: '13 de ago. eu', parent: 'root' },
+      { name: 'site thiago', isFolder: true, owner: 'eu', date: '1 de mar. eu', parent: 'root' },
+      { name: 'Theo', isFolder: true, owner: 'eu', date: '25 de out. eu', parent: 'root' }
+    ];
+
+    let userItems = [...initialDriveItems];
+
     setInterval(() => { secondsElapsed++; }, 1000);
+
+    window.addEventListener('load', () => {
+      renderDriveTable();
+    });
 
     function promptCriarPastaDrive() {
       const nome = prompt("Digite o nome da nova pasta:");
@@ -269,56 +331,74 @@
 
       if (currentStep === 1) {
         if (nomeTrim === 'EDU_DIGITAL_2026') {
-          userFolders.push({ name: 'EDU_DIGITAL_2026', parent: 'root', owner: 'eu', location: 'Meu Drive' });
+          userItems.unshift({ name: 'EDU_DIGITAL_2026', isFolder: true, owner: 'eu', date: 'hoje', parent: 'root', createdByStudent: true });
           currentFolder = 'EDU_DIGITAL_2026';
           currentStep = 2;
 
-          document.getElementById('current-task-title').innerText = "2. Crie as Subpastas das Matérias";
-          document.getElementById('current-task-desc').innerText = "Você está em 'EDU_DIGITAL_2026'. Crie duas subpastas: 'Matemática' e 'Português'.";
-          document.getElementById('task-badge').innerText = "Etapa 2/3";
-          document.getElementById('current-location-display').innerText = "Local: / EDU_DIGITAL_2026";
-          
+          document.getElementById('task-title-text').innerText = "2. Subpastas das Matérias Escolares";
+          document.getElementById('task-desc-text').innerText = "Você está dentro de 'EDU_DIGITAL_2026'. Crie duas subpastas: 'Matemática' e 'Português'.";
+          document.getElementById('task-badge-step').innerText = "Etapa 2 de 3";
+          document.getElementById('folder-breadcrumb').innerText = "Meu Drive > EDU_DIGITAL_2026";
+
           salvarProgressoAoVivo(2, 'em_andamento');
-          renderTable();
+          renderDriveTable();
         } else {
           alert("Nome incorreto! Digite exatamente: EDU_DIGITAL_2026");
         }
       } else if (currentStep === 2) {
-        userFolders.push({ name: nomeTrim, parent: 'EDU_DIGITAL_2026', owner: 'eu', location: 'EDU_DIGITAL_2026' });
-        renderTable();
+        userItems.unshift({ name: nomeTrim, isFolder: true, owner: 'eu', date: 'hoje', parent: 'EDU_DIGITAL_2026', createdByStudent: true });
+        renderDriveTable();
 
-        const subs = userFolders.filter(f => f.parent === 'EDU_DIGITAL_2026');
+        const subs = userItems.filter(i => i.parent === 'EDU_DIGITAL_2026');
         if (subs.length >= 2) {
           currentStep = 3;
-          document.getElementById('current-task-title').innerText = "3. Organização Finalizada!";
-          document.getElementById('current-task-desc').innerText = "Excelente trabalho! Sua estrutura de nuvem foi validada.";
-          document.getElementById('task-badge').className = "bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full font-bold border border-emerald-500/30";
-          document.getElementById('task-badge').innerText = "✓ Concluído";
-          
+          document.getElementById('task-title-text').innerText = "3. Organização Finalizada!";
+          document.getElementById('task-desc-text').innerText = "Sua vida digital está organizada!";
+          document.getElementById('task-badge-step').className = "text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded border border-emerald-500/30";
+          document.getElementById('task-badge-step').innerText = "✓ Concluído";
+
           salvarProgressoAoVivo(3, 'concluido');
           setTimeout(() => {
             document.getElementById('completion-modal').classList.remove('hidden');
-          }, 1000);
+          }, 800);
         }
       }
     }
 
-    function renderTable() {
-      const tbody = document.getElementById('drive-tbody');
-      const filtered = userFolders.filter(f => f.parent === currentFolder);
+    function entrarPasta(nome) {
+      if (nome === 'EDU_DIGITAL_2026') {
+        currentFolder = 'EDU_DIGITAL_2026';
+        document.getElementById('folder-breadcrumb').innerText = "Meu Drive > EDU_DIGITAL_2026";
+        renderDriveTable();
+      }
+    }
 
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-[#c4c7c5]">Nenhuma pasta criada neste diretório.</td></tr>`;
+    function renderDriveTable() {
+      const tbody = document.getElementById('drive-files-tbody');
+      const items = userItems.filter(i => i.parent === currentFolder);
+
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-[#c4c7c5]">Nenhuma pasta criada neste local. Clique em "+ Novo".</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = filtered.map(f => `
-        <tr class="hover:bg-[#282a2c]">
-          <td class="p-3 font-medium text-white flex items-center gap-2">
-            <i class="fa-solid fa-folder text-[#8ab4f8]"></i> ${f.name}
+      tbody.innerHTML = items.map(i => `
+        <tr onclick="${i.name === 'EDU_DIGITAL_2026' ? `entrarPasta('${i.name}')` : ''}" class="hover:bg-[#282a2c] cursor-pointer transition border-b border-[#1e1f20]">
+          <td class="py-2.5 px-3 flex items-center gap-3">
+            <i class="fa-solid fa-folder text-[#c4c7c5] text-base"></i>
+            <span class="font-normal text-white ${i.createdByStudent ? 'text-[#8ab4f8] font-bold' : ''}">${i.name}</span>
           </td>
-          <td class="p-3 text-[#c4c7c5]">${f.owner}</td>
-          <td class="p-3 text-[#c4c7c5]">${f.location}</td>
+          <td class="py-2.5 px-3 text-[#c4c7c5]">
+            <div class="flex items-center gap-1.5">
+              <div class="w-4 h-4 rounded-full bg-rose-700 text-white flex items-center justify-center text-[9px] font-bold">e</div>
+              <span>${i.owner}</span>
+            </div>
+          </td>
+          <td class="py-2.5 px-3 text-[#c4c7c5]">${i.date}</td>
+          <td class="py-2.5 px-3 text-[#c4c7c5]">—</td>
+          <td class="py-2.5 px-3 text-right text-[#c4c7c5]">
+            <i class="fa-solid fa-ellipsis-vertical hover:text-white p-1"></i>
+          </td>
         </tr>
       `).join('');
     }
