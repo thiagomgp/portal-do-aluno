@@ -44,7 +44,7 @@
     </div>
   </header>
 
-  <!-- BARRA DE NAVEGAÇÃO DE ABAS DA PÁGINA -->
+  <!-- NAVEGAÇÃO -->
   <div class="bg-slate-900/60 border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 flex gap-2 py-2 overflow-x-auto">
       <button id="btn-nav-aulas" onclick="mudarAbaPortal('aulas')" class="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 shadow transition flex items-center gap-2">
@@ -59,26 +59,25 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
 
-    <!-- SEÇÃO 1: AULAS INTERATIVAS (VARREDURA AUTOMÁTICA) -->
+    <!-- SEÇÃO AULAS -->
     <section id="secao-aulas" class="space-y-6">
       <div>
         <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-book-open text-emerald-400"></i>
           <span>Aulas e Desafios Práticos</span>
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Selecione uma das atividades disponíveis para iniciar seu aprendizado na nuvem.</p>
+        <p class="text-xs text-slate-400 mt-1">Selecione uma das atividades disponíveis para iniciar seu aprendizado.</p>
       </div>
 
-      <!-- GRID DE CARDS DE AULAS DETECTADAS -->
       <div id="grid-aulas-automaticas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div class="col-span-full p-8 text-center text-slate-500 bg-slate-900 border border-slate-800 rounded-2xl">
           <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-400 mb-2"></i>
-          <p class="text-xs">Identificando aulas na pasta 'aulainterativa'...</p>
+          <p class="text-xs">Carregando suas atividades e progressos...</p>
         </div>
       </div>
     </section>
 
-    <!-- SEÇÃO 2: PERFIL & CONFIGURAÇÕES COMPLETO -->
+    <!-- SEÇÃO PERFIL -->
     <section id="secao-perfil" class="hidden max-w-2xl mx-auto space-y-6">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
         
@@ -90,39 +89,28 @@
           </div>
         </div>
 
-        <!-- FORMULÁRIO DE DADOS PESSOAIS E AVATAR -->
         <form id="form-update-profile" class="space-y-4">
           <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Alterar Dados Pessoais & Foto</h4>
-          
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">Nome de Exibição / Apelido:</label>
-            <input type="text" id="profile-name-input" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="Como quer ser chamado..." required>
+            <input type="text" id="profile-name-input" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" required>
           </div>
-
           <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">URL da Imagem de Perfil (Opcional):</label>
-            <input type="url" id="profile-avatar-url" oninput="previewAvatarUrl(this.value)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="https://exemplo.com/minha-foto.png">
+            <label class="block text-xs font-medium text-slate-400 mb-1">URL da Foto de Perfil:</label>
+            <input type="url" id="profile-avatar-url" oninput="previewAvatarUrl(this.value)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="https://exemplo.com/foto.png">
           </div>
-
-          <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition">
-            Guardar Dados
-          </button>
+          <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition">Guardar Dados</button>
         </form>
 
         <hr class="border-slate-800">
 
-        <!-- FORMULÁRIO DE ALTERAÇÃO DE SENHA -->
         <form id="form-update-password" class="space-y-4">
           <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Alterar Senha de Acesso</h4>
-          
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">Nova Senha:</label>
             <input type="password" id="profile-new-password" minlength="6" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-amber-400" placeholder="Mínimo 6 caracteres" required>
           </div>
-
-          <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">
-            Atualizar Senha
-          </button>
+          <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Atualizar Senha</button>
         </form>
 
       </div>
@@ -130,7 +118,7 @@
 
   </main>
 
-  <!-- SUPABASE E MOTOR DE LÓGICA DO PORTAL -->
+  <!-- SCRIPTS & LOGICA DO PORTAL -->
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -142,7 +130,6 @@
       recuperarSessaoAluno();
       await varrerEExibirAulasGitHub();
 
-      // Submit Dados Pessoais
       document.getElementById('form-update-profile').addEventListener('submit', async (e) => {
         e.preventDefault();
         const novoNome = document.getElementById('profile-name-input').value.trim();
@@ -150,17 +137,10 @@
 
         if (!activeStudent || !activeStudent.id) return;
 
-        const { error } = await _supabase
-          .from('profiles')
-          .update({ 
-            nome_completo: novoNome,
-            foto_url: novaFoto || null
-          })
-          .eq('id', activeStudent.id);
-
-        if (error) alert("Erro ao atualizar dados: " + error.message);
+        const { error } = await _supabase.from('profiles').update({ nome_completo: novoNome, foto_url: novaFoto || null }).eq('id', activeStudent.id);
+        if (error) alert("Erro ao atualizar: " + error.message);
         else {
-          alert("Perfil atualizado com sucesso!");
+          alert("Perfil atualizado!");
           activeStudent.nome = novoNome;
           if (novaFoto) activeStudent.foto_url = novaFoto;
           sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
@@ -168,16 +148,13 @@
         }
       });
 
-      // Submit Senha
       document.getElementById('form-update-password').addEventListener('submit', async (e) => {
         e.preventDefault();
         const novaSenha = document.getElementById('profile-new-password').value;
-
         const { error } = await _supabase.auth.updateUser({ password: novaSenha });
-
-        if (error) alert("Erro ao alterar senha: " + error.message);
+        if (error) alert("Erro: " + error.message);
         else {
-          alert("Senha alterada com sucesso!");
+          alert("Senha alterada!");
           document.getElementById('profile-new-password').value = '';
         }
       });
@@ -189,8 +166,6 @@
         activeStudent = JSON.parse(saved);
         document.getElementById('student-display-name').innerText = activeStudent.nome || 'Aluno';
         document.getElementById('student-display-class').innerText = activeStudent.turma || 'Geral';
-
-        // Preenche campos do Perfil
         document.getElementById('profile-header-name').innerText = activeStudent.nome || 'Aluno';
         document.getElementById('profile-header-email').innerText = activeStudent.email || 'aluno@escola.com';
         document.getElementById('profile-name-input').value = activeStudent.nome || '';
@@ -202,49 +177,73 @@
     }
 
     function previewAvatarUrl(url) {
-      if (url.startsWith('http')) {
-        document.getElementById('profile-avatar-preview').src = url;
-      }
+      if (url.startsWith('http')) document.getElementById('profile-avatar-preview').src = url;
     }
 
-    // --- VARREDURA AUTOMÁTICA DA PASTA 'aulainterativa' DO GITHUB ---
     async function varrerEExibirAulasGitHub() {
       const grid = document.getElementById('grid-aulas-automaticas');
 
       try {
+        // 1. Busca os progressos do aluno no Supabase
+        let progressosMap = {};
+        if (activeStudent && activeStudent.id) {
+          const { data: progressos } = await _supabase
+            .from('se_progresso')
+            .select('modulo_id, etapa_atual, total_etapas, status')
+            .eq('aluno_id', activeStudent.id);
+
+          if (progressos) {
+            progressos.forEach(p => {
+              progressosMap[p.modulo_id] = p;
+            });
+          }
+        }
+
+        // 2. Busca lista de arquivos da pasta 'aulainterativa' no GitHub
         const res = await fetch('https://api.github.com/repos/thiagomgp/portal-do-aluno/contents/aulainterativa');
         const arquivos = await res.json();
 
         if (!Array.isArray(arquivos)) {
-          grid.innerHTML = `<div class="col-span-full p-4 text-center text-rose-400 text-xs">Não foi possível acessar a pasta 'aulainterativa'.</div>`;
+          grid.innerHTML = `<div class="col-span-full p-4 text-center text-rose-400 text-xs">Erro ao carregar pasta 'aulainterativa'.</div>`;
           return;
         }
 
         const arquivosHtml = arquivos.filter(f => f.name.endsWith('.html')).sort((a, b) => a.name.localeCompare(b.name));
 
         grid.innerHTML = arquivosHtml.map((file, index) => {
-          // Formatação automática do título a partir do arquivo
-          let tituloFormatted = file.name
-            .replace('.html', '')
+          const moduloId = file.name.replace('.html', '');
+          const prog = progressosMap[moduloId] || progressosMap[file.name] || null;
+
+          // Formatação do título
+          let tituloFormatted = moduloId
             .replace(/_/g, ' ')
             .replace(/-/g, ' ')
             .toUpperCase();
 
+          // Status & Badge de Etapas
+          let statusBadgeHTML = '';
+          if (prog && (prog.status === 'concluido' || prog.etapa_atual >= prog.total_etapas)) {
+            statusBadgeHTML = `<span class="text-[11px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full">✓ Concluído</span>`;
+          } else if (prog && prog.etapa_atual) {
+            statusBadgeHTML = `<span class="text-[11px] font-bold bg-amber-950 text-amber-400 border border-amber-800 px-2.5 py-0.5 rounded-full">Etapa ${prog.etapa_atual}/${prog.total_etapas || 4}</span>`;
+          } else {
+            statusBadgeHTML = `<span class="text-[11px] font-medium bg-slate-800 text-slate-400 border border-slate-700 px-2.5 py-0.5 rounded-full">Não iniciado</span>`;
+          }
+
           return `
             <div class="bg-slate-900 border border-slate-800 hover:border-emerald-500/50 p-5 rounded-2xl shadow-lg transition flex flex-col justify-between space-y-4">
-              <div class="space-y-2">
+              <div class="space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded border border-emerald-500/20">
                     Atividade ${index + 1}
                   </span>
-                  <i class="fa-solid fa-laptop-code text-slate-600"></i>
+                  ${statusBadgeHTML}
                 </div>
                 <h3 class="font-bold text-white text-base leading-snug">${tituloFormatted}</h3>
-                <p class="text-xs text-slate-400 font-mono">/aulainterativa/${file.name}</p>
               </div>
 
               <button onclick="acessarModulo('aulainterativa/${file.name}')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
-                <span>Iniciar Atividade</span>
+                <span>${prog && prog.status === 'concluido' ? 'Revisar Atividade' : 'Iniciar Atividade'}</span>
                 <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
@@ -253,7 +252,7 @@
 
       } catch (err) {
         console.error("Erro na varredura:", err);
-        grid.innerHTML = `<div class="col-span-full p-4 text-center text-rose-400 text-xs">Erro ao varrer repositório do GitHub.</div>`;
+        grid.innerHTML = `<div class="col-span-full p-4 text-center text-rose-400 text-xs">Erro ao varrer arquivos do portal.</div>`;
       }
     }
 
