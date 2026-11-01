@@ -55,10 +55,14 @@
             }
 
             await carregarProgressoSalvo();
+            startTimer();
         });
 
         async function carregarProgressoSalvo() {
-            if (!currentStudent || !currentStudent.id) return;
+            if (!currentStudent || !currentStudent.id) {
+                renderStep(0);
+                return;
+            }
 
             try {
                 const { data, error } = await _supabase
@@ -71,16 +75,15 @@
                 if (data && !error) {
                     secondsElapsed = data.tempo_segundos || 0;
                     const etapaSalvaIndex = Math.max(0, (data.etapa_atual || 1) - 1);
-                    currentStepIndex = etapaSalvaIndex;
+                    currentStepIndex = Math.min(etapaSalvaIndex, LESSON_STEPS.length - 1);
 
-                    totalXP = 0;
-                    for (let i = 0; i < currentStepIndex; i++) {
-                        totalXP += LESSON_STEPS[i].xp;
-                    }
+                    totalXP = currentStepIndex * 25;
                     document.getElementById('xp-counter').innerText = `${totalXP} XP`;
                 }
             } catch (err) {
                 console.error("Erro ao carregar progresso anterior:", err);
+            } finally {
+                renderStep(currentStepIndex);
             }
         }
 
@@ -103,7 +106,7 @@
         }
     </script>
 
-    <!-- CABEÇALHO COESO -->
+    <!-- CABEÇALHO -->
     <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
@@ -147,8 +150,6 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        <!-- PAINEL ESQUERDO: TEORIA -->
         <section class="lg:col-span-5 bg-slate-800 border border-slate-700 rounded-2xl flex flex-col shadow-xl overflow-hidden h-full min-h-[580px]">
             <div class="p-4 bg-slate-800/90 border-b border-slate-700/80 flex items-center justify-between">
                 <div>
@@ -171,7 +172,6 @@
             </div>
         </section>
 
-        <!-- PAINEL DIREITO: LABORATÓRIO PRÁTICO -->
         <section class="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden h-full min-h-[580px] p-6">
             <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-keyboard text-cyan-400"></i>
@@ -188,7 +188,7 @@
                 <i class="fa-solid fa-trophy"></i>
             </div>
             <div>
-                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Módulo Concluído com Éxito!</span>
+                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Módulo Concluído com Êxito!</span>
                 <h3 class="text-2xl font-extrabold text-white mt-1">Pontuação e Velocidade Registradas</h3>
                 <p class="text-slate-300 text-sm mt-2">Você atingiu a meta mínima de velocidade e precisão exigida no curso.</p>
             </div>
@@ -204,7 +204,7 @@
         </div>
     </div>
 
-    <!-- MOTOR DE LÓGICA E INTERAÇÕES DA AULA -->
+    <!-- MOTOR DE LÓGICA -->
     <script>
         const LESSON_STEPS = [
             {
@@ -276,7 +276,6 @@
         let timerInterval = null;
         let currentItemIndex = 0;
 
-        // Variaveis especificas do Teste de Digitação
         let dictationStartTime = null;
         let dictationTimerInterval = null;
         let dictationSeconds = 0;
@@ -290,12 +289,8 @@
 
         const targetExtendedDictation = `Atenção (estudantes do curso): a avaliação prática exige 100% de precisão! Verifique se a acentuação gráfica - agudo (á, é), circunflexo (ê, ô), til (ã, õ) e crase (à) - funciona corretamente. Não esqueça dos caracteres especiais: ç, @, %, colchetes [100%] e aspas "Cultura Digital". Você está pronto?`;
 
-        window.onload = function() {
-            startTimer();
-            renderStep(currentStepIndex);
-        };
-
         function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 secondsElapsed++;
                 const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
@@ -312,7 +307,7 @@
             document.getElementById('step-badge').innerText = step.badge;
             document.getElementById('step-content').innerHTML = step.content;
 
-            const progressPercent = (index / LESSON_STEPS.length) * 100;
+            const progressPercent = ((index + 1) / LESSON_STEPS.length) * 100;
             document.getElementById('top-progress-bar').style.width = `${progressPercent}%`;
 
             document.getElementById('next-btn').disabled = true;
@@ -420,7 +415,6 @@
             }
         }
 
-        // --- TESTE DE DIGITAÇÃO COM MÉTRICA DE PPM ---
         function loadExtendedDictationTest() {
             dictationStartTime = null;
             dictationSeconds = 0;
@@ -467,7 +461,6 @@
             const ppmElem = document.getElementById('ppm-count');
             const statusElem = document.getElementById('match-status');
 
-            // Inicia o cronômetro do teste no primeiro caractere digitado
             if (!dictationStartTime && inputVal.length > 0) {
                 dictationStartTime = Date.now();
                 dictationTimerInterval = setInterval(() => {
@@ -479,7 +472,6 @@
 
             countElem.innerText = inputVal.length;
 
-            // Cálculo de PPM (Palavras por minuto = (caracteres / 5) / minutos)
             const tempoEmMinutos = Math.max(dictationSeconds / 60, 1 / 60);
             const palavrasDigitadas = inputVal.length / 5;
             const ppmAtual = Math.round(palavrasDigitadas / tempoEmMinutos);
@@ -543,7 +535,6 @@
             document.getElementById('res-ppm').innerText = `${finalPPMCalculated} PPM`;
             document.getElementById('res-xp').innerText = `${totalXP} XP`;
 
-            // Salva como CONCLUÍDO no Supabase
             await salvarProgressoAoVivo(4, 'concluido');
 
             if (currentStudent && currentStudent.id) {
@@ -556,7 +547,7 @@
                         concluido: true
                     }]);
                 } catch (e) {
-                    console.error("Erro ao salvar finalização no Supabase:", e);
+                    console.error("Erro ao salvar finalização:", e);
                 }
             }
 
