@@ -30,6 +30,11 @@
     
     let currentStudent = null;
     const MODULE_ID = "desafio_nuvem";
+    const DEFAULT_UUID_DEMO = "00000000-0000-0000-0000-000000000001";
+
+    function isUUIDValido(str) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+    }
 
     window.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -38,11 +43,22 @@
       if (saved) {
         currentStudent = JSON.parse(saved);
       } else if (urlParams.has('id')) {
+        const rawId = urlParams.get('id');
         currentStudent = {
-          id: urlParams.get('id'),
+          id: isUUIDValido(rawId) ? rawId : DEFAULT_UUID_DEMO,
           nome: urlParams.get('nome') || 'Aluno',
           turma: urlParams.get('turma') || 'Geral'
         };
+      } else {
+        currentStudent = {
+          id: DEFAULT_UUID_DEMO,
+          nome: "Aluno Demo",
+          turma: "Geral"
+        };
+      }
+
+      if (!isUUIDValido(currentStudent.id)) {
+        currentStudent.id = DEFAULT_UUID_DEMO;
       }
 
       if (currentStudent && currentStudent.nome) {
@@ -64,16 +80,28 @@
 
     async function salvarProgressoAoVivo(etapaAtual, status = 'em_andamento') {
       if (!currentStudent || !currentStudent.id) return;
+
+      const payload = {
+        aluno_id: currentStudent.id,
+        modulo_id: MODULE_ID,
+        etapa_atual: Number(etapaAtual),
+        total_etapas: 3,
+        tempo_segundos: Number(secondsElapsed),
+        status: status,
+        updated_at: new Date().toISOString()
+      };
+
       try {
-        await _supabase.from('se_progresso').upsert({
-          aluno_id: currentStudent.id,
-          modulo_id: MODULE_ID,
-          etapa_atual: etapaAtual,
-          total_etapas: 3,
-          tempo_segundos: secondsElapsed,
-          status: status,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'aluno_id,modulo_id' });
+        const { data: updated, error: updateError } = await _supabase
+          .from('se_progresso')
+          .update(payload)
+          .eq('aluno_id', currentStudent.id)
+          .eq('modulo_id', MODULE_ID)
+          .select();
+
+        if (!updateError && (!updated || updated.length === 0)) {
+          await _supabase.from('se_progresso').insert([payload]);
+        }
       } catch (err) {}
     }
   </script>
@@ -288,7 +316,7 @@
               <span id="task-badge-step" class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded border border-amber-500/30">Etapa 1 de 3</span>
             </div>
             <h3 id="task-title-text" class="text-sm font-bold text-white mt-0.5">1. Estrutura Principal no Google Drive</h3>
-            <p id="task-desc-text" class="text-xs text-[#c4c7c5]">Clique no botão <strong class="text-white">+ Novo</strong> $\rightarrow$ <strong class="text-white">Nova pasta</strong> e crie a pasta <code class="text-amber-300 font-mono font-bold">EDU_DIGITAL_2026</code>.</p>
+            <p id="task-desc-text" class="text-xs text-[#c4c7c5]">Clique no botão <strong class="text-white">+ Novo</strong> → <strong class="text-white">Nova pasta</strong> e crie a pasta <code class="text-amber-300 font-mono font-bold">EDU_DIGITAL_2026</code>.</p>
           </div>
         </div>
 
@@ -374,7 +402,6 @@
     let currentStep = 1;
     let secondsElapsed = 0;
 
-    // NOVAS PASTAS GENÉRICAS E ESCOLARES (SUBSTITUINDO AS ANTERIORES)
     const initialDriveItems = [
       { name: 'Documentos do Aluno', isFolder: true, owner: 'eu', date: '20 de jan. de 2026', parent: 'root' },
       { name: 'Projetos Escolares', isFolder: true, owner: 'eu', date: '15 de fev. de 2026', parent: 'root' },
