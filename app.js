@@ -140,7 +140,7 @@ async function verificarEstadoEEntrar(user) {
       return;
     }
 
-    let nomeTurma = 'Sem Turma';
+    let nomeTurma = 'Geral';
     if (profile.turma_id) {
       const { data: turma } = await supabase
         .from('turmas')
@@ -151,6 +151,15 @@ async function verificarEstadoEEntrar(user) {
     }
 
     alunoAtual = profile;
+    alunoAtual.nomeTurmaCalculada = nomeTurma;
+
+    // Guarda dados completos no sessionStorage
+    sessionStorage.setItem('active_student', JSON.stringify({
+      id: profile.id,
+      nome: profile.nome_completo,
+      apelido: profile.apelido || '',
+      turma: nomeTurma
+    }));
 
     document.getElementById('auth-section')?.classList.add('hidden');
     document.getElementById('app-content')?.classList.remove('hidden');
@@ -162,7 +171,7 @@ async function verificarEstadoEEntrar(user) {
   }
 }
 
-function atualizarCabecalhoUsuario(nomeTurma = 'Sem Turma') {
+function atualizarCabecalhoUsuario(nomeTurma = 'Geral') {
   const nameEl = document.getElementById('student-display-name');
   const classEl = document.getElementById('student-display-class');
   
@@ -170,13 +179,13 @@ function atualizarCabecalhoUsuario(nomeTurma = 'Sem Turma') {
     nameEl.innerText = alunoAtual.apelido || alunoAtual.nome_completo;
   }
   if (classEl) {
-    classEl.innerText = nomeTurma;
+    classEl.innerText = alunoAtual?.nomeTurmaCalculada || nomeTurma;
   }
 }
 
 async function fazerLogout() {
   await supabase.auth.signOut();
-  sessionStorage.removeItem('active_student');
+  sessionStorage.clear();
   window.location.reload();
 }
 
@@ -326,14 +335,15 @@ function acessarRecurso(urlRecurso) {
   const studentData = {
     id: alunoAtual.id,
     nome: alunoAtual.nome_completo,
-    turma: alunoAtual.turma_id || 'Geral'
+    apelido: alunoAtual.apelido || '',
+    turma: alunoAtual.nomeTurmaCalculada || 'Geral'
   };
 
   sessionStorage.setItem('active_student', JSON.stringify(studentData));
 
   const params = new URLSearchParams({
     id: alunoAtual.id,
-    nome: alunoAtual.nome_completo,
+    nome: studentData.nome,
     turma: studentData.turma
   });
 
