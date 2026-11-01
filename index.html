@@ -44,7 +44,7 @@
     </div>
   </header>
 
-  <!-- NAVEGAÇÃO COMPLETA -->
+  <!-- NAVEGAÇÃO PRINCIPAL -->
   <div class="bg-slate-900/60 border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 flex gap-2 py-2 overflow-x-auto">
       <button id="btn-nav-inicio" onclick="mudarAbaPortal('inicio')" class="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 shadow transition flex items-center gap-2">
@@ -65,40 +65,57 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
 
-    <!-- SEÇÃO INÍCIO (BOAS-VINDAS E VISÃO GERAL) -->
+    <!-- SEÇÃO INÍCIO: SOMENTE MURAL DE NOTIFICAÇÕES/AVISOS -->
     <section id="secao-inicio" class="space-y-6">
-      <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <h2 class="text-2xl font-extrabold text-white">Bem-vindo ao Portal de Cultura Digital!</h2>
-        <p class="text-xs text-slate-400 mt-2 max-w-2xl">Acesse suas atividades interativas, pratique com exercícios práticos e acompanhe o progresso de sua jornada tecnológica em tempo real.</p>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-          <div onclick="mudarAbaPortal('aulas')" class="cursor-pointer bg-slate-950/80 border border-slate-800 p-4 rounded-xl hover:border-emerald-500/50 transition">
-            <i class="fa-solid fa-graduation-cap text-emerald-400 text-xl mb-2"></i>
-            <h3 class="text-sm font-bold text-white">Aulas Interativas</h3>
-            <p class="text-[11px] text-slate-400 mt-1">Pratique hardware, sistema de arquivos e comandos.</p>
+      <div>
+        <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-bullhorn text-emerald-400"></i>
+          <span>Mural de Recados & Avisos</span>
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Acompanhe os comunicados e orientações da turma.</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- NOTIFICAÇÃO 1 -->
+        <div class="bg-slate-900 border-l-4 border-emerald-500 border-y border-r border-slate-800 rounded-r-2xl p-5 shadow-lg space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-info"></i> Bem-vindo ao Semestre
+            </span>
+            <span class="text-[10px] text-slate-500 font-mono">Hoje</span>
           </div>
-          <div onclick="mudarAbaPortal('jogos')" class="cursor-pointer bg-slate-950/80 border border-slate-800 p-4 rounded-xl hover:border-emerald-500/50 transition">
-            <i class="fa-solid fa-gamepad text-amber-400 text-xl mb-2"></i>
-            <h3 class="text-sm font-bold text-white">Jogos Educativos</h3>
-            <p class="text-[11px] text-slate-400 mt-1">Desafios de agilidade e fixação de conceitos.</p>
+          <h3 class="text-sm font-bold text-white">Início das Atividades da Disciplina de Cultura Digital</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            As aulas interativas já estão disponíveis na aba "Aulas Interativas". Realize os módulos em sequência para garantir o registro do seu progresso.
+          </p>
+        </div>
+
+        <!-- NOTIFICAÇÃO 2 -->
+        <div class="bg-slate-900 border-l-4 border-amber-500 border-y border-r border-slate-800 rounded-r-2xl p-5 shadow-lg space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation"></i> Lembrete Importante
+            </span>
+            <span class="text-[10px] text-slate-500 font-mono">Geral</span>
           </div>
-          <div onclick="mudarAbaPortal('perfil')" class="cursor-pointer bg-slate-950/80 border border-slate-800 p-4 rounded-xl hover:border-emerald-500/50 transition">
-            <i class="fa-solid fa-user-gear text-cyan-400 text-xl mb-2"></i>
-            <h3 class="text-sm font-bold text-white">Meu Perfil</h3>
-            <p class="text-[11px] text-slate-400 mt-1">Personalize sua foto, apelido e senha de acesso.</p>
-          </div>
+          <h3 class="text-sm font-bold text-white">Sincronização de Progresso</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Lembre-se de concluir todas as etapas de cada exercício para que sua nota e tempo de execução sejam contabilizados corretamente no banco de dados.
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- SEÇÃO AULAS -->
+    <!-- SEÇÃO AULAS INTERATIVAS: SELEÇÃO DA DISCIPLINA + GRID DIRETO -->
     <section id="secao-aulas" class="hidden space-y-6">
-      <div>
-        <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
-          <i class="fa-solid fa-book-open text-emerald-400"></i>
-          <span>Aulas e Desafios Práticos</span>
-        </h2>
-        <p class="text-xs text-slate-400 mt-1">Selecione uma das atividades disponíveis para iniciar seu aprendizado.</p>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Disciplina Selecionada</span>
+          <h2 class="text-xl font-extrabold text-white flex items-center gap-2 mt-0.5">
+            <i class="fa-solid fa-laptop-code text-emerald-400"></i>
+            <span>Cultura Digital</span>
+          </h2>
+        </div>
       </div>
 
       <div id="grid-aulas-automaticas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -109,25 +126,22 @@
       </div>
     </section>
 
-    <!-- SEÇÃO JOGOS -->
+    <!-- SEÇÃO JOGOS EDUCATIVOS: EM BRANCO / EM BREVE -->
     <section id="secao-jogos" class="hidden space-y-6">
       <div>
         <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-gamepad text-amber-400"></i>
           <span>Jogos Educativos</span>
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Pratique digitação e conceitos básicos através de desafios gamificados.</p>
+        <p class="text-xs text-slate-400 mt-1">Atividades gamificadas para fixação de conhecimento.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-          <span class="text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded border border-amber-500/20">Desafio de Velocidade</span>
-          <h3 class="font-bold text-white text-base">Teste de Digitação Rápida</h3>
-          <p class="text-xs text-slate-400">Treine acentuação ABNT2 e caracteres especiais com meta de PPM.</p>
-          <button onclick="mudarAbaPortal('aulas')" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition">
-            Iniciar no Módulo de Teclado
-          </button>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center max-w-lg mx-auto space-y-3">
+        <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-hourglass-half"></i>
         </div>
+        <h3 class="text-base font-bold text-white">Conteúdo em Breve</h3>
+        <p class="text-xs text-slate-400">Esta seção está em desenvolvimento e estará disponível em breve com novos jogos interativos.</p>
       </div>
     </section>
 
@@ -144,7 +158,6 @@
           </div>
         </div>
 
-        <!-- FORMULÁRIO DE DADOS PESSOAIS COM NOME E APELIDO SEPARADOS -->
         <form id="form-update-profile" class="space-y-4">
           <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Alterar Dados Pessoais & Foto</h4>
           
@@ -182,7 +195,7 @@
 
   </main>
 
-  <!-- SCRIPTS & LOGICA DO PORTAL -->
+  <!-- SCRIPTS E LÓGICA DE INTEGRAÇÃO -->
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -246,8 +259,9 @@
         };
         sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
       } else {
+        // ID no formato UUID válido para evitar o Erro 400 no Supabase
         activeStudent = {
-          id: "aluno_demo_01",
+          id: "00000000-0000-0000-0000-000000000001",
           nome: "Aluno Demo",
           apelido: "aluno_demo",
           turma: "Geral",
@@ -285,12 +299,12 @@
       try {
         let progressosMap = {};
         if (activeStudent && activeStudent.id) {
-          const { data: progressos } = await _supabase
+          const { data: progressos, error } = await _supabase
             .from('se_progresso')
             .select('modulo_id, etapa_atual, total_etapas, status')
             .eq('aluno_id', activeStudent.id);
 
-          if (progressos) {
+          if (progressos && !error) {
             progressos.forEach(p => {
               progressosMap[p.modulo_id] = p;
             });
