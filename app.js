@@ -40,7 +40,7 @@ async function realizarLogin(e) {
   const password = passwordInput.value;
 
   if (!email || !password) {
-    alert('Por favor, preenche o e-mail e a senha.');
+    alert('Por favor, preencha o e-mail e a senha.');
     return;
   }
 
@@ -55,6 +55,51 @@ async function realizarLogin(e) {
     }
   } catch (err) {
     console.error('Erro inesperado no login:', err);
+  }
+}
+
+async function realizarRegistro(e) {
+  if (e) e.preventDefault();
+
+  const nome = document.getElementById('reg-nome')?.value.trim();
+  const turmaId = document.getElementById('reg-turma')?.value;
+  const email = document.getElementById('reg-email')?.value.trim();
+  const password = document.getElementById('reg-password')?.value;
+
+  if (!nome || !turmaId || !email || !password) {
+    alert('Preencha todos os campos do formulário de cadastro.');
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { nome_completo: nome, turma_id: turmaId }
+      }
+    });
+
+    if (error) {
+      alert('Erro no cadastro: ' + error.message);
+      return;
+    }
+
+    if (data.user) {
+      // Cria o perfil inicial do aluno no banco
+      await supabase.from('profiles').insert([{
+        id: data.user.id,
+        nome_completo: nome,
+        turma_id: turmaId,
+        status: 'pendente'
+      }]);
+
+      alert('Cadastro realizado! Sua conta aguarda aprovação pelo professor.');
+      document.getElementById('register-form').reset();
+      toggleAuthMode('login');
+    }
+  } catch (err) {
+    console.error('Erro ao cadastrar:', err);
   }
 }
 
@@ -121,8 +166,19 @@ async function verificarEstadoEEntrar(user) {
 function atualizarCabecalhoUsuario(nomeTurma = 'Sem Turma') {
   const userInfo = document.getElementById('user-info');
   if (userInfo && alunoAtual) {
-    userInfo.innerHTML = `👋 Olá, <strong class="text-emerald-400">${alunoAtual.apelido || alunoAtual.nome_completo}</strong> (${nomeTurma})`;
+    userInfo.innerHTML = `
+      <div class="flex items-center gap-3">
+        <span>👋 Olá, <strong class="text-emerald-400">${alunoAtual.apelido || alunoAtual.nome_completo}</strong> (${nomeTurma})</span>
+        <button onclick="fazerLogout()" class="text-xs bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white px-2.5 py-1 rounded transition">Sair</button>
+      </div>
+    `;
   }
+}
+
+async function fazerLogout() {
+  await supabase.auth.signOut();
+  sessionStorage.removeItem('active_student');
+  window.location.reload();
 }
 
 // ==========================================
@@ -160,7 +216,7 @@ async function carregarAvisos() {
   if (!listaAvisos) return;
 
   if (!avisos || avisos.length === 0) {
-    listaAvisos.innerHTML = '<p class="text-slate-400 text-sm">Sem avisos no mural de momento.</p>';
+    listaAvisos.innerHTML = '<p class="text-slate-400 text-sm">Sem avisos no mural no momento.</p>';
     return;
   }
 
@@ -168,7 +224,7 @@ async function carregarAvisos() {
     <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 border-l-4 border-l-emerald-500 shadow-md">
       <div class="flex justify-between items-start mb-2">
         <h3 class="font-bold text-emerald-400 text-lg">${aviso.titulo}</h3>
-        <span class="text-xs text-slate-500">${new Date(aviso.created_at).toLocaleDateString('pt-PT')}</span>
+        <span class="text-xs text-slate-500">${new Date(aviso.created_at).toLocaleDateString('pt-BR')}</span>
       </div>
       <p class="text-slate-300 text-sm leading-relaxed">${aviso.mensagem}</p>
     </div>
@@ -190,12 +246,13 @@ async function carregarDisciplinas() {
   if (!container) return;
 
   if (!disciplinasLiberadas || disciplinasLiberadas.length === 0) {
-    container.innerHTML = '<p class="text-slate-400 col-span-full">Nenhuma disciplina atribuída à sua turma.</p>';
+    container.innerHTML = '<p class="text-slate-400 col-span-full">Nenhuma disciplina atribuída à sua turma no momento.</p>';
     return;
   }
 
   container.innerHTML = disciplinasLiberadas.map(item => {
     const disc = item.disciplinas;
+    if (!disc) return '';
     return `
       <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 hover:border-emerald-500/50 transition shadow-lg flex flex-col justify-between">
         <div>
@@ -214,7 +271,7 @@ async function carregarDisciplinas() {
   }).join('');
 }
 
-// ABRIR MODAL COM LISTA DE AULAS / MATERIAIS / PROVAS
+// ABRIR MODAL COM LISTA DE AULAS / MATERIAIS / PROVAS (totalmente dinâmico do banco)
 async function abrirConteudo(disciplinaId, tipo) {
   const modal = document.getElementById('modal-conteudos');
   const tituloModal = document.getElementById('modal-conteudos-titulo');
@@ -224,25 +281,16 @@ async function abrirConteudo(disciplinaId, tipo) {
   const titulos = { aula: '🎬 Aulas Disponíveis', material: '📁 Materiais de Estudo', prova: '📝 Avaliações e Provas' };
   tituloModal.innerText = titulos[tipo] || 'Conteúdos';
 
-  // Busca do Banco de Dados os conteúdos da disciplina
-  let { data: conteudos } = await supabase
+  // Busca do Banco de Dados os conteúdos cadastrados para a disciplina
+  const { data: conteudos, error } = await supabase
     .from('conteudos_disciplina')
     .select('*')
     .eq('disciplina_id', disciplinaId)
     .eq('tipo', tipo)
     .order('ordem', { ascending: true });
 
-  // Se for "aula" e não tiver nada no banco ainda, exibe a aula padrão
-  if (tipo === 'aula' && (!conteudos || conteudos.length === 0)) {
-    conteudos = [{
-      titulo: 'Módulo 1: Hardware, Software e Licenciamento',
-      descricao: 'Teoria aprofundada, diagnósticos e licenças CC/GPL.',
-      url_recurso: 'aulainterativa/intro_hw_sw.html'
-    }];
-  }
-
-  if (!conteudos || conteudos.length === 0) {
-    container.innerHTML = '<p class="text-slate-400 text-xs py-4 text-center">Nenhum recurso cadastrado até o momento.</p>';
+  if (error || !conteudos || conteudos.length === 0) {
+    container.innerHTML = '<p class="text-slate-400 text-xs py-4 text-center">Nenhum recurso cadastrado para este tópico até o momento.</p>';
   } else {
     container.innerHTML = conteudos.map(item => `
       <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between hover:border-emerald-500/50 transition">
@@ -265,7 +313,7 @@ function fecharModalConteudos() {
 }
 
 function acessarRecurso(urlRecurso) {
-  if (!alunoAtual) return;
+  if (!alunoAtual || !urlRecurso) return;
 
   const studentData = {
     id: alunoAtual.id,
@@ -282,7 +330,13 @@ function acessarRecurso(urlRecurso) {
   });
 
   fecharModalConteudos();
-  window.open(`${urlRecurso}?${params.toString()}`, '_blank');
+  
+  // Abre o recurso ou redireciona
+  if (urlRecurso.startsWith('http://') || urlRecurso.startsWith('https://')) {
+    window.open(urlRecurso, '_blank');
+  } else {
+    window.location.href = `${urlRecurso}?${params.toString()}`;
+  }
 }
 
 // ==========================================
@@ -294,7 +348,7 @@ async function carregarJogos() {
   if (!container) return;
 
   if (!jogos || jogos.length === 0) {
-    container.innerHTML = '<p class="text-slate-400 col-span-full">Nenhum jogo disponível.</p>';
+    container.innerHTML = '<p class="text-slate-400 col-span-full">Nenhum jogo disponível no momento.</p>';
     return;
   }
 
@@ -316,8 +370,6 @@ async function renderizarPerfil() {
   if (!alunoAtual) return;
   const container = document.getElementById('dados-perfil');
   if (!container) return;
-
-  const { data: meritos } = await supabase.from('meritos').select('*').eq('aluno_id', alunoAtual.id);
 
   const avatarHTML = alunoAtual.avatar_url 
     ? `<img src="${alunoAtual.avatar_url}" class="w-16 h-16 rounded-full object-cover border-2 border-emerald-500 bg-slate-800" alt="Avatar">`
@@ -373,7 +425,13 @@ async function atualizarDadosPessoais() {
   renderizarPerfil();
 }
 
+// INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', () => {
   carregarTurmasCadastro();
   verificarSessao();
+
+  const regForm = document.getElementById('register-form');
+  if (regForm) {
+    regForm.addEventListener('submit', realizarRegistro);
+  }
 });
