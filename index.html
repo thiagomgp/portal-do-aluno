@@ -300,69 +300,99 @@
     });
 
     // CARREGA DADOS DO ALUNO REAL CONSULTANDO O BANCO DE DADOS
-    async function carregarSessaoReal() {
-      let studentId = null;
+    // CARREGA DADOS DO ALUNO REAL COM BUSCA NO SUPABASE PROFILES + AUTH
+async function carregarSessaoReal() {
+  let studentId = null;
+  let studentEmail = null;
 
-      const saved = sessionStorage.getItem('active_student');
-      const urlParams = new URLSearchParams(window.location.search);
+  // 1. Tenta obter o aluno através da sessão de login ativa (auth.users)
+  try {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (session && session.user) {
+      studentId = session.user.id;
+      studentEmail = session.user.email;
+    }
+  } catch (e) {}
 
-      if (saved) {
-        try {
-          activeStudent = JSON.parse(saved);
-          studentId = activeStudent.id;
-        } catch (e) {}
-      } else if (urlParams.has('id')) {
-        studentId = urlParams.get('id');
+  // 2. Se não houver login ativo, verifica o URL ou o sessionStorage
+  if (!studentId) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const saved = sessionStorage.getItem('active_student');
+
+    if (urlParams.has('id')) {
+      studentId = urlParams.get('id');
+    } else if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        studentId = parsed.id;
+        studentEmail = parsed.email;
+      } catch (e) {}
+    }
+  }
+
+  // 3. Se temos um ID válido (diferente do DEMO), consulta a tabela profiles
+  if (studentId && studentId !== DEFAULT_UUID_DEMO) {
+    try {
+      const { data: profile, error } = await _supabase
+        .from('profiles')
+        .select('*, turmas(nome)')
+        .eq('id', studentId)
+        .maybeSingle();
+
+      if (profile && !error) {
         activeStudent = {
-          id: studentId,
-          nome: urlParams.get('nome') || 'Aluno',
-          turma: urlParams.get('turma') || 'Geral'
+          id: profile.id,
+          nome: profile.nome_completo || 'Aluno',
+          apelido: profile.apelido || '',
+          email: studentEmail || 'aluno@escola.com',
+          turma: profile.turmas?.nome || 'Geral',
+          foto_url: profile.avatar_url || ''
         };
       }
+    } catch (err) {
+      console.warn("Erro ao carregar perfil do Supabase:", err);
+    }
+  }
 
-      if (!studentId || studentId === DEFAULT_UUID_DEMO) {
-        try {
-          const { data: { session } } = await _supabase.auth.getSession();
-          if (session && session.user) {
-            studentId = session.user.id;
-            activeStudent = { id: studentId, email: session.user.email };
-          }
-        } catch (e) {}
-      }
+  // 4. Se não encontrar nada, usa o aluno cadastrado de teste como padrão
+  if (!activeStudent || activeStudent.id === DEFAULT_UUID_DEMO) {
+    // Se quiser que o aluno "teste teste" seja o padrão em vez do Demo:
+    activeStudent = {
+      id: "659ebb95-7f24-4e4f-91ec-224... ", // Cole o UUID completo do Supabase aqui
+      nome: "teste teste",
+      turma: "Geral",
+      email: "aluno@escola.com",
+      apelido: "",
+      foto_url: "https://i.pinimg.com/736x/ce/4c/ab/ce..."
+    };
+  }
 
-      if (studentId && studentId !== DEFAULT_UUID_DEMO) {
-        try {
-          const { data: profile, error } = await _supabase
-            .from('profiles')
-            .select('*, turmas(nome)')
-            .eq('id', studentId)
-            .maybeSingle();
+  sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
 
-          if (profile && !error) {
-            activeStudent = {
-              id: profile.id,
-              nome: profile.nome_completo || activeStudent?.nome || 'Aluno',
-              apelido: profile.apelido || '',
-              email: profile.email || activeStudent?.email || 'aluno@escola.com',
-              turma: profile.turmas?.nome || activeStudent?.turma || 'Geral',
-              foto_url: profile.avatar_url || ''
-            };
-          }
-        } catch (err) {
-          console.warn("Aviso ao carregar perfil do Supabase:", err);
-        }
-      }
+  // Atualiza os campos na tela
+  const nomeExibicao = activeStudent.nome || "Aluno";
+  const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
 
-      if (!activeStudent) {
-        activeStudent = {
-          id: DEFAULT_UUID_DEMO,
-          nome: "Aluno Demo",
-          turma: "Geral",
-          email: "aluno@escola.com",
-          apelido: "aluno_demo",
-          foto_url: ""
-        };
-      }
+  if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
+  if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Geral";
+
+  if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
+  if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
+  if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
+
+  if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
+  if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
+  if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
+
+  if (document.getElementById('profile-avatar-url')) {
+    document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
+  }
+  if (document.getElementById('profile-avatar-preview')) {
+    document.getElementById('profile-avatar-preview').src = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
+      ? activeStudent.foto_url 
+      : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
+  }
+}
 
       sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
 
