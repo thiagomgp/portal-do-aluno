@@ -311,102 +311,99 @@
     });
 
     async function carregarSessaoReal() {
-      let studentId = null;
-      let studentEmail = null;
+  let studentId = null;
+  let studentEmail = null;
 
-      try {
-        const { data: { session } } = await _supabase.auth.getSession();
-        if (session && session.user) {
-          studentId = session.user.id;
-          studentEmail = session.user.email;
-        }
-      } catch (e) {}
-
-      if (!studentId) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const saved = sessionStorage.getItem('active_student');
-
-        if (urlParams.has('id')) {
-          studentId = urlParams.get('id');
-        } else if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            studentId = parsed.id;
-            studentEmail = parsed.email;
-          } catch (e) {}
-        }
-      }
-
-      if (!studentId) {
-        studentId = DEFAULT_UUID_TESTE;
-      }
-
-      try {
-        const { data: profile, error } = await _supabase
-          .from('profiles')
-          .select('*, turmas(id, nome)')
-          .eq('id', studentId)
-          .maybeSingle();
-
-        if (profile && !error) {
-          activeStudent = {
-            id: profile.id,
-            nome: profile.nome_completo || 'Aluno',
-            apelido: profile.apelido || '',
-            email: studentEmail || 'aluno@escola.com',
-            turma_id: profile.turma_id,
-            turma: profile.turmas?.nome || 'Sem Turma',
-            foto_url: profile.avatar_url || ''
-          };
-        }
-      } catch (err) {
-        console.warn("Erro ao carregar perfil do Supabase:", err);
-      }
-
-      if (activeStudent && (!activeStudent.turma_id || activeStudent.turma === 'Sem Turma')) {
-        const { data: turmasDisponiveis } = await _supabase.from('turmas').select('id, nome').limit(1);
-        if (turmasDisponiveis && turmasDisponiveis.length > 0) {
-          activeStudent.turma_id = turmasDisponiveis[0].id;
-          activeStudent.turma = turmasDisponiveis[0].nome;
-          await _supabase.from('profiles').update({ turma_id: turmasDisponiveis[0].id }).eq('id', activeStudent.id);
-        }
-      }
-
-      if (!activeStudent) {
-        activeStudent = {
-          id: DEFAULT_UUID_TESTE,
-          nome: "teste teste",
-          turma: "Geral",
-          email: "aluno@escola.com",
-          apelido: "",
-          foto_url: "https://i.pinimg.com/736x/ce/4c/ab/ce4cab3df20d39e248f3b259d6402ecf.jpg"
-        };
-      }
-
-      sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
-
-      const nomeExibicao = activeStudent.nome || "Aluno";
-      const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
-
-      if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
-      if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Turma Geral";
-
-      const avatarSrc = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
-        ? activeStudent.foto_url 
-        : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
-
-      if (document.getElementById('header-student-avatar')) document.getElementById('header-student-avatar').src = avatarSrc;
-      if (document.getElementById('profile-avatar-preview')) document.getElementById('profile-avatar-preview').src = avatarSrc;
-
-      if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
-      if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
-      if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
-
-      if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
-      if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
-      if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
-      if (document.getElementById('profile-avatar-url')) document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
+  try {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (session && session.user) {
+      studentId = session.user.id;
+      studentEmail = session.user.email;
     }
+  } catch (e) {}
+
+  if (!studentId) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('id')) {
+      studentId = urlParams.get('id');
+    }
+  }
+
+  // Se não houver ID na URL nem na sessão auth, usa o ID padrão de teste
+  if (!studentId) {
+    studentId = DEFAULT_UUID_TESTE;
+  }
+
+  // BUSCA DIRETAMENTE DO SUPABASE A TURMA MAIS RECENTE REGISTRADA
+  try {
+    const { data: profile, error } = await _supabase
+      .from('profiles')
+      .select('*, turmas(id, nome)')
+      .eq('id', studentId)
+      .maybeSingle();
+
+    if (profile && !error) {
+      activeStudent = {
+        id: profile.id,
+        nome: profile.nome_completo || 'Aluno',
+        apelido: profile.apelido || '',
+        email: studentEmail || 'aluno@escola.com',
+        turma_id: profile.turma_id,
+        turma: profile.turmas?.nome || 'Sem Turma',
+        foto_url: profile.avatar_url || ''
+      };
+    }
+  } catch (err) {
+    console.warn("Erro ao carregar perfil do Supabase:", err);
+  }
+
+  // Se o aluno ainda não tiver turma no banco, vincula a primeira turma cadastrada
+  if (activeStudent && (!activeStudent.turma_id || activeStudent.turma === 'Sem Turma')) {
+    const { data: turmasDisponiveis } = await _supabase.from('turmas').select('id, nome').limit(1);
+    if (turmasDisponiveis && turmasDisponiveis.length > 0) {
+      activeStudent.turma_id = turmasDisponiveis[0].id;
+      activeStudent.turma = turmasDisponiveis[0].nome;
+      await _supabase.from('profiles').update({ turma_id: turmasDisponiveis[0].id }).eq('id', activeStudent.id);
+    }
+  }
+
+  if (!activeStudent) {
+    activeStudent = {
+      id: DEFAULT_UUID_TESTE,
+      nome: "teste teste",
+      turma: "Sem Turma",
+      email: "aluno@escola.com",
+      apelido: "",
+      foto_url: "https://i.pinimg.com/736x/ce/4c/ab/ce4cab3df20d39e248f3b259d6402ecf.jpg"
+    };
+  }
+
+  // Salva no sessionStorage o estado atualizado retornado pelo Supabase
+  sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
+
+  const nomeExibicao = activeStudent.nome || "Aluno";
+  const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
+
+  // Atualiza os elementos da interface do Aluno
+  if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
+  if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Sem Turma";
+
+  const avatarSrc = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
+    ? activeStudent.foto_url 
+    : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
+
+  if (document.getElementById('header-student-avatar')) document.getElementById('header-student-avatar').src = avatarSrc;
+  if (document.getElementById('profile-avatar-preview')) document.getElementById('profile-avatar-preview').src = avatarSrc;
+
+  if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
+  if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
+  if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
+
+  if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
+  if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
+  if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
+  if (document.getElementById('profile-avatar-url')) document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
+}
 
     function previewAvatarUrl(url) {
       if (url && url.startsWith('http')) {
