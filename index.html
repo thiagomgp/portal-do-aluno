@@ -38,7 +38,7 @@
         <div id="user-info-bar" class="flex items-center gap-3 bg-slate-950/80 px-3.5 py-1.5 rounded-full border border-emerald-500/30 shadow-inner">
           <div class="relative shrink-0">
             <img id="header-student-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Aluno" alt="Avatar do Aluno" class="w-9 h-9 rounded-full bg-slate-900 border-2 border-emerald-400 object-cover shadow-[0_0_10px_rgba(52,211,153,0.3)]">
-            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950" title="Online"></div>
+            <div id="status-indicator-dot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950" title="Online"></div>
           </div>
 
           <div class="text-xs">
@@ -50,9 +50,9 @@
           </div>
         </div>
 
-        <button onclick="fazerLogout(event)" class="text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
-          <i class="fa-solid fa-right-from-bracket text-xs"></i>
-          <span>Sair</span>
+        <button id="btn-auth-action" onclick="tratarAcaoAuthHeader()" class="text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-right-from-bracket text-xs" id="icon-auth-action"></i>
+          <span id="label-auth-action">Sair</span>
         </button>
       </div>
     </div>
@@ -237,6 +237,58 @@
 
   </main>
 
+  <!-- MODAL EMBUTIDO DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
+  <div id="modal-auth-container" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-6">
+      
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto text-xl shadow-[0_0_15px_rgba(52,211,153,0.2)]">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <h2 id="auth-title" class="text-xl font-bold text-white tracking-wide">Acesso ao Portal do Aluno</h2>
+        <p id="auth-subtitle" class="text-xs text-slate-400">Entre com as suas credenciais para aceder às suas aulas</p>
+      </div>
+
+      <!-- BOTÕES DE ALTERNÂNCIA (LOGIN vs REGISTO) -->
+      <div class="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs font-semibold">
+        <button id="btn-tab-login" onclick="alternarAbaAuth('login')" class="py-2 rounded-lg bg-emerald-500 text-slate-950 font-bold transition">Entrar</button>
+        <button id="btn-tab-register" onclick="alternarAbaAuth('register')" class="py-2 rounded-lg text-slate-400 hover:text-white transition">Criar Conta</button>
+      </div>
+
+      <!-- FORMULÁRIO DE LOGIN -->
+      <form id="form-auth-login" onsubmit="executarLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">E-mail</label>
+          <input type="email" id="login-email" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="seuemail@exemplo.com" required>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Senha</label>
+          <input type="password" id="login-password" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition shadow-lg">Entrar no Portal</button>
+      </form>
+
+      <!-- FORMULÁRIO DE CADASTRO -->
+      <form id="form-auth-register" onsubmit="executarCadastro(event)" class="hidden space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Nome Completo</label>
+          <input type="text" id="reg-nome" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="Seu Nome Completo" required>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">E-mail</label>
+          <input type="email" id="reg-email" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="seuemail@exemplo.com" required>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Senha</label>
+          <input type="password" id="reg-password" minlength="6" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="Mínimo 6 caracteres" required>
+        </div>
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition shadow-lg">Solicitar Registo</button>
+      </form>
+
+      <div id="auth-feedback-msg" class="text-xs text-center hidden p-3 rounded-lg font-medium"></div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -246,8 +298,10 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       await carregarSessaoReal();
-      await varrerEExibirAulasGitHub();
-      await carregarAvisosMuralAluno();
+      if (activeStudent) {
+        await varrerEExibirAulasGitHub();
+        await carregarAvisosMuralAluno();
+      }
 
       document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -270,7 +324,7 @@
             .eq('id', activeStudent.id);
 
           if (error) {
-            alert("Erro ao salvar no banco: " + error.message);
+            alert("Erro ao guardar dados: " + error.message);
           } else {
             alert("Perfil atualizado com sucesso!");
             activeStudent.nome = updates.nome_completo;
@@ -289,9 +343,9 @@
         const { error } = await _supabase.auth.updateUser({ password: novaSenha });
 
         if (error) {
-          alert("Erro ao alterar senha: " + error.message);
+          alert("Erro ao alterar palavra-passe: " + error.message);
         } else {
-          alert("Senha alterada com sucesso!");
+          alert("Palavra-passe alterada com sucesso!");
           document.getElementById('profile-new-password').value = '';
         }
       });
@@ -301,7 +355,6 @@
       let studentId = null;
       let studentEmail = null;
 
-      // 1. Tenta obter a sessão de autenticação do Supabase
       try {
         const { data: { session } } = await _supabase.auth.getSession();
         if (session && session.user) {
@@ -310,7 +363,6 @@
         }
       } catch (e) {}
 
-      // 2. Se não houver sessão ativa, tenta obter do ID repassado na URL
       if (!studentId) {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('id')) {
@@ -318,14 +370,11 @@
         }
       }
 
-      // 3. Se ainda assim não houver ID válido, encerra sem exibir dados de teste fictícios
       if (!studentId) {
-        if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = "Não autenticado";
-        if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = "Realize o login";
+        exibirModalAutenticacao();
         return;
       }
 
-      // 4. Busca os dados reais do perfil e turma do Supabase
       try {
         const { data: profile, error } = await _supabase
           .from('profiles')
@@ -333,26 +382,33 @@
           .eq('id', studentId)
           .maybeSingle();
 
-        if (profile && !error) {
-          let nomeTurma = "Sem Turma";
-
-          if (profile.turma_id) {
-            const { data: tData } = await _supabase.from('turmas').select('nome').eq('id', profile.turma_id).maybeSingle();
-            if (tData) nomeTurma = tData.nome;
-          }
-
-          activeStudent = {
-            id: profile.id,
-            nome: profile.nome_completo || 'Aluno',
-            apelido: profile.apelido || '',
-            email: studentEmail || 'aluno@escola.com',
-            turma_id: profile.turma_id,
-            turma: nomeTurma,
-            foto_url: profile.avatar_url || ''
-          };
+        if (error || !profile) {
+          exibirModalAutenticacao();
+          return;
         }
+
+        let nomeTurma = "Sem Turma";
+        if (profile.turma_id) {
+          const { data: tData } = await _supabase.from('turmas').select('nome').eq('id', profile.turma_id).maybeSingle();
+          if (tData) nomeTurma = tData.nome;
+        }
+
+        activeStudent = {
+          id: profile.id,
+          nome: profile.nome_completo || 'Aluno',
+          apelido: profile.apelido || '',
+          email: studentEmail || 'aluno@escola.com',
+          turma_id: profile.turma_id,
+          turma: nomeTurma,
+          foto_url: profile.avatar_url || '',
+          status: profile.status || 'ativo'
+        };
+
+        fecharModalAutenticacao();
       } catch (err) {
         console.warn("Erro ao carregar perfil do Supabase:", err);
+        exibirModalAutenticacao();
+        return;
       }
 
       if (!activeStudent) return;
@@ -378,6 +434,101 @@
       if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
       if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
       if (document.getElementById('profile-avatar-url')) document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
+
+      document.getElementById('label-auth-action').innerText = "Sair";
+      document.getElementById('icon-auth-action').className = "fa-solid fa-right-from-bracket text-xs";
+    }
+
+    function exibirModalAutenticacao() {
+      activeStudent = null;
+      document.getElementById('student-display-name').innerText = "Não autenticado";
+      document.getElementById('student-display-class').innerText = "Realize o login";
+      document.getElementById('label-auth-action').innerText = "Entrar";
+      document.getElementById('icon-auth-action').className = "fa-solid fa-right-to-bracket text-xs";
+
+      document.getElementById('modal-auth-container').classList.remove('hidden');
+    }
+
+    function fecharModalAutenticacao() {
+      document.getElementById('modal-auth-container').classList.add('hidden');
+    }
+
+    function alternarAbaAuth(aba) {
+      const isLogin = aba === 'login';
+      document.getElementById('form-auth-login').classList.toggle('hidden', !isLogin);
+      document.getElementById('form-auth-register').classList.toggle('hidden', isLogin);
+
+      document.getElementById('btn-tab-login').className = isLogin
+        ? 'py-2 rounded-lg bg-emerald-500 text-slate-950 font-bold transition'
+        : 'py-2 rounded-lg text-slate-400 hover:text-white transition';
+
+      document.getElementById('btn-tab-register').className = !isLogin
+        ? 'py-2 rounded-lg bg-emerald-500 text-slate-950 font-bold transition'
+        : 'py-2 rounded-lg text-slate-400 hover:text-white transition';
+
+      document.getElementById('auth-feedback-msg').classList.add('hidden');
+    }
+
+    async function executarLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const feedback = document.getElementById('auth-feedback-msg');
+
+      feedback.classList.remove('hidden');
+      feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-slate-800 text-slate-300";
+      feedback.innerText = "A autenticar...";
+
+      const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-rose-950/80 border border-rose-800 text-rose-300";
+        feedback.innerText = "Erro ao entrar: " + error.message;
+      } else {
+        feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-emerald-950/80 border border-emerald-800 text-emerald-300";
+        feedback.innerText = "Login efetuado com sucesso! A carregar portal...";
+        setTimeout(async () => {
+          await carregarSessaoReal();
+          await varrerEExibirAulasGitHub();
+          await carregarAvisosMuralAluno();
+        }, 500);
+      }
+    }
+
+    async function executarCadastro(e) {
+      e.preventDefault();
+      const nome = document.getElementById('reg-nome').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const feedback = document.getElementById('auth-feedback-msg');
+
+      feedback.classList.remove('hidden');
+      feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-slate-800 text-slate-300";
+      feedback.innerText = "A criar conta...";
+
+      const { data, error } = await _supabase.auth.signUp({ email, password });
+
+      if (error) {
+        feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-rose-950/80 border border-rose-800 text-rose-300";
+        feedback.innerText = "Erro no registo: " + error.message;
+      } else if (data.user) {
+        await _supabase.from('profiles').insert([{
+          id: data.user.id,
+          nome_completo: nome,
+          status: 'pendente'
+        }]);
+
+        feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-amber-950/80 border border-amber-800 text-amber-300";
+        feedback.innerText = "Conta criada com sucesso! A sua conta aguarda aprovação pelo professor.";
+      }
+    }
+
+    function tratarAcaoAuthHeader() {
+      if (activeStudent) {
+        fazerLogout();
+      } else {
+        exibirModalAutenticacao();
+      }
     }
 
     function previewAvatarUrl(url) {
@@ -387,7 +538,6 @@
       }
     }
 
-    // CARREGAMENTO E FILTRO DO MURAL DE AVISOS
     async function carregarAvisosMuralAluno() {
       const lista = document.getElementById('lista-avisos');
       if (!lista || !activeStudent) return;
@@ -541,7 +691,7 @@
       if (activeStudent && activeStudent.id) {
         window.location.href = `${caminhoArquivo}?id=${encodeURIComponent(activeStudent.id)}&nome=${encodeURIComponent(activeStudent.nome)}&turma=${encodeURIComponent(activeStudent.turma || '')}`;
       } else {
-        window.location.href = caminhoArquivo;
+        exibirModalAutenticacao();
       }
     }
 
@@ -597,7 +747,7 @@
       } catch (err) {}
       sessionStorage.clear();
       localStorage.clear();
-      window.location.href = window.location.pathname;
+      exibirModalAutenticacao();
     }
   </script>
 </body>
