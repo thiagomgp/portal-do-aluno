@@ -313,7 +313,7 @@
         }
       });
 
-      // Form Modal Editar Aluno
+      // Form Modal Editar Aluno (sem enviar updated_at para evitar o erro 400)
       document.getElementById('form-modal-editar-aluno').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('modal-aluno-id').value;
@@ -324,8 +324,7 @@
         const { error } = await supabase.from('profiles').update({
           nome_completo: nome,
           apelido: apelido,
-          turma_id: turmaId,
-          updated_at: new Date().toISOString()
+          turma_id: turmaId
         }).eq('id', id);
 
         if (error) {
@@ -410,7 +409,6 @@
       }
     }
 
-    // CARREGAR LISTA COMPLETA DE ALUNOS COM BUSCA ROBUSTA
     async function carregarListaGestaoAlunos() {
       const tbody = document.getElementById('tabela-gestao-alunos');
       if (!tbody) return;
