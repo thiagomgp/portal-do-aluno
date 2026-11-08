@@ -146,7 +146,7 @@
     <!-- ABA 3: GESTÃO GERAL E ALUNOS -->
     <div id="aba-gestao" class="hidden space-y-8">
       
-      <!-- GESTÃO DE TURMAS COM BOTÃO DE EXCLUIR -->
+      <!-- GESTÃO DE TURMAS COM EXCLUSÃO CORRIGIDA -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🏫 Gerenciar Turmas</h2>
         <form id="form-criar-turma" class="flex gap-3">
@@ -156,7 +156,7 @@
         <div id="lista-turmas" class="flex flex-wrap gap-2 pt-2"></div>
       </section>
 
-      <!-- GERENCIAMENTO DE ALUNOS COM E-MAIL, APROVAÇÃO E EXCLUSÃO -->
+      <!-- GERENCIAMENTO DE ALUNOS -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🎓 Cadastro & Gestão de Alunos</h2>
@@ -395,7 +395,7 @@
         document.getElementById('lista-turmas').innerHTML = listaTurmasGlobal.map(t => `
           <div class="inline-flex items-center gap-1.5 bg-slate-950 border border-slate-800 text-indigo-300 px-3 py-1.5 rounded-lg text-xs font-bold">
             <span>${t.nome}</span>
-            <button onclick="excluirTurma('${t.id}', '${t.nome.replace(/'/g, "\\'")}') text-slate-400 hover:text-rose-400 transition ml-1" title="Excluir turma">
+            <button onclick="excluirTurma('${t.id}', '${t.nome.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-rose-400 transition ml-1" title="Excluir turma">
               <i class="fa-solid fa-xmark text-xs"></i>
             </button>
           </div>
@@ -417,14 +417,13 @@
     }
 
     async function carregarMapeamentoAlunos() {
-      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, email, apelido, turma_id, avatar_url, status');
+      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, apelido, turma_id, avatar_url, status');
       if (alunos) {
         listaAlunosCompleta = alunos;
         mapaAlunosGlobal = {};
         alunos.forEach(a => {
           mapaAlunosGlobal[a.id] = {
             nome: a.nome_completo || a.apelido || 'Aluno Registrado',
-            email: a.email || '—',
             turma_id: a.turma_id,
             avatar_url: a.avatar_url,
             status: a.status
@@ -446,7 +445,7 @@
 
       tbody.innerHTML = alunos.map(a => {
         const nome = a.nome_completo || 'Aluno';
-        const email = a.email || '—';
+        const email = a.email || 'Cadastrado no Auth';
         const avatar = a.avatar_url && a.avatar_url.startsWith('http') 
           ? a.avatar_url 
           : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nome)}`;
