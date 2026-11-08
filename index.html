@@ -23,22 +23,38 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
 
-  <!-- CABEÇALHO SUPERIOR -->
-  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+  <!-- CABEÇALHO SUPERIOR COM AVATAR DESTACADO DA IDENTIDADE VISUAL -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      
+      <!-- BRANDING DO PORTAL -->
       <div class="flex items-center gap-3">
         <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></div>
-        <h1 class="text-lg font-bold text-emerald-400">Portal do Aluno</h1>
+        <h1 class="text-lg font-bold text-emerald-400 tracking-wide">Portal do Aluno</h1>
       </div>
 
+      <!-- IDENTIDADE VISUAL & AVATAR DO ALUNO SELECIONADO -->
       <div class="flex items-center gap-4">
-        <div id="user-info-bar" class="text-xs text-slate-300 flex items-center gap-2">
-          <span>👋 Olá, <strong id="student-display-name" class="text-white">Carregando...</strong></span>
-          <span class="text-slate-600">|</span>
-          <span id="student-display-class" class="text-slate-400">--</span>
+        <div id="user-info-bar" class="flex items-center gap-3 bg-slate-950/80 px-3.5 py-1.5 rounded-full border border-emerald-500/30 shadow-inner">
+          <!-- AVATAR VISÍVEL COM ANEL EM EMERALD NEON -->
+          <div class="relative shrink-0">
+            <img id="header-student-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Aluno" alt="Avatar do Aluno" class="w-9 h-9 rounded-full bg-slate-900 border-2 border-emerald-400 object-cover shadow-[0_0_10px_rgba(52,211,153,0.3)]">
+            <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950" title="Online"></div>
+          </div>
+
+          <!-- INFORMAÇÕES DE NOME E TURMA -->
+          <div class="text-xs">
+            <div class="font-bold text-white leading-tight" id="student-display-name">Carregando...</div>
+            <div class="text-[10px] text-emerald-400 font-medium leading-tight flex items-center gap-1 mt-0.5">
+              <i class="fa-solid fa-users text-[9px]"></i>
+              <span id="student-display-class">--</span>
+            </div>
+          </div>
         </div>
-        <button onclick="fazerLogout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-lg transition">
-          Sair
+
+        <button onclick="fazerLogout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i>
+          <span>Sair</span>
         </button>
       </div>
     </div>
@@ -182,7 +198,7 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
         
         <div class="flex items-center gap-4 border-b border-slate-800 pb-6">
-          <img id="profile-avatar-preview" src="https://api.dicebear.com/7.x/bottts/svg?seed=Aluno" alt="Avatar" class="w-16 h-16 rounded-full bg-slate-950 border-2 border-emerald-400 object-cover">
+          <img id="profile-avatar-preview" src="https://api.dicebear.com/7.x/bottts/svg?seed=Aluno" alt="Avatar" class="w-16 h-16 rounded-full bg-slate-950 border-2 border-emerald-400 object-cover shadow-[0_0_12px_rgba(52,211,153,0.4)]">
           <div>
             <h3 id="profile-header-name" class="text-lg font-bold text-white">--</h3>
             <p id="profile-header-nickname" class="text-xs text-emerald-400 font-medium">@--</p>
@@ -209,7 +225,7 @@
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">URL da Foto de Perfil:</label>
+            <label class="block text-xs font-medium text-slate-400 mb-1">URL da Foto de Perfil (Avatar):</label>
             <input type="url" id="profile-avatar-url" oninput="previewAvatarUrl(this.value)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="https://exemplo.com/foto.png">
           </div>
 
@@ -243,6 +259,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await carregarSessaoReal();
       await varrerEExibirAulasGitHub();
+      await carregarAvisosMuralAluno();
 
       // Form Perfil
       document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
@@ -296,12 +313,11 @@
       });
     });
 
-    // CARREGA DADOS DO ALUNO REAL COM BUSCA NO SUPABASE PROFILES + AUTH
+    // CARREGA DADOS DO ALUNO REAL COM VINCULAÇÃO ESTRITA DE TURMA
     async function carregarSessaoReal() {
       let studentId = null;
       let studentEmail = null;
 
-      // 1. Tenta obter o aluno através da sessão de login ativa
       try {
         const { data: { session } } = await _supabase.auth.getSession();
         if (session && session.user) {
@@ -310,7 +326,6 @@
         }
       } catch (e) {}
 
-      // 2. Se não houver login ativo, verifica o URL ou o sessionStorage
       if (!studentId) {
         const urlParams = new URLSearchParams(window.location.search);
         const saved = sessionStorage.getItem('active_student');
@@ -326,16 +341,14 @@
         }
       }
 
-      // Se nenhum ID for passado, carrega por padrão o aluno cadastrado no banco
       if (!studentId) {
         studentId = DEFAULT_UUID_TESTE;
       }
 
-      // 3. Consulta a tabela profiles com o ID capturado
       try {
         const { data: profile, error } = await _supabase
           .from('profiles')
-          .select('*, turmas(nome)')
+          .select('*, turmas(id, nome)')
           .eq('id', studentId)
           .maybeSingle();
 
@@ -345,7 +358,8 @@
             nome: profile.nome_completo || 'Aluno',
             apelido: profile.apelido || '',
             email: studentEmail || 'aluno@escola.com',
-            turma: profile.turmas?.nome || 'Geral',
+            turma_id: profile.turma_id,
+            turma: profile.turmas?.nome || 'Sem Turma',
             foto_url: profile.avatar_url || ''
           };
         }
@@ -353,7 +367,16 @@
         console.warn("Erro ao carregar perfil do Supabase:", err);
       }
 
-      // Fallback de garantia
+      // Se o aluno não tiver turma no perfil, atribui uma turma padrão válida
+      if (activeStudent && (!activeStudent.turma_id || activeStudent.turma === 'Sem Turma')) {
+        const { data: turmasDisponiveis } = await _supabase.from('turmas').select('id, nome').limit(1);
+        if (turmasDisponiveis && turmasDisponiveis.length > 0) {
+          activeStudent.turma_id = turmasDisponiveis[0].id;
+          activeStudent.turma = turmasDisponiveis[0].nome;
+          await _supabase.from('profiles').update({ turma_id: turmasDisponiveis[0].id }).eq('id', activeStudent.id);
+        }
+      }
+
       if (!activeStudent) {
         activeStudent = {
           id: DEFAULT_UUID_TESTE,
@@ -367,12 +390,19 @@
 
       sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
 
-      // Atualiza os campos na tela
       const nomeExibicao = activeStudent.nome || "Aluno";
       const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
 
       if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
-      if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Geral";
+      if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Turma Geral";
+
+      // Atualiza os avatares (Cabeçalho e Perfil)
+      const avatarSrc = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
+        ? activeStudent.foto_url 
+        : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
+
+      if (document.getElementById('header-student-avatar')) document.getElementById('header-student-avatar').src = avatarSrc;
+      if (document.getElementById('profile-avatar-preview')) document.getElementById('profile-avatar-preview').src = avatarSrc;
 
       if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
       if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
@@ -381,19 +411,56 @@
       if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
       if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
       if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
-
-      if (document.getElementById('profile-avatar-url')) {
-        document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
-      }
-      if (document.getElementById('profile-avatar-preview')) {
-        document.getElementById('profile-avatar-preview').src = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
-          ? activeStudent.foto_url 
-          : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
-      }
+      if (document.getElementById('profile-avatar-url')) document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
     }
 
     function previewAvatarUrl(url) {
-      if (url && url.startsWith('http')) document.getElementById('profile-avatar-preview').src = url;
+      if (url && url.startsWith('http')) {
+        document.getElementById('profile-avatar-preview').src = url;
+        document.getElementById('header-student-avatar').src = url;
+      }
+    }
+
+    // CARREGA AVISOS ESPECÍFICOS DA TURMA OU GLOBAIS
+    async function carregarAvisosMuralAluno() {
+      const lista = document.getElementById('lista-avisos');
+      if (!lista || !activeStudent) return;
+
+      try {
+        let query = _supabase.from('avisos').select('*, turmas(nome)').order('created_at', { ascending: false });
+
+        if (activeStudent.turma_id) {
+          query = query.or(`turma_id.eq.${activeStudent.turma_id},tipo.eq.geral,turma_id.is.null`);
+        } else {
+          query = query.or(`tipo.eq.geral,turma_id.is.null`);
+        }
+
+        const { data: avisos, error } = await query;
+
+        if (error || !avisos || avisos.length === 0) {
+          lista.innerHTML = `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-slate-500 text-xs">
+              Nenhum recado ou aviso pendente no momento.
+            </div>
+          `;
+          return;
+        }
+
+        lista.innerHTML = avisos.map(a => `
+          <div class="bg-slate-900 border-l-4 border-emerald-500 border-y border-r border-slate-800 rounded-r-2xl p-5 shadow-lg space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-info"></i> ${a.titulo}
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">${a.turmas ? a.turmas.nome : 'Global'}</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">${a.mensagem}</p>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error("Erro ao carregar avisos do aluno:", err);
+      }
     }
 
     async function varrerEExibirAulasGitHub() {
@@ -411,9 +478,7 @@
               .eq('aluno_id', activeStudent.id);
 
             if (progressos) {
-              progressos.forEach(p => {
-                progressosMap[p.modulo_id] = p;
-              });
+              progressos.forEach(p => { progressosMap[p.modulo_id] = p; });
             }
           } catch (e) {}
         }
@@ -442,26 +507,6 @@
                      progressosMap[aliasId] || 
                      progressosMap['intro_hw_sw'] || 
                      progressosMap['hardware_software'] || null;
-
-          if (!prog) {
-            const chavesBusca = [
-              `progresso_${rawNameNoExt}`, 
-              `progresso_${rawFileName}`, 
-              `progresso_${aliasId}`, 
-              `progresso_intro_hw_sw`, 
-              `progresso_Modulo1-introducao`,
-              `progresso_hardware_software`
-            ];
-            for (const chave of chavesBusca) {
-              const local = localStorage.getItem(chave);
-              if (local) {
-                try {
-                  prog = JSON.parse(local);
-                  break;
-                } catch (e) {}
-              }
-            }
-          }
 
           let tituloFormatted = rawNameNoExt.replace(/_/g, ' ').replace(/-/g, ' ').toUpperCase();
           let statusBadgeHTML = '';
