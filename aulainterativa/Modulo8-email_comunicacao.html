@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 8: O Comunicador Digital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      suppressWarning: true,
+      theme: { extend: { colors: { indigo: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' } } } }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
+
+  <!-- CABEÇALHO DA AULA -->
+  <header class="bg-slate-900 border-b border-indigo-500/30 p-4 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="bg-indigo-600 text-white font-bold text-xs px-2.5 py-1 rounded-md">MÓDULO 8</span>
+        <h1 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+          <i class="fa-regular fa-envelope"></i> Comunicação Digital & E-mail
+        </h1>
+      </div>
+      <span id="aluno-identificacao" class="text-xs text-slate-400 font-mono">Aluno: Carregando...</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
+
+    <!-- SELETOR DE ETAPAS -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center gap-2 overflow-x-auto">
+      <button id="btn-etapa-1" onclick="tentarTrocarEtapa(1)" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition">1. Netiqueta & Boas Práticas</button>
+      <div class="w-8 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-2" onclick="tentarTrocarEtapa(2)" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">2. Simulação Real de Anexo e Envio</button>
+    </div>
+
+    <!-- ETAPA 1: NETIQUETA -->
+    <section id="etapa-1" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">1. Regras de Netiqueta na Internet</h2>
+        <p class="text-xs text-slate-400 mt-1">Escrever textos inteiros em MAIÚSCULAS na internet equivale a <strong class="text-rose-400">GRITAR</strong> com o destinatário.</p>
+      </div>
+
+      <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4 text-xs">
+        <p class="text-slate-300">Selecione qual a forma correta de enviar uma dúvida ao professor por e-mail:</p>
+        <button onclick="validarNetiqueta(false)" class="w-full p-3 bg-slate-900 hover:bg-slate-800 rounded-lg text-left border border-slate-800">ME RESPONDE AGORA PRECISO DE AJUDA URGENTE!!!</button>
+        <button onclick="validarNetiqueta(true)" class="w-full p-3 bg-slate-900 hover:bg-slate-800 rounded-lg text-left border border-slate-800 text-emerald-400 font-semibold">Olá, Professor! Gostaria de tirar uma dúvida sobre a atividade. Obrigado!</button>
+        <div id="feedback-e1" class="text-xs font-bold h-4"></div>
+      </div>
+    </section>
+
+    <!-- ETAPA 2: SIMULADOR DE E-MAIL COM NAVEGAÇÃO DE PASTAS -->
+    <section id="etapa-2" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">2. Escrevendo e Anexando um Arquivo com Navegação no Windows</h2>
+        <p class="text-xs text-slate-400">Preencha os campos abaixo e clique em <strong>Anexar Arquivo...</strong>. Navegue pelas pastas do computador para encontrar o arquivo <code class="text-indigo-300">Atividade_Modulo8.pdf</code>.</p>
+      </div>
+
+      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Para (E-mail do Professor):</label>
+          <input type="email" id="email-para" placeholder="professor@escola.edu.br" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded text-xs text-white">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Assunto:</label>
+          <input type="text" id="email-assunto" placeholder="Entrega da Atividade do Módulo 8" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded text-xs text-white">
+        </div>
+        
+        <!-- SEÇÃO DE ANEXO REALISTA -->
+        <div class="space-y-2 border-t border-b border-slate-800 py-3">
+          <label class="block text-xs font-bold text-slate-400">Anexo de Documento:</label>
+          <div class="flex items-center gap-3">
+            <button onclick="abrirModalSelecaoArquivo()" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold px-4 py-2 rounded-lg text-xs border border-slate-700 transition flex items-center gap-2">
+              <i class="fa-solid fa-folder-open text-amber-400"></i> Localizar e Anexar Arquivo...
+            </button>
+            <span id="status-anexo" class="text-xs text-slate-500 font-mono">Nenhum arquivo selecionado.</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Mensagem:</label>
+          <textarea id="email-msg" rows="3" placeholder="Prezado professor, me chamo..." class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded text-xs text-white"></textarea>
+        </div>
+
+        <button onclick="enviarEmailSimulado()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg text-xs transition shadow-lg">🚀 Enviar E-mail Completo</button>
+        <div id="feedback-e2" class="text-xs font-bold text-center h-4"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL SIMULADOR DO EXPLORER COM NAVEGAÇÃO DE PASTAS DO WINDOWS -->
+  <div id="modal-selecionar-arquivo" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-[#1f1f1f] border border-slate-700 rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden text-xs flex flex-col">
+      <!-- BARRA DE TÍTULO DA JANELA -->
+      <div class="bg-[#2d2d2d] px-3 py-2 flex justify-between items-center text-slate-300">
+        <span class="font-bold flex items-center gap-2"><i class="fa-regular fa-folder-open text-amber-400"></i> Abrir - Selecionar Arquivo para Anexar</span>
+        <button onclick="fecharModalSelecaoArquivo()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <!-- BARRA DE CAMINHO DE ENDEREÇO DO WINDOWS -->
+      <div class="bg-[#252525] p-2 border-b border-slate-800 flex items-center gap-2 text-[11px]">
+        <button onclick="navegarParaPasta('Documentos')" class="p-1 hover:bg-slate-700 rounded text-slate-400"><i class="fa-solid fa-arrow-left"></i></button>
+        <div id="caminho-pasta-atual" class="flex-1 bg-[#141414] border border-slate-700 rounded px-2.5 py-1 font-mono text-slate-300 flex items-center gap-1">
+          <i class="fa-regular fa-folder text-amber-400"></i> Este Computador > Documentos
+        </div>
+      </div>
+
+      <!-- ESTRUTURA PRINCIPAL: PASTRAS LATERAIS + CONTEÚDO -->
+      <div class="flex flex-1 min-h-[250px]">
+        <!-- ÁRVORE DE PASTAS LATERAL DO WINDOWS -->
+        <div class="w-48 bg-[#181818] border-r border-slate-800 p-2 space-y-1 text-[11px]">
+          <div class="px-2 py-1 text-[10px] font-bold text-slate-500 uppercase">Acesso rápido</div>
+          <div onclick="navegarParaPasta('Área de Trabalho')" id="nav-desktop" class="p-1.5 rounded flex items-center gap-2 cursor-pointer hover:bg-slate-800 text-slate-300">
+            <i class="fa-solid fa-desktop text-blue-400"></i> Área de Trabalho
+          </div>
+          <div onclick="navegarParaPasta('Downloads')" id="nav-downloads" class="p-1.5 rounded flex items-center gap-2 cursor-pointer hover:bg-slate-800 text-slate-300">
+            <i class="fa-solid fa-download text-blue-400"></i> Downloads
+          </div>
+          <div onclick="navegarParaPasta('Documentos')" id="nav-documentos" class="p-1.5 rounded flex items-center gap-2 cursor-pointer bg-indigo-600/30 text-indigo-300 font-bold border border-indigo-500/40">
+            <i class="fa-solid fa-folder text-amber-400"></i> Documentos
+          </div>
+          <div onclick="navegarParaPasta('Imagens')" id="nav-imagens" class="p-1.5 rounded flex items-center gap-2 cursor-pointer hover:bg-slate-800 text-slate-300">
+            <i class="fa-solid fa-image text-emerald-400"></i> Imagens
+          </div>
+          <div onclick="navegarParaPasta('Músicas')" id="nav-musicas" class="p-1.5 rounded flex items-center gap-2 cursor-pointer hover:bg-slate-800 text-slate-300">
+            <i class="fa-solid fa-music text-rose-400"></i> Músicas
+          </div>
+        </div>
+
+        <!-- ÁREA DOS ARQUIVOS DA PASTA SELECIONADA -->
+        <div class="flex-1 p-3 bg-[#141414] overflow-y-auto">
+          <div id="grid-arquivos-pasta" class="space-y-1">
+            <!-- Conteúdo dinâmico via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RODAPÉ DA JANELA COM BOTÃO DE CONFIRMAÇÃO -->
+      <div class="bg-[#202020] p-3 border-t border-slate-800 flex justify-between items-center">
+        <span id="nome-arquivo-selecionado-modal" class="text-slate-400 italic font-mono text-[11px]">Nenhum arquivo selecionado</span>
+        <div class="flex gap-2">
+          <button onclick="confirmarAnexoModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded transition">Abrir (Anexar)</button>
+          <button onclick="fecharModalSelecaoArquivo()" class="bg-slate-800 text-slate-300 font-bold px-3 py-1.5 rounded">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let alunoAtualId = null;
+    let etapaMaxConcluida = 1;
+    let pastaAtual = 'Documentos';
+    let arquivoAnexadoNome = null;
+    let arquivoSelecionadoTemp = null;
+
+    // BANCO DE DADOS FICTÍCIO DAS PASTAS DO WINDOWS
+    const CONTEUDO_PASTAS = {
+      'Documentos': [
+        { nome: 'Atividade_Modulo8.pdf', tamanho: '245 KB', tipo: 'pdf', correto: true },
+        { nome: 'Relatorio_Escolar.docx', tamanho: '118 KB', tipo: 'doc', correto: false },
+        { nome: 'Minhas_Anotacoes.txt', tamanho: '12 KB', tipo: 'txt', correto: false }
+      ],
+      'Downloads': [
+        { nome: 'Atividade_Modulo8.pdf', tamanho: '245 KB', tipo: 'pdf', correto: true },
+        { nome: 'Instalador_Jogo.exe', tamanho: '45 MB', tipo: 'exe', correto: false },
+        { nome: 'Musica_Nova.mp3', tamanho: '4.2 MB', tipo: 'mp3', correto: false }
+      ],
+      'Área de Trabalho': [
+        { nome: 'Atalho_Navegador.lnk', tamanho: '1 KB', tipo: 'link', correto: false },
+        { nome: 'Rascunho.txt', tamanho: '4 KB', tipo: 'txt', correto: false }
+      ],
+      'Imagens': [
+        { nome: 'Foto_Perfil.png', tamanho: '1.2 MB', tipo: 'img', correto: false },
+        { nome: 'Paisagem.jpg', tamanho: '3.5 MB', tipo: 'img', correto: false }
+      ],
+      'Músicas': [
+        { nome: 'Som_Ambiente.mp3', tamanho: '5.1 MB', tipo: 'mp3', correto: false }
+      ]
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      alunoAtualId = urlParams.get('id');
+      document.getElementById('aluno-identificacao').innerText = `Aluno: ${urlParams.get('nome') || 'Estudante'}`;
+      renderizarPasta('Documentos');
+    });
+
+    function tentarTrocarEtapa(n) {
+      if (n > etapaMaxConcluida) return alert(`⚠️ Conclua a Etapa ${etapaMaxConcluida} primeiro!`);
+      carregarEtapa(n);
+    }
+
+    function carregarEtapa(n) {
+      for (let i = 1; i <= 2; i++) {
+        const sec = document.getElementById(`etapa-${i}`);
+        const btn = document.getElementById(`btn-etapa-${i}`);
+        if (sec) sec.classList.toggle('hidden', i !== n);
+        if (btn) {
+          const liberado = i <= etapaMaxConcluida;
+          btn.className = i === n ? 'px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition' : liberado ? 'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition' : 'px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition';
+        }
+      }
+    }
+
+    function validarNetiqueta(correto) {
+      const fb = document.getElementById('feedback-e1');
+      if (correto) {
+        fb.innerText = '✓ Excelente! Comunicação clara, educada e formal. Avançando...';
+        fb.className = 'text-xs font-bold text-emerald-400';
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 2);
+        setTimeout(() => carregarEtapa(2), 1000);
+      } else {
+        fb.innerText = '❌ Evite usar maiúsculas e tom agressivo na internet!';
+        fb.className = 'text-xs font-bold text-rose-400';
+      }
+    }
+
+    // NAVEGAÇÃO DE PASTAS DENTRO DO MODAL
+    function abrirModalSelecaoArquivo() {
+      document.getElementById('modal-selecionar-arquivo').classList.remove('hidden');
+    }
+
+    function fecharModalSelecaoArquivo() {
+      document.getElementById('modal-selecionar-arquivo').classList.add('hidden');
+    }
+
+    function navegarParaPasta(nomePasta) {
+      pastaAtual = nomePasta;
+      document.getElementById('caminho-pasta-atual').innerHTML = `<i class="fa-regular fa-folder text-amber-400"></i> Este Computador > ${nomePasta}`;
+      
+      // Atualizar destaque lateral
+      const navs = ['desktop', 'downloads', 'documentos', 'imagens', 'musicas'];
+      navs.forEach(n => {
+        const el = document.getElementById(`nav-${n}`);
+        if (el) el.className = "p-1.5 rounded flex items-center gap-2 cursor-pointer hover:bg-slate-800 text-slate-300";
+      });
+
+      const navMapeado = { 'Área de Trabalho':'desktop', 'Downloads':'downloads', 'Documentos':'documentos', 'Imagens':'imagens', 'Músicas':'musicas' };
+      const elAtivo = document.getElementById(`nav-${navMapeado[nomePasta]}`);
+      if (elAtivo) elAtivo.className = "p-1.5 rounded flex items-center gap-2 cursor-pointer bg-indigo-600/30 text-indigo-300 font-bold border border-indigo-500/40";
+
+      renderizarPasta(nomePasta);
+    }
+
+    function renderizarPasta(nomePasta) {
+      const container = document.getElementById('grid-arquivos-pasta');
+      const arquivos = CONTEUDO_PASTAS[nomePasta] || [];
+
+      if (arquivos.length === 0) {
+        container.innerHTML = `<p class="text-slate-500 italic text-center py-8">Esta pasta está vazia.</p>`;
+        return;
+      }
+
+      container.innerHTML = arquivos.map(a => {
+        let icone = 'fa-file-lines text-cyan-400';
+        if (a.tipo === 'pdf') icone = 'fa-file-pdf text-rose-400';
+        if (a.tipo === 'img') icone = 'fa-image text-emerald-400';
+        if (a.tipo === 'mp3') icone = 'fa-music text-amber-400';
+
+        return `
+          <div onclick="selecionarItemArquivo('${a.nome}', ${a.correto}, this)" class="item-arq-row p-2 rounded hover:bg-slate-800 border border-transparent cursor-pointer flex justify-between items-center text-slate-300">
+            <span class="flex items-center gap-2 font-medium"><i class="fa-solid ${icone}"></i> ${a.nome}</span>
+            <span class="text-slate-500 font-mono text-[10px]">${a.tamanho}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selecionarItemArquivo(nome, correto, el) {
+      document.querySelectorAll('.item-arq-row').forEach(r => r.className = "item-arq-row p-2 rounded hover:bg-slate-800 border border-transparent cursor-pointer flex justify-between items-center text-slate-300");
+      el.className = "item-arq-row p-2 rounded bg-indigo-600/30 border border-indigo-500/50 cursor-pointer flex justify-between items-center text-indigo-200 font-bold";
+
+      if (correto) {
+        arquivoSelecionadoTemp = nome;
+        document.getElementById('nome-arquivo-selecionado-modal').innerText = `Arquivo Selecionado: ${nome}`;
+        document.getElementById('nome-arquivo-selecionado-modal').className = 'text-emerald-400 font-bold font-mono text-[11px]';
+      } else {
+        arquivoSelecionadoTemp = null;
+        document.getElementById('nome-arquivo-selecionado-modal').innerText = `Atenção: Selecione o arquivo 'Atividade_Modulo8.pdf'!`;
+        document.getElementById('nome-arquivo-selecionado-modal').className = 'text-amber-400 font-bold font-mono text-[11px]';
+      }
+    }
+
+    function confirmarAnexoModal() {
+      if (!arquivoSelecionadoTemp) {
+        alert("Selecione o arquivo de documento correto 'Atividade_Modulo8.pdf' em Documentos ou Downloads!");
+        return;
+      }
+      arquivoAnexadoNome = arquivoSelecionadoTemp;
+      document.getElementById('status-anexo').innerText = `✓ ${arquivoAnexadoNome} (245 KB) anexado com sucesso!`;
+      document.getElementById('status-anexo').className = 'text-xs text-emerald-400 font-bold font-mono';
+      fecharModalSelecaoArquivo();
+    }
+
+    function enviarEmailSimulado() {
+      const para = document.getElementById('email-para').value.trim();
+      const ass = document.getElementById('email-assunto').value.trim();
+      const msg = document.getElementById('email-msg').value.trim();
+      const fb = document.getElementById('feedback-e2');
+
+      if (para && ass && msg && arquivoAnexadoNome) {
+        fb.innerText = '🏆 PARABÉNS! E-mail formal com anexo simulado enviado com sucesso!';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        salvarProgressoSupabase('Modulo8-email_comunicacao', 2, 2, 60, 'concluido');
+      } else {
+        fb.innerText = '⚠️ Preencha o e-mail, assunto, mensagem e navegue até a pasta para anexar o arquivo!';
+        fb.className = 'text-xs font-bold text-amber-400 text-center';
+      }
+    }
+
+    async function salvarProgressoSupabase(mod, etapa, total, tempo, status) {
+      if (!alunoAtualId) return;
+      await _supabase.from('se_progresso').upsert([{ aluno_id: alunoAtualId, modulo_id: mod, etapa_atual: etapa, total_etapas: total, tempo_segundos: tempo, status: status, updated_at: new Date().toISOString() }], { onConflict: 'aluno_id, modulo_id' });
+    }
+  </script>
+</body>
+</html>

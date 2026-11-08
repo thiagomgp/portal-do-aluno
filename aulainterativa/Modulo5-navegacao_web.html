@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 5: O Explorador da Rede</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      suppressWarning: true,
+      theme: { extend: { colors: { indigo: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' } } } }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
+
+  <!-- CABEÇALHO DA AULA -->
+  <header class="bg-slate-900 border-b border-indigo-500/30 p-4 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="bg-indigo-600 text-white font-bold text-xs px-2.5 py-1 rounded-md">MÓDULO 5</span>
+        <h1 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+          <i class="fa-solid fa-compass"></i> Navegação Web & Buscadores
+        </h1>
+      </div>
+      <span id="aluno-identificacao" class="text-xs text-slate-400 font-mono">Aluno: Carregando...</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
+
+    <!-- SELETOR DE ETAPAS -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center gap-2 overflow-x-auto">
+      <button id="btn-etapa-1" onclick="tentarTrocarEtapa(1)" class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition">1. Anatomia do Navegador</button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-2" onclick="tentarTrocarEtapa(2)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">2. Técnicas de Busca</button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-3" onclick="tentarTrocarEtapa(3)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">3. Fontes Confiáveis</button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-4" onclick="tentarTrocarEtapa(4)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">4. Desafio Final (Pesquisa)</button>
+    </div>
+
+    <!-- ETAPA 1: ANATOMIA DO NAVEGADOR (SIMULADOR CHROME) -->
+    <section id="etapa-1" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">1. Como Funciona um Navegador Web (Google Chrome)</h2>
+        <p class="text-xs text-slate-400 mt-1">Digite o endereço do portal na barra de navegação simulada: <strong class="text-indigo-300">portal.edu.br</strong> e pressione <strong>Enter</strong>.</p>
+      </div>
+
+      <div class="bg-[#202124] p-3 rounded-2xl border border-slate-700 shadow-2xl space-y-3">
+        <!-- BARRA SUPERIOR ESTILO GOOGLE CHROME -->
+        <div class="flex items-center gap-2">
+          <!-- BOTOES DE CONTROLADORES DO CHROME -->
+          <div class="flex items-center gap-1 text-slate-400 text-xs px-1">
+            <button class="p-1.5 hover:bg-slate-700 rounded-full cursor-not-allowed opacity-50"><i class="fa-solid fa-arrow-left"></i></button>
+            <button class="p-1.5 hover:bg-slate-700 rounded-full cursor-not-allowed opacity-50"><i class="fa-solid fa-arrow-right"></i></button>
+            <button class="p-1.5 hover:bg-slate-700 rounded-full"><i class="fa-solid fa-rotate-right"></i></button>
+          </div>
+
+          <!-- OMNIBOX (BARRA DE ENDEREÇO DO CHROME) -->
+          <div class="flex-1 bg-[#292a2d] hover:bg-[#323336] focus-within:bg-[#323336] border border-slate-700/60 focus-within:border-indigo-500 rounded-full px-3 py-1.5 flex items-center gap-2 transition">
+            <i class="fa-solid fa-lock text-emerald-400 text-xs"></i>
+            <input type="text" id="input-url-simulada" onkeydown="validarURLSimulada(event)" placeholder="Pesquise no Google ou digite uma URL" class="w-full bg-transparent text-xs text-white focus:outline-none font-sans">
+            <i class="fa-regular fa-star text-slate-400 text-xs cursor-pointer hover:text-amber-400"></i>
+          </div>
+
+          <button onclick="validarURLSimulada({key:'Enter'})" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-full text-xs transition">Ir ➔</button>
+        </div>
+
+        <div id="feedback-e1" class="text-xs font-bold text-center h-4 py-1"></div>
+      </div>
+    </section>
+
+    <!-- ETAPA 2: REFINANDO BUSCAS -->
+    <section id="etapa-2" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">2. Refinando Buscas na Internet</h2>
+        <p class="text-xs text-slate-400 mt-1">Usar aspas <code class="text-indigo-300">"termo exato"</code> força o buscador a procurar a frase exatamente como foi digitada.</p>
+      </div>
+
+      <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+        <p class="text-xs text-slate-300">Pesquise pela frase exata: <strong class="text-indigo-300">"história da informática no Brasil"</strong> incluindo as aspas.</p>
+        <div class="flex gap-2">
+          <input type="text" id="input-busca-aspas" placeholder='Digite com aspas...' class="flex-1 p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">
+          <button onclick="validarBuscaAspas()" class="bg-indigo-600 hover:bg-indigo-500 font-bold px-4 py-2.5 rounded-lg text-xs">Pesquisar</button>
+        </div>
+        <div id="feedback-e2" class="text-xs font-bold h-4"></div>
+      </div>
+    </section>
+
+    <!-- ETAPA 3: FONTES CONFIÁVEIS -->
+    <section id="etapa-3" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">3. Identificando Sites Seguros e Oficiais</h2>
+        <p class="text-xs text-slate-400 mt-1">Domínios oficiais de governo usam <code class="text-indigo-300">.gov.br</code> e universidades usam <code class="text-indigo-300">.edu.br</code> com conexão criptografada (HTTPS).</p>
+      </div>
+
+      <div class="space-y-3">
+        <p class="text-xs text-slate-300">Selecione qual das URLs abaixo é a <strong>OFICIAL E SEGURA</strong> para serviços governamentais:</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <button onclick="validarFonte(false)" class="p-4 bg-slate-950 hover:bg-slate-800 rounded-xl border border-slate-800 text-left font-mono">http://gov-brasil-atendimento.com</button>
+          <button onclick="validarFonte(true)" class="p-4 bg-slate-950 hover:bg-slate-800 rounded-xl border border-slate-800 text-left font-mono text-emerald-400">https://www.gov.br</button>
+          <button onclick="validarFonte(false)" class="p-4 bg-slate-950 hover:bg-slate-800 rounded-xl border border-slate-800 text-left font-mono">http://servicos.gov.br.site-link.net</button>
+        </div>
+        <div id="feedback-e3" class="text-xs font-bold h-4"></div>
+      </div>
+    </section>
+
+    <!-- ETAPA 4: DESAFIO FINAL DE FAVORITOS -->
+    <section id="etapa-4" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">4. Desafio Prático: Salvar Favoritos no Chrome</h2>
+        <p class="text-xs text-slate-400">Adicione os dois sites confiáveis abaixo à sua barra de favoritos do Chrome clicando na estrela ⭐.</p>
+      </div>
+
+      <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3">
+        <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-800 text-xs">
+          <span><i class="fa-solid fa-globe text-indigo-400 mr-2"></i>https://www.mec.gov.br</span>
+          <button id="star-1" onclick="favoritar(1)" class="text-slate-500 hover:text-amber-400 text-lg"><i class="fa-solid fa-star"></i></button>
+        </div>
+        <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-800 text-xs">
+          <span><i class="fa-solid fa-globe text-indigo-400 mr-2"></i>https://www.ibge.gov.br</span>
+          <button id="star-2" onclick="favoritar(2)" class="text-slate-500 hover:text-amber-400 text-lg"><i class="fa-solid fa-star"></i></button>
+        </div>
+        <div id="feedback-e4" class="text-xs font-bold h-4 text-center"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let alunoAtualId = null;
+    let etapaMaxConcluida = 1;
+    let fav1 = false, fav2 = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      alunoAtualId = urlParams.get('id');
+      document.getElementById('aluno-identificacao').innerText = `Aluno: ${urlParams.get('nome') || 'Estudante'}`;
+    });
+
+    function tentarTrocarEtapa(n) {
+      if (n > etapaMaxConcluida) return alert(`⚠️ Conclua a Etapa ${etapaMaxConcluida} primeiro!`);
+      carregarEtapa(n);
+    }
+
+    function carregarEtapa(n) {
+      for (let i = 1; i <= 4; i++) {
+        const sec = document.getElementById(`etapa-${i}`);
+        const btn = document.getElementById(`btn-etapa-${i}`);
+        if (sec) sec.classList.toggle('hidden', i !== n);
+        if (btn) {
+          const liberado = i <= etapaMaxConcluida;
+          btn.className = i === n ? 'px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition' : liberado ? 'px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition' : 'px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition';
+        }
+      }
+    }
+
+    // VALIDAÇÃO FLEXÍVEL SEM EXIGIR HTTP DE FORMA OBRIGATÓRIA
+    function validarURLSimulada(e) {
+      if (e.key === 'Enter') {
+        const val = document.getElementById('input-url-simulada').value.trim().toLowerCase();
+        const fb = document.getElementById('feedback-e1');
+        
+        // Aceita 'portal.edu.br', 'www.portal.edu.br' ou 'https://portal.edu.br'
+        if (val === 'portal.edu.br' || val === 'www.portal.edu.br' || val === 'https://portal.edu.br') {
+          fb.innerText = '✓ Endereço correto! Conexão segura estabelecida via Chrome.';
+          fb.className = 'text-xs font-bold text-emerald-400';
+          etapaMaxConcluida = Math.max(etapaMaxConcluida, 2);
+          setTimeout(() => carregarEtapa(2), 1000);
+        } else {
+          fb.innerText = '⚠️ Digite o endereço do portal corretamente: portal.edu.br';
+          fb.className = 'text-xs font-bold text-rose-400';
+        }
+      }
+    }
+
+    function validarBuscaAspas() {
+      const val = document.getElementById('input-busca-aspas').value.trim();
+      const fb = document.getElementById('feedback-e2');
+      if (val === '"história da informática no Brasil"') {
+        fb.innerText = '✓ Busca exata realizada com sucesso!';
+        fb.className = 'text-xs font-bold text-emerald-400';
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 3);
+        setTimeout(() => carregarEtapa(3), 1000);
+      } else {
+        fb.innerText = '⚠️ Lembre-se de incluir as aspas duplas no início e no fim!';
+        fb.className = 'text-xs font-bold text-rose-400';
+      }
+    }
+
+    function validarFonte(correto) {
+      const fb = document.getElementById('feedback-e3');
+      if (correto) {
+        fb.innerText = '✓ Correto! Possui HTTPS e o domínio oficial .gov.br';
+        fb.className = 'text-xs font-bold text-emerald-400';
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 4);
+        setTimeout(() => carregarEtapa(4), 1000);
+      } else {
+        fb.innerText = '❌ Incorreto! Cuidado com links falsos sem HTTPS ou com domínios suspeitos.';
+        fb.className = 'text-xs font-bold text-rose-400';
+      }
+    }
+
+    function favoritar(n) {
+      if (n === 1) { fav1 = true; document.getElementById('star-1').className = 'text-amber-400 text-lg'; }
+      if (n === 2) { fav2 = true; document.getElementById('star-2').className = 'text-amber-400 text-lg'; }
+
+      if (fav1 && fav2) {
+        const fb = document.getElementById('feedback-e4');
+        fb.innerText = '🏆 PARABÉNS! Módulo 5 concluído com sucesso!';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        salvarProgressoSupabase('Modulo5-navegacao_web', 4, 4, 60, 'concluido');
+      }
+    }
+
+    async function salvarProgressoSupabase(mod, etapa, total, tempo, status) {
+      if (!alunoAtualId) return;
+      await _supabase.from('se_progresso').upsert([{ aluno_id: alunoAtualId, modulo_id: mod, etapa_atual: etapa, total_etapas: total, tempo_segundos: tempo, status: status, updated_at: new Date().toISOString() }], { onConflict: 'aluno_id, modulo_id' });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 6: O Guardião de Dados</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      suppressWarning: true,
+      theme: { extend: { colors: { indigo: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' } } } }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
+
+  <header class="bg-slate-900 border-b border-indigo-500/30 p-4 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="bg-indigo-600 text-white font-bold text-xs px-2.5 py-1 rounded-md">MÓDULO 6</span>
+        <h1 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved"></i> Segurança Digital & Ciberhigiene
+        </h1>
+      </div>
+      <span id="aluno-identificacao" class="text-xs text-slate-400 font-mono">Aluno: Carregando...</span>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
+
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center gap-2 overflow-x-auto">
+      <button id="btn-etapa-1" onclick="tentarTrocarEtapa(1)" class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition">1. Criação de Senhas Fortes</button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-2" onclick="tentarTrocarEtapa(2)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">2. Detector de Phishing</button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-3" onclick="tentarTrocarEtapa(3)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">3. Privacidade & Dados</button>
+    </div>
+
+    <!-- ETAPA 1 -->
+    <section id="etapa-1" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">1. Construindo uma Senha Forte</h2>
+        <p class="text-xs text-slate-400 mt-1">Sua senha deve conter ao menos: 8 caracteres, letras maiúsculas, números e um símbolo (ex: <code class="text-indigo-300">@, #, $</code>).</p>
+      </div>
+
+      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
+        <input type="password" id="input-senha-teste" oninput="avaliarSenha()" placeholder="Digite uma nova senha segura..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500">
+        
+        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+          <div id="barra-forca-senha" class="h-full w-0 transition-all duration-300 bg-rose-500"></div>
+        </div>
+        <div id="feedback-senha" class="text-xs font-bold text-rose-400">Senha Muito Fraca</div>
+
+        <button id="btn-confirmar-senha" disabled onclick="concluirSenha()" class="w-full bg-slate-800 text-slate-500 font-bold py-2.5 rounded-lg text-xs cursor-not-allowed">Confirmar Senha Forte</button>
+      </div>
+    </section>
+
+    <!-- ETAPA 2 -->
+    <section id="etapa-2" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">2. Identificador de Golpes & Phishing</h2>
+        <p class="text-xs text-slate-400">Examine o e-mail abaixo e decida se é LEGÍTIMO ou GOLPE:</p>
+      </div>
+
+      <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4 text-xs">
+        <div class="border-b border-slate-800 pb-3 space-y-1">
+          <p><strong>De:</strong> suporte-banco-urgente@xzy-seguranca.net</p>
+          <p><strong>Assunto:</strong> 🚨 SUA CONTA SERÁ BLOQUEADA EM 24 HORAS!</p>
+        </div>
+        <p class="text-slate-300">Prezado cliente, identificamos uma atividade suspeita. Clique no link abaixo imediatamente para atualizar sua senha ou perderá seu acesso:</p>
+        <span class="text-indigo-400 underline cursor-pointer">http://atualizar-minha-conta-agora.com</span>
+
+        <div class="flex gap-4 pt-3">
+          <button onclick="validarPhishing(false)" class="flex-1 bg-emerald-950 hover:bg-emerald-900 border border-emerald-800 text-emerald-300 font-bold py-3 rounded-xl">✓ E-mail Seguro e Legítimo</button>
+          <button onclick="validarPhishing(true)" class="flex-1 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold py-3 rounded-xl">🚨 É UM GOLPE (PHISHING)</button>
+        </div>
+        <div id="feedback-phishing" class="text-xs font-bold text-center h-4"></div>
+      </div>
+    </section>
+
+    <!-- ETAPA 3 -->
+    <section id="etapa-3" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">3. Proteção de Dados Pessoais</h2>
+        <p class="text-xs text-slate-400">Selecione o que <strong>NUNCA</strong> deve ser compartilhado em redes sociais públicas:</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+        <label class="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800 cursor-pointer">
+          <input type="checkbox" onchange="verificarPrivacidade()" class="chk-priv w-4 h-4 text-indigo-600 rounded">
+          <span>CPF e RG</span>
+        </label>
+        <label class="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800 cursor-pointer">
+          <input type="checkbox" onchange="verificarPrivacidade()" class="chk-priv w-4 h-4 text-indigo-600 rounded">
+          <span>Endereço Residencial Completo</span>
+        </label>
+        <label class="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800 cursor-pointer">
+          <input type="checkbox" onchange="verificarPrivacidade()" class="chk-priv w-4 h-4 text-indigo-600 rounded">
+          <span>Senhas de Acesso</span>
+        </label>
+        <label class="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800 cursor-pointer">
+          <input type="checkbox" onchange="verificarPrivacidade()" class="chk-priv w-4 h-4 text-indigo-600 rounded">
+          <span>Fotos do Cartão de Crédito</span>
+        </label>
+      </div>
+
+      <div id="feedback-e3" class="text-xs font-bold text-center h-4"></div>
+    </section>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let alunoAtualId = null;
+    let etapaMaxConcluida = 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      alunoAtualId = urlParams.get('id');
+      document.getElementById('aluno-identificacao').innerText = `Aluno: ${urlParams.get('nome') || 'Estudante'}`;
+    });
+
+    function tentarTrocarEtapa(n) {
+      if (n > etapaMaxConcluida) return alert(`⚠️ Conclua a Etapa ${etapaMaxConcluida} primeiro!`);
+      carregarEtapa(n);
+    }
+
+    function carregarEtapa(n) {
+      for (let i = 1; i <= 3; i++) {
+        const sec = document.getElementById(`etapa-${i}`);
+        const btn = document.getElementById(`btn-etapa-${i}`);
+        if (sec) sec.classList.toggle('hidden', i !== n);
+        if (btn) {
+          const liberado = i <= etapaMaxConcluida;
+          btn.className = i === n ? 'px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition' : liberado ? 'px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition' : 'px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition';
+        }
+      }
+    }
+
+    function avaliarSenha() {
+      const s = document.getElementById('input-senha-teste').value;
+      const barra = document.getElementById('barra-forca-senha');
+      const fb = document.getElementById('feedback-senha');
+      const btn = document.getElementById('btn-confirmar-senha');
+
+      let forca = 0;
+      if (s.length >= 8) forca += 25;
+      if (/[A-Z]/.test(s)) forca += 25;
+      if (/[0-9]/.test(s)) forca += 25;
+      if (/[^A-Za-z0-9]/.test(s)) forca += 25;
+
+      barra.style.width = `${forca}%`;
+
+      if (forca < 50) {
+        barra.className = "h-full transition-all duration-300 bg-rose-500";
+        fb.innerText = "Senha Fraca (Faltam maiúsculas, números ou símbolos)";
+        fb.className = "text-xs font-bold text-rose-400";
+        btn.disabled = true;
+        btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-2.5 rounded-lg text-xs cursor-not-allowed";
+      } else if (forca < 100) {
+        barra.className = "h-full transition-all duration-300 bg-amber-500";
+        fb.innerText = "Senha Média (Adicione caracteres especiais)";
+        fb.className = "text-xs font-bold text-amber-400";
+        btn.disabled = true;
+      } else {
+        barra.className = "h-full transition-all duration-300 bg-emerald-500";
+        fb.innerText = "✓ Senha Muito Forte!";
+        fb.className = "text-xs font-bold text-emerald-400";
+        btn.disabled = false;
+        btn.className = "w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-xs transition";
+      }
+    }
+
+    function concluirSenha() {
+      etapaMaxConcluida = Math.max(etapaMaxConcluida, 2);
+      carregarEtapa(2);
+    }
+
+    function validarPhishing(isGolpe) {
+      const fb = document.getElementById('feedback-phishing');
+      if (isGolpe) {
+        fb.innerText = '✓ Excelente! Você identificou o remetente suspeito e a urgência falsa!';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 3);
+        setTimeout(() => carregarEtapa(3), 1200);
+      } else {
+        fb.innerText = '❌ Cuidado! E-mails pedindo alteração de senha com links estranhos são golpes!';
+        fb.className = 'text-xs font-bold text-rose-400 text-center';
+      }
+    }
+
+    function verificarPrivacidade() {
+      const chks = document.querySelectorAll('.chk-priv');
+      const todosMarcados = Array.from(chks).every(c => c.checked);
+      const fb = document.getElementById('feedback-e3');
+
+      if (todosMarcados) {
+        fb.innerText = '🏆 PARABÉNS! Você domina a Segurança Digital e a proteção de dados!';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        salvarProgressoSupabase('Modulo6-seguranca_digital', 3, 3, 60, 'concluido');
+      }
+    }
+
+    async function salvarProgressoSupabase(mod, etapa, total, tempo, status) {
+      if (!alunoAtualId) return;
+      await _supabase.from('se_progresso').upsert([{ aluno_id: alunoAtualId, modulo_id: mod, etapa_atual: etapa, total_etapas: total, tempo_segundos: tempo, status: status, updated_at: new Date().toISOString() }], { onConflict: 'aluno_id, modulo_id' });
+    }
+  </script>
+</body>
+</html>
