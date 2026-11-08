@@ -96,69 +96,44 @@
       </div>
     </section>
 
-    <!-- SEÇÃO 2: DISCIPLINAS -->
+    <!-- SEÇÃO 2: DISCIPLINAS ATRIBUÍDAS À TURMA -->
     <section id="secao-disciplinas" class="hidden space-y-6">
       <div>
         <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
           <i class="fa-solid fa-chalkboard-user text-emerald-400"></i>
-          <span>Minhas Disciplinas (BNCC)</span>
+          <span>Minhas Disciplinas</span>
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Selecione uma opção dentro da disciplina para ver o conteúdo.</p>
+        <p class="text-xs text-slate-400 mt-1">Selecione uma disciplina liberada para a sua turma.</p>
       </div>
 
       <div id="lista-disciplinas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 max-w-md">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
-              CD
-            </div>
-            <div>
-              <h3 class="font-extrabold text-white text-base">Cultura Digital</h3>
-              <p class="text-[11px] text-slate-400">Conteúdos e Práticas de Tecnologia</p>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
-            <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="w-28 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition shadow">
-              <i class="fa-solid fa-laptop-code text-xs"></i> Aulas
-            </button>
-            <button id="btn-sub-materiais" onclick="selecionarSubAbaDisciplina('materiais')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
-              <i class="fa-solid fa-folder text-xs"></i> Materiais
-            </button>
-            <button id="btn-sub-provas" onclick="selecionarSubAbaDisciplina('provas')" class="w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
-              <i class="fa-solid fa-file-pen text-xs"></i> Provas
-            </button>
-          </div>
+        <div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-slate-400 text-xs">
+          Buscando disciplinas atribuídas à sua turma...
         </div>
       </div>
 
-      <div id="painel-conteudo-disciplina" class="pt-4 space-y-4 border-t border-slate-800">
-        <div id="sub-conteudo-aulas" class="space-y-4">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-            <i class="fa-solid fa-list-check"></i> Atividades Interativas Disponíveis
+      <div id="painel-conteudo-disciplina" class="hidden pt-4 space-y-4 border-t border-slate-800">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2" id="titulo-disciplina-selecionada">
+            <i class="fa-solid fa-book-open"></i> Conteúdo da Disciplina
           </h3>
-          <div id="grid-aulas-automaticas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="col-span-full p-8 text-center text-slate-500 bg-slate-900 border border-slate-800 rounded-2xl">
-              <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-400 mb-2"></i>
-              <p class="text-xs">Carregando atividades...</p>
-            </div>
+          <div class="flex gap-2">
+            <button id="btn-sub-aulas" onclick="selecionarSubAbaDisciplina('aulas')" class="px-3 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs transition">Aulas</button>
+            <button id="btn-sub-materiais" onclick="selecionarSubAbaDisciplina('materiais')" class="px-3 py-1.5 bg-slate-800 text-slate-400 hover:text-white rounded-lg text-xs transition">Materiais</button>
+            <button id="btn-sub-provas" onclick="selecionarSubAbaDisciplina('provas')" class="px-3 py-1.5 bg-slate-800 text-slate-400 hover:text-white rounded-lg text-xs transition">Provas</button>
           </div>
         </div>
 
-        <div id="sub-conteudo-materiais" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
-          <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
-            <i class="fa-solid fa-folder-open"></i>
-          </div>
-          <h4 class="text-sm font-bold text-white">Materiais Didáticos & Apostilas</h4>
-          <p class="text-xs text-slate-400">Nenhum material em PDF anexado no momento.</p>
+        <div id="sub-conteudo-aulas" class="space-y-4">
+          <div id="grid-aulas-automaticas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
-        <div id="sub-conteudo-provas" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
-          <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto text-xl">
-            <i class="fa-solid fa-file-signature"></i>
-          </div>
-          <h4 class="text-sm font-bold text-white">Avaliações & Testes Práticos</h4>
-          <p class="text-xs text-slate-400">Não há provas ou testes pendentes agendados.</p>
+        <div id="sub-conteudo-materiais" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+          Nenhum material cadastrado para esta disciplina.
+        </div>
+
+        <div id="sub-conteudo-provas" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">
+          Nenhuma avaliação pendente cadastrada.
         </div>
       </div>
     </section>
@@ -197,27 +172,22 @@
 
         <form id="form-update-profile" class="space-y-4">
           <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Alterar Dados Pessoais & Foto</h4>
-          
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">Nome Completo / Exibição:</label>
             <input type="text" id="profile-name-input" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400">
           </div>
-
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">Apelido (Nome de Usuário):</label>
             <input type="text" id="profile-nickname-input" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="ex: dev_aluno">
           </div>
-
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">E-mail de Acesso:</label>
-            <input type="email" id="profile-email-input" readonly class="w-full p-2.5 bg-slate-900/60 border border-slate-800 rounded-lg text-slate-400 text-xs cursor-not-allowed" title="O e-mail é gerenciado pelo login">
+            <input type="email" id="profile-email-input" readonly class="w-full p-2.5 bg-slate-900/60 border border-slate-800 rounded-lg text-slate-400 text-xs cursor-not-allowed">
           </div>
-
           <div>
             <label class="block text-xs font-medium text-slate-400 mb-1">URL da Foto de Perfil (Avatar):</label>
-            <input type="url" id="profile-avatar-url" oninput="previewAvatarUrl(this.value)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="https://exemplo.com/foto.png">
+            <input type="url" id="profile-avatar-url" oninput="previewAvatarUrl(this.value)" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-emerald-400">
           </div>
-
           <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition">Guardar Alterações</button>
         </form>
 
@@ -237,10 +207,28 @@
 
   </main>
 
+  <!-- MODAL DE PENDÊNCIA (BLOQUEIO) -->
+  <div id="modal-pendente-block" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-8 text-center space-y-4 shadow-2xl">
+      <div class="w-16 h-16 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full flex items-center justify-center mx-auto text-2xl">
+        <i class="fa-solid fa-user-clock"></i>
+      </div>
+      <h3 class="text-xl font-bold text-white">Conta Aguardando Aprovação</h3>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        O seu cadastro no portal foi recebido com sucesso. Por motivos de segurança, o seu acesso precisa ser liberado pelo professor da disciplina.
+      </p>
+      <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-amber-400 font-medium">
+        Por favor, informe ao seu professor para aprovar a sua conta no Painel.
+      </div>
+      <button onclick="fazerLogout()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs transition">
+        Sair / Tentar Novamente
+      </button>
+    </div>
+  </div>
+
   <!-- MODAL EMBUTIDO DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
   <div id="modal-auth-container" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-6">
-      
       <div class="text-center space-y-2">
         <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto text-xl shadow-[0_0_15px_rgba(52,211,153,0.2)]">
           <i class="fa-solid fa-graduation-cap"></i>
@@ -249,13 +237,11 @@
         <p id="auth-subtitle" class="text-xs text-slate-400">Entre com as suas credenciais para aceder às suas aulas</p>
       </div>
 
-      <!-- BOTÕES DE ALTERNÂNCIA (LOGIN vs REGISTO) -->
       <div class="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs font-semibold">
         <button id="btn-tab-login" onclick="alternarAbaAuth('login')" class="py-2 rounded-lg bg-emerald-500 text-slate-950 font-bold transition">Entrar</button>
         <button id="btn-tab-register" onclick="alternarAbaAuth('register')" class="py-2 rounded-lg text-slate-400 hover:text-white transition">Criar Conta</button>
       </div>
 
-      <!-- FORMULÁRIO DE LOGIN -->
       <form id="form-auth-login" onsubmit="executarLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">E-mail</label>
@@ -268,7 +254,6 @@
         <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition shadow-lg">Entrar no Portal</button>
       </form>
 
-      <!-- FORMULÁRIO DE CADASTRO -->
       <form id="form-auth-register" onsubmit="executarCadastro(event)" class="hidden space-y-4">
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome Completo</label>
@@ -282,7 +267,7 @@
           <label class="block text-xs font-medium text-slate-400 mb-1">Senha</label>
           <input type="password" id="reg-password" minlength="6" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-400" placeholder="Mínimo 6 caracteres" required>
         </div>
-        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition shadow-lg">Solicitar Registo</button>
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs transition shadow-lg">Solicitar Cadastro</button>
       </form>
 
       <div id="auth-feedback-msg" class="text-xs text-center hidden p-3 rounded-lg font-medium"></div>
@@ -298,57 +283,10 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       await carregarSessaoReal();
-      if (activeStudent) {
-        await varrerEExibirAulasGitHub();
+      if (activeStudent && activeStudent.status === 'ativo') {
+        await carregarDisciplinasTurma();
         await carregarAvisosMuralAluno();
       }
-
-      document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!activeStudent || !activeStudent.id) return;
-
-        const novoNome = document.getElementById('profile-name-input').value.trim();
-        const novoApelido = document.getElementById('profile-nickname-input').value.trim();
-        const novaFoto = document.getElementById('profile-avatar-url').value.trim();
-
-        const updates = {
-          nome_completo: novoNome || activeStudent.nome,
-          apelido: novoApelido,
-          avatar_url: novaFoto
-        };
-
-        try {
-          const { error } = await _supabase
-            .from('profiles')
-            .update(updates)
-            .eq('id', activeStudent.id);
-
-          if (error) {
-            alert("Erro ao guardar dados: " + error.message);
-          } else {
-            alert("Perfil atualizado com sucesso!");
-            activeStudent.nome = updates.nome_completo;
-            activeStudent.apelido = updates.apelido;
-            activeStudent.foto_url = updates.avatar_url;
-            await carregarSessaoReal();
-          }
-        } catch (err) {
-          console.error("Exceção ao atualizar perfil:", err);
-        }
-      });
-
-      document.getElementById('form-update-password')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const novaSenha = document.getElementById('profile-new-password').value;
-        const { error } = await _supabase.auth.updateUser({ password: novaSenha });
-
-        if (error) {
-          alert("Erro ao alterar palavra-passe: " + error.message);
-        } else {
-          alert("Palavra-passe alterada com sucesso!");
-          document.getElementById('profile-new-password').value = '';
-        }
-      });
     });
 
     async function carregarSessaoReal() {
@@ -364,13 +302,6 @@
       } catch (e) {}
 
       if (!studentId) {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('id')) {
-          studentId = urlParams.get('id');
-        }
-      }
-
-      if (!studentId) {
         exibirModalAutenticacao();
         return;
       }
@@ -384,6 +315,12 @@
 
         if (error || !profile) {
           exibirModalAutenticacao();
+          return;
+        }
+
+        // BLOQUEIO DE ALUNOS PENDENTES
+        if (profile.status === 'pendente') {
+          document.getElementById('modal-pendente-block').classList.remove('hidden');
           return;
         }
 
@@ -405,6 +342,7 @@
         };
 
         fecharModalAutenticacao();
+        document.getElementById('modal-pendente-block').classList.add('hidden');
       } catch (err) {
         console.warn("Erro ao carregar perfil do Supabase:", err);
         exibirModalAutenticacao();
@@ -437,6 +375,63 @@
 
       document.getElementById('label-auth-action').innerText = "Sair";
       document.getElementById('icon-auth-action').className = "fa-solid fa-right-from-bracket text-xs";
+    }
+
+    async function carregarDisciplinasTurma() {
+      const container = document.getElementById('lista-disciplinas');
+      if (!container || !activeStudent) return;
+
+      if (!activeStudent.turma_id) {
+        container.innerHTML = `
+          <div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-amber-400 text-xs">
+            Você ainda não foi atribuído a uma turma pelo professor.
+          </div>
+        `;
+        return;
+      }
+
+      // Busca quais disciplinas estão atribuídas à turma do aluno
+      const { data: relacoes } = await _supabase
+        .from('turma_disciplinas')
+        .select('disciplina_id, disciplinas(*)')
+        .eq('turma_id', activeStudent.turma_id);
+
+      if (!relacoes || relacoes.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-slate-400 text-xs">
+            Nenhuma disciplina liberada para a sua turma (${activeStudent.turma}) até o momento.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = relacoes.map(r => {
+        const disc = r.disciplinas;
+        if (!disc) return '';
+        return `
+          <div class="bg-slate-900 border border-slate-800 hover:border-emerald-500/50 p-5 rounded-2xl shadow-xl space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+                <i class="fa-solid fa-book"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-base">${disc.nome}</h3>
+                <p class="text-[11px] text-slate-400">${disc.descricao || 'Disciplina da Turma'}</p>
+              </div>
+            </div>
+            <button onclick="carregarConteudoDisciplina('${disc.id}', '${disc.nome.replace(/'/g, "\\'")}')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 rounded-lg text-xs transition">
+              Acessar Conteúdo
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function carregarConteudoDisciplina(disciplinaId, nomeDisciplina) {
+      document.getElementById('painel-conteudo-disciplina').classList.remove('hidden');
+      document.getElementById('titulo-disciplina-selecionada').innerText = nomeDisciplina;
+
+      await varrerEExibirAulasGitHub();
     }
 
     function exibirModalAutenticacao() {
@@ -477,7 +472,7 @@
 
       feedback.classList.remove('hidden');
       feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-slate-800 text-slate-300";
-      feedback.innerText = "A autenticar...";
+      feedback.innerText = "Autenticando...";
 
       const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
 
@@ -486,11 +481,9 @@
         feedback.innerText = "Erro ao entrar: " + error.message;
       } else {
         feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-emerald-950/80 border border-emerald-800 text-emerald-300";
-        feedback.innerText = "Login efetuado com sucesso! A carregar portal...";
+        feedback.innerText = "Login efetuado com sucesso!";
         setTimeout(async () => {
           await carregarSessaoReal();
-          await varrerEExibirAulasGitHub();
-          await carregarAvisosMuralAluno();
         }, 500);
       }
     }
@@ -504,13 +497,13 @@
 
       feedback.classList.remove('hidden');
       feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-slate-800 text-slate-300";
-      feedback.innerText = "A criar conta...";
+      feedback.innerText = "Criando conta...";
 
       const { data, error } = await _supabase.auth.signUp({ email, password });
 
       if (error) {
         feedback.className = "text-xs text-center p-3 rounded-lg font-medium bg-rose-950/80 border border-rose-800 text-rose-300";
-        feedback.innerText = "Erro no registo: " + error.message;
+        feedback.innerText = "Erro no cadastro: " + error.message;
       } else if (data.user) {
         await _supabase.from('profiles').insert([{
           id: data.user.id,
@@ -706,17 +699,6 @@
       if (subAulas) subAulas.classList.toggle('hidden', subAba !== 'aulas');
       if (subMateriais) subMateriais.classList.toggle('hidden', subAba !== 'materiais');
       if (subProvas) subProvas.classList.toggle('hidden', subAba !== 'provas');
-
-      const btnAulas = document.getElementById('btn-sub-aulas');
-      const btnMateriais = document.getElementById('btn-sub-materiais');
-      const btnProvas = document.getElementById('btn-sub-provas');
-
-      const estiloAtivo = 'w-28 bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-[11px] flex items-center justify-center gap-1.5 transition shadow';
-      const estiloInativo = 'w-28 bg-slate-800 text-slate-400 hover:text-white border border-slate-700/60 py-2 rounded-lg text-[11px] font-medium flex items-center justify-center gap-1.5 transition';
-
-      if (btnAulas) btnAulas.className = subAba === 'aulas' ? estiloAtivo : estiloInativo;
-      if (btnMateriais) btnMateriais.className = subAba === 'materiais' ? estiloAtivo : estiloInativo;
-      if (btnProvas) btnProvas.className = subAba === 'provas' ? estiloAtivo : estiloInativo;
     }
 
     function mudarAbaPortal(aba) {
@@ -734,10 +716,6 @@
             : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition flex items-center gap-2';
         }
       });
-
-      if (aba === 'disciplinas') {
-        selecionarSubAbaDisciplina('aulas');
-      }
     }
 
     function fazerLogout(e) {
