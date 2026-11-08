@@ -29,34 +29,18 @@
 
     <!-- BARRA PRINCIPAL DE ABAS -->
     <div class="flex border-b border-slate-800 gap-2 pb-2 overflow-x-auto">
-      <button id="btn-tab-ultimas" onclick="mudarAbaPrincipal('ultimas')" class="px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2">
-        ⚡ Últimas 10 Atualizações
-      </button>
-      <button id="btn-tab-aluno" onclick="mudarAbaPrincipal('aluno')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2">
-        🎯 Acompanhamento por Turma e Aluno
-      </button>
-      <button id="btn-tab-disciplinas" onclick="mudarAbaPrincipal('disciplinas')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2">
-        📘 Disciplinas & Atribuição
-      </button>
-      <button id="btn-tab-gestao" onclick="mudarAbaPrincipal('gestao')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2">
-        ⚙️ Gestão Geral & Alunos
-      </button>
+      <button id="btn-tab-ultimas" onclick="mudarAbaPrincipal('ultimas')" class="px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2">⚡ Feed de Atualizações</button>
+      <button id="btn-tab-aluno" onclick="mudarAbaPrincipal('aluno')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2">🎯 Acompanhamento de Alunos</button>
+      <button id="btn-tab-disciplinas" onclick="mudarAbaPrincipal('disciplinas')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2">📘 Disciplinas & Conteúdos GitHub</button>
+      <button id="btn-tab-gestao" onclick="mudarAbaPrincipal('gestao')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2">⚙️ Gestão Geral & Alunos</button>
     </div>
 
-    <!-- ABA 1: ÚLTIMAS 10 ATUALIZAÇÕES -->
+    <!-- ABA 1: FEED DE ATUALIZAÇÕES -->
     <section id="aba-ultimas" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
-            📊 Feed de Atividades Recentes (10 Últimas)
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">Acompanhe em tempo real as tarefas dos estudantes.</p>
-        </div>
-        <button onclick="carregarRelatorioProgresso()" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg text-slate-200 transition flex items-center gap-1.5">
-          🔄 Atualizar Dados
-        </button>
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold text-indigo-400">📊 Feed de Atividades Recentes (10 Últimas)</h2>
+        <button onclick="carregarRelatorioProgresso()" class="bg-slate-800 text-xs px-3 py-2 rounded text-slate-200">🔄 Atualizar Dados</button>
       </div>
-
       <div class="overflow-x-auto pt-2">
         <table class="w-full text-left border-collapse">
           <thead>
@@ -76,23 +60,17 @@
 
     <!-- ABA 2: ACOMPANHAMENTO -->
     <section id="aba-aluno" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
-      <div>
-        <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
-          🔍 Painel Pedagógico de Turmas e Alunos
-        </h2>
-        <p class="text-xs text-slate-400 mt-1">Selecione uma turma para ver a visão geral do grupo ou um aluno específico.</p>
-      </div>
-
+      <h2 class="text-lg font-bold text-indigo-400">🔍 Painel Pedagógico de Turmas e Alunos</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">1. Selecione a Turma</label>
-          <select id="filtro-turma-aluno" onchange="processarSelecaoTurma()" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white focus:outline-none focus:border-indigo-500">
+          <select id="filtro-turma-aluno" onchange="processarSelecaoTurma()" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white">
             <option value="">Selecione a Turma...</option>
           </select>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">2. Selecione o Aluno (Opcional)</label>
-          <select id="filtro-aluno-especifico" onchange="carregarHistoricoAlunoEspecifico()" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white focus:outline-none focus:border-indigo-500" disabled>
+          <select id="filtro-aluno-especifico" onchange="carregarHistoricoAlunoEspecifico()" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white" disabled>
             <option value="">Selecione uma turma primeiro...</option>
           </select>
         </div>
@@ -106,12 +84,12 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
+              <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase bg-slate-950/50">
                 <th class="p-3">Aluno</th>
                 <th class="p-3">Apelido</th>
                 <th class="p-3">Tarefas Iniciadas</th>
                 <th class="p-3">Tarefas Concluídas</th>
-                <th class="p-3">Tempo Total em Estudo</th>
+                <th class="p-3">Tempo Total</th>
                 <th class="p-3 text-right">Ação</th>
               </tr>
             </thead>
@@ -128,15 +106,14 @@
           </div>
           <div id="resumo-stats-aluno" class="flex gap-2 text-xs"></div>
         </div>
-
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
+              <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase bg-slate-950/50">
                 <th class="p-3">Módulo / Atividade</th>
-                <th class="p-3">Último Acesso / Atualização</th>
-                <th class="p-3">Tempo Efetivo Dedicado</th>
-                <th class="p-3">Progresso Teórico</th>
+                <th class="p-3">Último Acesso</th>
+                <th class="p-3">Tempo Efetivo</th>
+                <th class="p-3">Progresso</th>
                 <th class="p-3 text-center">Status</th>
               </tr>
             </thead>
@@ -146,10 +123,10 @@
       </div>
     </section>
 
-    <!-- ABA 3: DISCIPLINAS, ANEXOS & ATRIBUIÇÃO ÀS TURMAS -->
+    <!-- ABA 3: DISCIPLINAS & ANEXAR AULAS DO GITHUB -->
     <section id="aba-disciplinas" class="hidden space-y-8">
       
-      <!-- CRIAR E GERENCIAR DISCIPLINAS -->
+      <!-- CRIAR E EDITAR DISCIPLINAS -->
       <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">📘 Criar & Gerenciar Disciplinas</h2>
         
@@ -173,12 +150,31 @@
         </div>
       </div>
 
-      <!-- GERENCIADOR DE CONTEÚDOS DA DISCIPLINAR (AULAS, MATERIAIS, PROVAS) -->
+      <!-- VINCULAR AULAS IDENTIFICADAS NO GITHUB -->
       <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4">
           <div>
-            <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">📂 Anexar Aulas, Materiais e Provas</h2>
-            <p class="text-xs text-slate-400">Selecione uma disciplina abaixo para cadastrar seu conteúdo pedagógico.</p>
+            <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+              <i class="fa-brands fa-github text-white"></i> Aulas Detectadas na pasta /aulainterativa do GitHub
+            </h2>
+            <p class="text-xs text-slate-400">Atribua cada aula encontrada no repositório a uma disciplina específica.</p>
+          </div>
+          <button onclick="carregarAulasDoGitHub()" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold px-3 py-2 rounded-lg border border-slate-700 transition">
+            <i class="fa-solid fa-arrows-rotate"></i> Recarregar GitHub
+          </button>
+        </div>
+
+        <div id="container-aulas-github" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="col-span-full p-4 text-center text-xs text-slate-500">Buscando arquivos HTML no repositório GitHub...</div>
+        </div>
+      </div>
+
+      <!-- MATERIAIS & PROVAS -->
+      <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-indigo-400">📄 Materiais Didáticos & Provas</h2>
+            <p class="text-xs text-slate-400">Selecione uma disciplina para cadastrar PDFs, links ou provas.</p>
           </div>
           <select id="select-disciplina-conteudo" onchange="carregarConteudosDisciplinaSelecionada()" class="p-2.5 bg-slate-950 border border-indigo-500/50 rounded-xl text-xs text-white font-bold">
             <option value="">Selecione a Disciplina...</option>
@@ -186,46 +182,27 @@
         </div>
 
         <div id="painel-gestao-anexos" class="hidden space-y-6">
-          
-          <!-- 1. CADASTRAR AULA -->
+          <!-- ANEXAR MATERIAL -->
           <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-            <h3 class="text-xs font-bold text-emerald-400 uppercase flex items-center gap-2">
-              <i class="fa-solid fa-laptop-code"></i> Cadastrar Aula / Atividade Interativa
-            </h3>
-            <form id="form-add-aula" class="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <input type="text" id="aula-titulo" placeholder="Título da Aula (Ex: Módulo 1 - Intro)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
-              <input type="text" id="aula-link" placeholder="Caminho/URL (Ex: aulainterativa/Modulo1-introdução.html)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
-              <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs transition">Adicionar Aula</button>
-            </form>
-            <div id="lista-aulas-disciplina" class="space-y-2 pt-2"></div>
-          </div>
-
-          <!-- 2. ANEXAR MATERIAL -->
-          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-            <h3 class="text-xs font-bold text-cyan-400 uppercase flex items-center gap-2">
-              <i class="fa-solid fa-folder-open"></i> Anexar Material Didático (PDF / Link)
-            </h3>
+            <h3 class="text-xs font-bold text-cyan-400 uppercase flex items-center gap-2"><i class="fa-solid fa-folder-open"></i> Anexar PDF / Link</h3>
             <form id="form-add-material" class="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <input type="text" id="mat-titulo" placeholder="Nome do Material (Ex: Apostila em PDF)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
-              <input type="url" id="mat-url" placeholder="Link (Ex: https://drive.google.com/...)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
+              <input type="text" id="mat-titulo" placeholder="Nome do Material (Ex: Apostila PDF)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
+              <input type="url" id="mat-url" placeholder="URL (https://drive.google.com/...)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
               <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2.5 rounded-lg text-xs transition">Anexar Material</button>
             </form>
             <div id="lista-materiais-disciplina" class="space-y-2 pt-2"></div>
           </div>
 
-          <!-- 3. CADASTRAR PROVA -->
+          <!-- CADASTRAR PROVA -->
           <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
-            <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center gap-2">
-              <i class="fa-solid fa-file-pen"></i> Cadastrar Avaliação / Prova
-            </h3>
+            <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center gap-2"><i class="fa-solid fa-file-pen"></i> Cadastrar Avaliação / Prova</h3>
             <form id="form-add-prova" class="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <input type="text" id="prova-titulo" placeholder="Nome da Avaliação (Ex: Prova 1)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
-              <input type="url" id="prova-link" placeholder="Link da Prova (Ex: Form do Google)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
+              <input type="text" id="prova-titulo" placeholder="Nome da Prova" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
+              <input type="url" id="prova-link" placeholder="Link da Prova (ex: Form do Google)" class="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white" required>
               <button type="submit" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-lg text-xs transition">Cadastrar Prova</button>
             </form>
             <div id="lista-provas-disciplina" class="space-y-2 pt-2"></div>
           </div>
-
         </div>
       </div>
 
@@ -250,36 +227,31 @@
 
     <!-- ABA 4: GESTÃO GERAL E ALUNOS -->
     <div id="aba-gestao" class="hidden space-y-8">
-      
-      <!-- GESTÃO DE TURMAS -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🏫 Gerenciar Turmas</h2>
         <form id="form-criar-turma" class="flex gap-3">
-          <input type="text" id="nome-turma" class="flex-1 p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" placeholder="Ex: Turma 81, Geral..." required>
-          <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-lg transition text-xs">Criar Turma</button>
+          <input type="text" id="nome-turma" class="flex-1 p-3 bg-slate-950 rounded-lg border border-slate-800 text-white text-sm" placeholder="Ex: Turma 81..." required>
+          <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-lg text-xs transition">Criar Turma</button>
         </form>
         <div id="lista-turmas" class="flex flex-wrap gap-2 pt-2"></div>
       </section>
 
-      <!-- GERENCIAMENTO DE ALUNOS -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🎓 Cadastro & Gestão de Alunos</h2>
-          <button onclick="carregarListaGestaoAlunos()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition">Atualizar Alunos</button>
+          <button onclick="carregarListaGestaoAlunos()" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded transition">Atualizar Alunos</button>
         </div>
-        <p class="text-xs text-slate-400">Aprove novas contas pendentes, edite nomes, atribua turmas ou remova o acesso dos estudantes.</p>
-
         <div class="overflow-x-auto pt-2">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
+              <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase bg-slate-950/50">
                 <th class="p-3">Avatar</th>
                 <th class="p-3">Nome Completo</th>
                 <th class="p-3">E-mail</th>
                 <th class="p-3">Apelido</th>
                 <th class="p-3">Turma Atual</th>
-                <th class="p-3 text-center">Status da Conta</th>
-                <th class="p-3 text-right">Ações de Gestão</th>
+                <th class="p-3 text-center">Status</th>
+                <th class="p-3 text-right">Ações</th>
               </tr>
             </thead>
             <tbody id="tabela-gestao-alunos" class="divide-y divide-slate-800 text-xs"></tbody>
@@ -287,7 +259,6 @@
         </div>
       </section>
 
-      <!-- MURAL DE AVISOS -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">📢 Mural de Avisos</h2>
         <form id="form-aviso" class="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
@@ -295,7 +266,7 @@
           <h3 id="titulo-form-aviso" class="text-xs font-bold text-indigo-300 uppercase">Publicar Novo Aviso</h3>
           <div>
             <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Título</label>
-            <input type="text" id="aviso-titulo" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" required>
+            <input type="text" id="aviso-titulo" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white text-sm" required>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -312,11 +283,11 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Mensagem</label>
-            <textarea id="aviso-mensagem" rows="3" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" required></textarea>
+            <textarea id="aviso-mensagem" rows="3" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white text-sm" required></textarea>
           </div>
           <div class="flex gap-2">
-            <button type="submit" id="btn-salvar-aviso" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-lg transition text-xs">Publicar Aviso</button>
-            <button type="button" id="btn-cancelar-edicao" onclick="cancelarEdicaoAviso()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-lg transition text-xs">Cancelar Edição</button>
+            <button type="submit" id="btn-salvar-aviso" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-lg text-xs">Publicar Aviso</button>
+            <button type="button" id="btn-cancelar-edicao" onclick="cancelarEdicaoAviso()" class="hidden bg-slate-800 text-slate-300 px-4 py-2.5 rounded-lg text-xs">Cancelar Edição</button>
           </div>
         </form>
         <div>
@@ -333,9 +304,7 @@
   <div id="modal-editar-aluno" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-user-pen text-indigo-400"></i> Editar Dados do Aluno
-        </h3>
+        <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-user-pen text-indigo-400"></i> Editar Dados do Aluno</h3>
         <button onclick="fecharModalEditarAluno()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -343,17 +312,17 @@
         <input type="hidden" id="modal-aluno-id">
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Nome Completo</label>
-          <input type="text" id="modal-aluno-nome" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-indigo-500" required>
+          <input type="text" id="modal-aluno-nome" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs" required>
         </div>
 
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Apelido</label>
-          <input type="text" id="modal-aluno-apelido" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-indigo-500">
+          <input type="text" id="modal-aluno-apelido" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs">
         </div>
 
         <div>
           <label class="block text-xs font-medium text-slate-400 mb-1">Turma Atribuída</label>
-          <select id="modal-aluno-turma" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-indigo-500" required></select>
+          <select id="modal-aluno-turma" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs" required></select>
         </div>
 
         <div class="pt-2 flex gap-2">
@@ -377,31 +346,26 @@
     let listaDisciplinasGlobal = [];
     let mapaAlunosGlobal = {};
     let listaAlunosCompleta = [];
-    let listaAvisosGlobal = [];
+    let listaAulasVincular = {};
 
     document.addEventListener('DOMContentLoaded', () => {
       inicializarDados();
 
-      // Form Criar Turma
       document.getElementById('form-criar-turma').addEventListener('submit', async (e) => {
         e.preventDefault();
         const nome = document.getElementById('nome-turma').value.trim();
         if (!nome) return;
-        const { error } = await supabase.from('turmas').insert([{ nome: nome }]);
+        const { error } = await supabase.from('turmas').insert([{ nome }]);
         if (error) alert('Erro ao criar turma: ' + error.message);
-        else {
-          document.getElementById('nome-turma').value = '';
-          inicializarDados();
-        }
+        else { document.getElementById('nome-turma').value = ''; inicializarDados(); }
       });
 
-      // Form Criar Disciplina
       document.getElementById('form-criar-disciplina').addEventListener('submit', async (e) => {
         e.preventDefault();
         const nome = document.getElementById('disc-nome').value.trim();
         const desc = document.getElementById('disc-desc').value.trim();
         if (!nome) return;
-        const { error } = await supabase.from('disciplinas').insert([{ nome: nome, descricao: desc }]);
+        const { error } = await supabase.from('disciplinas').insert([{ nome, descricao: desc }]);
         if (error) alert('Erro ao criar disciplina: ' + error.message);
         else {
           document.getElementById('disc-nome').value = '';
@@ -410,81 +374,35 @@
         }
       });
 
-      // Cadastrar Aula na Disciplina
-      document.getElementById('form-add-aula').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const discId = document.getElementById('select-disciplina-conteudo').value;
-        const titulo = document.getElementById('aula-titulo').value.trim();
-        const link = document.getElementById('aula-link').value.trim();
-        if (!discId || !titulo) return;
-        const { error } = await supabase.from('disciplina_aulas').insert([{ disciplina_id: discId, titulo, link_aula: link }]);
-        if (error) alert('Erro ao adicionar aula: ' + error.message);
-        else {
-          document.getElementById('aula-titulo').value = '';
-          document.getElementById('aula-link').value = '';
-          carregarConteudosDisciplinaSelecionada();
-        }
-      });
-
-      // Anexar Material na Disciplina
       document.getElementById('form-add-material').addEventListener('submit', async (e) => {
         e.preventDefault();
         const discId = document.getElementById('select-disciplina-conteudo').value;
         const titulo = document.getElementById('mat-titulo').value.trim();
         const url = document.getElementById('mat-url').value.trim();
         if (!discId || !titulo) return;
-        const { error } = await supabase.from('disciplina_materiais').insert([{ disciplina_id: discId, titulo, link_url: url }]);
-        if (error) alert('Erro ao anexar material: ' + error.message);
-        else {
-          document.getElementById('mat-titulo').value = '';
-          document.getElementById('mat-url').value = '';
-          carregarConteudosDisciplinaSelecionada();
-        }
+        await supabase.from('disciplina_materiais').insert([{ disciplina_id: discId, titulo, link_url: url }]);
+        document.getElementById('mat-titulo').value = '';
+        document.getElementById('mat-url').value = '';
+        carregarConteudosDisciplinaSelecionada();
       });
 
-      // Cadastrar Prova na Disciplina
       document.getElementById('form-add-prova').addEventListener('submit', async (e) => {
         e.preventDefault();
         const discId = document.getElementById('select-disciplina-conteudo').value;
         const titulo = document.getElementById('prova-titulo').value.trim();
         const link = document.getElementById('prova-link').value.trim();
         if (!discId || !titulo) return;
-        const { error } = await supabase.from('disciplina_provas').insert([{ disciplina_id: discId, titulo, link_prova: link }]);
-        if (error) alert('Erro ao cadastrar prova: ' + error.message);
-        else {
-          document.getElementById('prova-titulo').value = '';
-          document.getElementById('prova-link').value = '';
-          carregarConteudosDisciplinaSelecionada();
-        }
-      });
-
-      // Form Modal Editar Aluno
-      document.getElementById('form-modal-editar-aluno').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('modal-aluno-id').value;
-        const nome = document.getElementById('modal-aluno-nome').value.trim();
-        const apelido = document.getElementById('modal-aluno-apelido').value.trim();
-        const turmaId = document.getElementById('modal-aluno-turma').value;
-
-        const { error } = await supabase.from('profiles').update({
-          nome_completo: nome,
-          apelido: apelido,
-          turma_id: turmaId
-        }).eq('id', id);
-
-        if (error) {
-          alert('Erro ao atualizar aluno: ' + error.message);
-        } else {
-          alert('Aluno atualizado com sucesso!');
-          fecharModalEditarAluno();
-          inicializarDados();
-        }
+        await supabase.from('disciplina_provas').insert([{ disciplina_id: discId, titulo, link_prova: link }]);
+        document.getElementById('prova-titulo').value = '';
+        document.getElementById('prova-link').value = '';
+        carregarConteudosDisciplinaSelecionada();
       });
     });
 
     async function inicializarDados() {
       await carregarTurmas();
       await carregarDisciplinas();
+      await carregarAulasDoGitHub();
       await carregarMapeamentoAlunos();
       await carregarRelatorioProgresso();
       await carregarListaGestaoAlunos();
@@ -510,17 +428,12 @@
       document.getElementById('filtro-turma-aluno').innerHTML = '<option value="">Selecione a Turma...</option>' + listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
       document.getElementById('select-turma-atribuicao').innerHTML = '<option value="">Selecione a Turma...</option>' + listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
       document.getElementById('aviso-turma').innerHTML = listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
-      
-      const modalTurmas = document.getElementById('modal-aluno-turma');
-      if (modalTurmas) modalTurmas.innerHTML = listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
 
       if (document.getElementById('lista-turmas')) {
         document.getElementById('lista-turmas').innerHTML = listaTurmasGlobal.map(t => `
           <div class="inline-flex items-center gap-1.5 bg-slate-950 border border-slate-800 text-indigo-300 px-3 py-1.5 rounded-lg text-xs font-bold">
             <span>${t.nome}</span>
-            <button onclick="excluirTurma('${t.id}', '${t.nome.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-rose-400 transition ml-1" title="Excluir turma">
-              <i class="fa-solid fa-xmark text-xs"></i>
-            </button>
+            <button onclick="excluirTurma('${t.id}', '${t.nome.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-rose-400 transition ml-1"><i class="fa-solid fa-xmark text-xs"></i></button>
           </div>
         `).join('');
       }
@@ -551,24 +464,90 @@
       `).join('');
     }
 
+    // CONSULTA AUTOMÁTICA DA PASTA /aulainterativa DO GITHUB
+    async function carregarAulasDoGitHub() {
+      const container = document.getElementById('container-aulas-github');
+      if (!container) return;
+
+      try {
+        const res = await fetch('https://api.github.com/repos/thiagomgp/portal-do-aluno/contents/aulainterativa');
+        const arquivos = await res.json();
+
+        if (!Array.isArray(arquivos)) {
+          container.innerHTML = '<div class="col-span-full p-4 text-center text-rose-400 text-xs">Erro ao consultar GitHub.</div>';
+          return;
+        }
+
+        const htmlFiles = arquivos.filter(f => f.name.endsWith('.html'));
+
+        // Consulta quais aulas já foram associadas no Supabase
+        const { data: vinculos } = await supabase.from('disciplina_aulas').select('*, disciplinas(nome)');
+        const mapaVinculos = {};
+        if (vinculos) {
+          vinculos.forEach(v => { mapaVinculos[v.link_aula] = v.disciplinas ? v.disciplinas.nome : 'Vinculado'; });
+        }
+
+        container.innerHTML = htmlFiles.map(f => {
+          const caminho = `aulainterativa/${f.name}`;
+          const estaVinculado = mapaVinculos[caminho];
+          const nomeAmigavel = f.name.replace('.html', '').replace(/_/g, ' ').replace(/-/g, ' ');
+
+          return `
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[10px] font-bold uppercase text-slate-400 font-mono">${f.name}</span>
+                  ${estaVinculado ? `<span class="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-bold">${estaVinculado}</span>` : `<span class="text-[10px] bg-amber-950 text-amber-400 border border-amber-800 px-2 py-0.5 rounded font-bold">Sem Disciplina</span>`}
+                </div>
+                <h4 class="font-bold text-white text-sm mt-2">${nomeAmigavel}</h4>
+              </div>
+
+              <div class="space-y-2 pt-2 border-t border-slate-800/60">
+                <select id="select-disc-para-${f.sha}" class="w-full p-2 bg-slate-900 border border-slate-800 rounded text-xs text-white">
+                  <option value="">Escolher Disciplina...</option>
+                  ${listaDisciplinasGlobal.map(d => `<option value="${d.id}">${d.nome}</option>`).join('')}
+                </select>
+                <button onclick="vincularAulaGitHub('${f.name}', '${caminho}', '${f.sha}')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded text-xs transition">
+                  Vincular a esta Disciplina
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error("Erro GitHub:", err);
+        container.innerHTML = '<div class="col-span-full p-4 text-center text-rose-400 text-xs">Erro de conexão com o GitHub.</div>';
+      }
+    }
+
+    async function vincularAulaGitHub(nomeArquivo, caminhoHtml, sha) {
+      const select = document.getElementById(`select-disc-para-${sha}`);
+      const discId = select.value;
+      if (!discId) { alert("Por favor, selecione uma disciplina primeiro!"); return; }
+
+      const titulo = nomeArquivo.replace('.html', '').replace(/_/g, ' ').replace(/-/g, ' ');
+
+      const { error } = await supabase.from('disciplina_aulas').insert([{
+        disciplina_id: discId,
+        titulo: titulo,
+        link_aula: caminhoHtml
+      }]);
+
+      if (error) {
+        alert("Erro ao vincular aula: " + error.message);
+      } else {
+        alert("Aula vinculada com sucesso!");
+        carregarAulasDoGitHub();
+      }
+    }
+
     async function carregarConteudosDisciplinaSelecionada() {
       const discId = document.getElementById('select-disciplina-conteudo').value;
       const painel = document.getElementById('painel-gestao-anexos');
       if (!discId) { painel.classList.add('hidden'); return; }
       painel.classList.remove('hidden');
 
-      // AULAS
-      const { data: aulas } = await supabase.from('disciplina_aulas').select('*').eq('disciplina_id', discId);
-      document.getElementById('lista-aulas-disciplina').innerHTML = (aulas && aulas.length > 0)
-        ? aulas.map(a => `
-            <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-800 text-xs">
-              <span><i class="fa-solid fa-laptop-code text-emerald-400 mr-2"></i><strong>${a.titulo}</strong> <code class="text-slate-400">(${a.link_aula})</code></span>
-              <button onclick="deletarConteudo('disciplina_aulas', '${a.id}')" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash-can"></i></button>
-            </div>
-          `).join('')
-        : '<p class="text-xs text-slate-500">Nenhuma aula cadastrada nesta disciplina.</p>';
-
-      // MATERIAIS
       const { data: materiais } = await supabase.from('disciplina_materiais').select('*').eq('disciplina_id', discId);
       document.getElementById('lista-materiais-disciplina').innerHTML = (materiais && materiais.length > 0)
         ? materiais.map(m => `
@@ -579,7 +558,6 @@
           `).join('')
         : '<p class="text-xs text-slate-500">Nenhum material anexado.</p>';
 
-      // PROVAS
       const { data: provas } = await supabase.from('disciplina_provas').select('*').eq('disciplina_id', discId);
       document.getElementById('lista-provas-disciplina').innerHTML = (provas && provas.length > 0)
         ? provas.map(p => `
@@ -595,12 +573,6 @@
       if (!confirm('Excluir este item?')) return;
       await supabase.from(tabela).delete().eq('id', id);
       carregarConteudosDisciplinaSelecionada();
-    }
-
-    async function excluirDisciplina(id) {
-      if (!confirm('Excluir esta disciplina?')) return;
-      await supabase.from('disciplinas').delete().eq('id', id);
-      carregarDisciplinas();
     }
 
     async function carregarAtribuicoesTurma() {
@@ -715,12 +687,8 @@
 
     async function aprovarAluno(id) {
       const { error } = await supabase.from('profiles').update({ status: 'ativo' }).eq('id', id);
-      if (error) {
-        alert('Erro ao aprovar aluno: ' + error.message);
-      } else {
-        alert('Aluno aprovado com sucesso!');
-        inicializarDados();
-      }
+      if (error) alert('Erro ao aprovar aluno: ' + error.message);
+      else { alert('Aluno aprovado com sucesso!'); inicializarDados(); }
     }
 
     async function excluirAluno(id, nome) {
