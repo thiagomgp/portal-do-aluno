@@ -156,7 +156,7 @@
         <div id="lista-turmas" class="flex flex-wrap gap-2 pt-2"></div>
       </section>
 
-      <!-- GERENCIAMENTO DE ALUNOS (NOVO) -->
+      <!-- GERENCIAMENTO DE ALUNOS -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🎓 Cadastro & Gestão de Alunos</h2>
@@ -259,7 +259,7 @@
 
       <div class="space-y-2">
         <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Redefinição de Senha</h4>
-        <p class="text-[11px] text-slate-400">Envia um e-mail com instrução de redefinição para a conta do aluno ou redefine via admin.</p>
+        <p class="text-[11px] text-slate-400">Envia um e-mail com instrução de redefinição para a conta do aluno.</p>
         <button onclick="executarResetSenhaAluno()" class="w-full bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-key"></i> Solicitar Reset de Senha
         </button>
@@ -410,12 +410,12 @@
       }
     }
 
-    // CARREGAR LISTA COMPLETA DE ALUNOS COM BOTÕES DE GESTÃO E EDITAR
+    // CARREGAR LISTA COMPLETA DE ALUNOS COM BUSCA ROBUSTA
     async function carregarListaGestaoAlunos() {
       const tbody = document.getElementById('tabela-gestao-alunos');
       if (!tbody) return;
 
-      const { data: alunos, error } = await supabase.from('profiles').select('*, turmas(nome)').order('nome_completo');
+      const { data: alunos, error } = await supabase.from('profiles').select('*').order('nome_completo');
 
       if (error || !alunos || alunos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Nenhum aluno registrado.</td></tr>';
@@ -427,7 +427,9 @@
         const avatar = a.avatar_url && a.avatar_url.startsWith('http') 
           ? a.avatar_url 
           : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nome)}`;
-        const turma = a.turmas ? a.turmas.nome : 'Sem Turma';
+
+        const turmaObj = listaTurmasGlobal.find(t => t.id === a.turma_id);
+        const turmaNome = turmaObj ? turmaObj.nome : 'Sem Turma';
 
         return `
           <tr class="hover:bg-slate-950/40 transition">
@@ -436,7 +438,9 @@
             </td>
             <td class="p-3 font-semibold text-slate-200">${nome}</td>
             <td class="p-3 text-slate-400">${a.apelido ? '@' + a.apelido : '—'}</td>
-            <td class="p-3"><span class="px-2.5 py-1 rounded bg-slate-950 text-indigo-300 font-bold border border-slate-800">${turma}</span></td>
+            <td class="p-3">
+              <span class="px-2.5 py-1 rounded bg-slate-950 text-indigo-300 font-bold border border-slate-800">${turmaNome}</span>
+            </td>
             <td class="p-3 text-right">
               <button onclick="abrirModalEditarAluno('${a.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ml-auto">
                 <i class="fa-solid fa-user-pen text-xs"></i> Editar / Alterar Turma
@@ -469,7 +473,6 @@
       
       if (!confirm(`Confirmar envio de reset de senha para ${aluno?.nome_completo || 'este aluno'}?`)) return;
 
-      // Dispara e-mail de reset via Supabase Auth
       if (aluno && aluno.email) {
         const { error } = await supabase.auth.resetPasswordForEmail(aluno.email);
         if (error) alert('Erro ao solicitar reset: ' + error.message);
