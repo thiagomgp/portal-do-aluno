@@ -156,13 +156,13 @@
         <div id="lista-turmas" class="flex flex-wrap gap-2 pt-2"></div>
       </section>
 
-      <!-- GERENCIAMENTO DE ALUNOS -->
+      <!-- GERENCIAMENTO DE ALUNOS COM APROVAÇÃO E EXCLUSÃO -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🎓 Cadastro & Gestão de Alunos</h2>
           <button onclick="carregarListaGestaoAlunos()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition">Atualizar Alunos</button>
         </div>
-        <p class="text-xs text-slate-400">Edite nomes, reatribua turmas e efetue o reset de senha de acesso dos estudantes.</p>
+        <p class="text-xs text-slate-400">Aprove novas contas pendentes, edite nomes, atribua turmas ou remova o acesso dos estudantes.</p>
 
         <div class="overflow-x-auto pt-2">
           <table class="w-full text-left border-collapse">
@@ -172,6 +172,7 @@
                 <th class="p-3">Nome Completo</th>
                 <th class="p-3">Apelido</th>
                 <th class="p-3">Turma Atual</th>
+                <th class="p-3 text-center">Status da Conta</th>
                 <th class="p-3 text-right">Ações de Gestão</th>
               </tr>
             </thead>
@@ -313,7 +314,7 @@
         }
       });
 
-      // Form Modal Editar Aluno (sem enviar updated_at para evitar o erro 400)
+      // Form Modal Editar Aluno
       document.getElementById('form-modal-editar-aluno').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('modal-aluno-id').value;
@@ -395,7 +396,7 @@
     }
 
     async function carregarMapeamentoAlunos() {
-      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, apelido, turma_id, avatar_url');
+      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, apelido, turma_id, avatar_url, status');
       if (alunos) {
         listaAlunosCompleta = alunos;
         mapaAlunosGlobal = {};
@@ -403,7 +404,8 @@
           mapaAlunosGlobal[a.id] = {
             nome: a.nome_completo || a.apelido || 'Aluno Registrado',
             turma_id: a.turma_id,
-            avatar_url: a.avatar_url
+            avatar_url: a.avatar_url,
+            status: a.status
           };
         });
       }
@@ -416,7 +418,7 @@
       const { data: alunos, error } = await supabase.from('profiles').select('*').order('nome_completo');
 
       if (error || !alunos || alunos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Nenhum aluno registrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">Nenhum aluno registrado.</td></tr>';
         return;
       }
 
@@ -429,6 +431,15 @@
         const turmaObj = listaTurmasGlobal.find(t => t.id === a.turma_id);
         const turmaNome = turmaObj ? turmaObj.nome : 'Sem Turma';
 
+        const isPendente = (a.status === 'pendente');
+        const badgeStatus = isPendente
+          ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800 flex items-center gap-1 justify-center"><i class="fa-solid fa-clock"></i> Pendente</span>`
+          : `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1 justify-center"><i class="fa-solid fa-circle-check"></i> Ativo</span>`;
+
+        const btnAprovar = isPendente
+          ? `<button onclick="aprovarAluno('${a.id}')" title="Aprovar aluno no portal" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1.5 rounded-lg transition flex items-center gap-1"><i class="fa-solid fa-check"></i> Aprovar</button>`
+          : '';
+
         return `
           <tr class="hover:bg-slate-950/40 transition">
             <td class="p-3">
@@ -439,14 +450,48 @@
             <td class="p-3">
               <span class="px-2.5 py-1 rounded bg-slate-950 text-indigo-300 font-bold border border-slate-800">${turmaNome}</span>
             </td>
+            <td class="p-3 text-center">${badgeStatus}</td>
             <td class="p-3 text-right">
-              <button onclick="abrirModalEditarAluno('${a.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ml-auto">
-                <i class="fa-solid fa-user-pen text-xs"></i> Editar / Alterar Turma
-              </button>
+              <div class="flex items-center justify-end gap-2">
+                ${btnAprovar}
+                <button onclick="abrirModalEditarAluno('${a.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-user-pen text-xs"></i> Editar
+                </button>
+                <button onclick="excluirAluno('${a.id}', '${nome.replace(/'/g, "\\'")}')" class="text-xs bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-bold px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                  <i class="fa-solid fa-trash-can text-xs"></i> Excluir
+                </button>
+              </div>
             </td>
           </tr>
         `;
       }).join('');
+    }
+
+    async function aprovarAluno(id) {
+      const { error } = await supabase.from('profiles').update({ status: 'ativo' }).eq('id', id);
+      if (error) {
+        alert('Erro ao aprovar aluno: ' + error.message);
+      } else {
+        alert('Aluno aprovado com sucesso! Agora ele tem acesso completo ao portal.');
+        inicializarDados();
+      }
+    }
+
+    async function excluirAluno(id, nome) {
+      if (!confirm(`Tem certeza que deseja excluir o aluno "${nome}"? Esta ação removerá o perfil e seu histórico de progresso!`)) return;
+
+      // 1. Apaga os dados de progresso vinculados
+      await supabase.from('se_progresso').delete().eq('aluno_id', id);
+
+      // 2. Apaga o perfil do aluno
+      const { error } = await supabase.from('profiles').delete().eq('id', id);
+
+      if (error) {
+        alert('Erro ao excluir aluno: ' + error.message);
+      } else {
+        alert('Aluno removido com sucesso!');
+        inicializarDados();
+      }
     }
 
     function abrirModalEditarAluno(id) {
