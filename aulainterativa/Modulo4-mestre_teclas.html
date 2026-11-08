@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 4: O Mestre das Teclas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      suppressWarning: true,
+      theme: { extend: { colors: { indigo: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' } } } }
+    }
+  </script>
+  <style>
+    .explorer-tree-item:hover { background-color: rgba(255, 255, 255, 0.05); }
+    .explorer-file-item:hover { background-color: rgba(99, 102, 241, 0.15); }
+    .explorer-file-item.selected { background-color: rgba(99, 102, 241, 0.3); border: 1px solid rgba(129, 140, 248, 0.5); }
+    .key-badge { background: #1e293b; border: 1px solid #475569; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-weight: bold; color: #818cf8; }
+    
+    .char-correct { color: #4ade80; background-color: rgba(74, 222, 128, 0.15); }
+    .char-incorrect { color: #f87171; background-color: rgba(248, 113, 113, 0.25); text-decoration: underline; }
+    .char-pending { color: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
+
+  <!-- CABEÇALHO DA AULA -->
+  <header class="bg-slate-900 border-b border-indigo-500/30 p-4 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="bg-indigo-600 text-white font-bold text-xs px-2.5 py-1 rounded-md">MÓDULO 4</span>
+        <h1 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+          <i class="fa-solid fa-keyboard"></i> O Mestre das Teclas: Treino & Desafio
+        </h1>
+      </div>
+      <div class="flex items-center gap-4 text-xs">
+        <span id="aluno-identificacao" class="text-slate-400 font-mono">Aluno: Carregando...</span>
+        <span id="cronometro-combo" class="hidden bg-rose-950 text-rose-400 border border-rose-800 font-mono font-bold px-3 py-1 rounded-lg">⏱️ 00:30</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
+
+    <!-- SELETOR DE ETAPAS / PROGRESSO (COM BLOQUEIO) -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center gap-2 overflow-x-auto">
+      <button id="btn-etapa-1" onclick="tentarTrocarEtapa(1)" class="px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white flex items-center gap-1.5 transition">
+        <span>1</span> Posicionamento
+      </button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-2" onclick="tentarTrocarEtapa(2)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed flex items-center gap-1.5 transition">
+        <span>2</span> 10 Testes de Cópia
+      </button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-3" onclick="tentarTrocarEtapa(3)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed flex items-center gap-1.5 transition">
+        <span>3</span> Prova de Digitação (PPM)
+      </button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-4" onclick="tentarTrocarEtapa(4)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed flex items-center gap-1.5 transition">
+        <span>4</span> Prática Guiada de Atalhos
+      </button>
+      <div class="w-4 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-5" onclick="tentarTrocarEtapa(5)" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed flex items-center gap-1.5 transition">
+        <span>5</span> Combo 30s
+      </button>
+    </div>
+
+    <!-- ETAPA 1: POSICIONAMENTO DOS DEDOS -->
+    <section id="etapa-1" class="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400 flex items-center gap-2">
+          <i class="fa-solid fa-hand-pointer"></i> 1. Posição Base das Mãos no Teclado
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Sua mão deve descansar sobre as teclas <strong>A S D F (esquerda)</strong> e <strong>J K L Ç (direita)</strong>.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+          <h3 class="font-bold text-indigo-300">✋ Mão Esquerda</h3>
+          <ul class="space-y-1 text-slate-300">
+            <li>• Mínimo: <span class="key-badge">A</span> | Anelar: <span class="key-badge">S</span> | Médio: <span class="key-badge">D</span> | Indicador: <span class="key-badge">F</span></li>
+          </ul>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+          <h3 class="font-bold text-indigo-300">🤚 Mão Direita</h3>
+          <ul class="space-y-1 text-slate-300">
+            <li>• Indicador: <span class="key-badge">J</span> | Médio: <span class="key-badge">K</span> | Anelar: <span class="key-badge">L</span> | Mínimo: <span class="key-badge">Ç</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 text-center space-y-4">
+        <p class="text-xs text-slate-300">Digite a sequência de teste abaixo para prosseguir:</p>
+        <div id="target-pos-render" class="text-2xl font-mono font-bold tracking-widest py-2 rounded bg-slate-900"></div>
+        <input type="text" id="input-pos-teste" oninput="renderizarTextoColorido('input-pos-teste', 'asdf jklç', 'target-pos-render', concluirPosicionamento)" placeholder="Digite aqui: asdf jklç" class="w-full max-w-md p-3 bg-slate-900 border border-slate-700 rounded-lg text-center font-mono text-base text-white focus:outline-none focus:border-indigo-500" autocomplete="off">
+        <div id="feedback-pos" class="text-xs font-bold h-4"></div>
+      </div>
+    </section>
+
+    <!-- ETAPA 2: 10 TESTES DE CÓPIA PROGRESSIVOS -->
+    <section id="etapa-2" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-base font-bold text-indigo-400">2. Série de 10 Exercícios de Cópia</h2>
+          <p class="text-xs text-slate-400">Acerte as letras para que fiquem verdes. Erros ficarão vermelhos.</p>
+        </div>
+        <span id="num-exercicio-badge" class="bg-indigo-600 text-white font-bold text-xs px-3 py-1 rounded-lg">Exercício 1 / 10</span>
+      </div>
+
+      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 text-center space-y-4">
+        <div id="copia-target-render" class="text-xl font-mono font-bold tracking-wide py-3 px-4 rounded-lg bg-slate-900 border border-slate-800 min-h-[50px] flex items-center justify-center flex-wrap gap-0.5"></div>
+
+        <input type="text" id="copia-input" oninput="processarCopiaInput()" placeholder="Digite o texto exatamente como mostrado acima..." class="w-full max-w-xl p-3 bg-slate-900 border border-slate-700 rounded-lg text-center font-mono text-base text-white focus:outline-none focus:border-indigo-500" autocomplete="off">
+
+        <div id="copia-feedback" class="text-xs font-bold h-4"></div>
+      </div>
+    </section>
+
+    <!-- ETAPA 3: PROVA DE DIGITAÇÃO (PPM) -->
+    <section id="etapa-3" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-base font-bold text-indigo-400">3. Prova Oficial de Digitação</h2>
+          <p class="text-xs text-slate-400">Meta: Alcançar de <strong>10 a 20 Palavras Por Minuto (PPM)</strong>.</p>
+        </div>
+        <div class="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-center">
+          <div class="text-[10px] text-slate-400 uppercase">Velocidade Atual</div>
+          <div id="ppm-val" class="text-lg font-bold text-cyan-400 font-mono">0 PPM</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
+        <div id="prova-target-render" class="text-sm font-mono leading-relaxed p-4 rounded-lg bg-slate-900 border border-slate-800 flex flex-wrap gap-0.5"></div>
+
+        <textarea id="prova-input" oninput="processarProvaInput()" rows="4" placeholder="Comece a digitar aqui para iniciar a prova..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg font-mono text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+
+        <div id="prova-feedback" class="text-xs font-bold text-center h-4"></div>
+      </div>
+    </section>
+
+    <!-- ETAPA 4: PRÁTICA GUIADA E SIMULADA DOS ATALHOS -->
+    <section id="etapa-4" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div>
+        <h2 class="text-base font-bold text-indigo-400">4. Prática Guiada: Simulação de Atalhos e Explorer</h2>
+        <p class="text-xs text-slate-400">Complete as 4 tarefas de treino abaixo para destravar a Prova Final de 30s.</p>
+      </div>
+
+      <!-- PAINEL DE TAREFAS GUIADAS -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+        <div id="check-t1" class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+          <span class="font-bold text-amber-400">1. Criar Arquivo</span>
+          <p class="text-slate-400 text-[11px]">Botão Direito no Explorer > Novo > Documento de Texto.</p>
+        </div>
+        <div id="check-t2" class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+          <span class="font-bold text-amber-400">2. Digitar Nome</span>
+          <p class="text-slate-400 text-[11px]">Digite seu nome dentro do Bloco de Notas.</p>
+        </div>
+        <div id="check-t3" class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+          <span class="font-bold text-amber-400">3. Copiar e Colar</span>
+          <p class="text-slate-400 text-[11px]">Duplique o texto usando <strong>Ctrl+C</strong> e <strong>Ctrl+V</strong>.</p>
+        </div>
+        <div id="check-t4" class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+          <span class="font-bold text-amber-400">4. Alternar Janela</span>
+          <p class="text-slate-400 text-[11px]">Pressione <strong>Alt+Tab</strong> para simular troca.</p>
+        </div>
+      </div>
+
+      <!-- AMBIENTE DE SIMULAÇÃO GUIADA -->
+      <div class="bg-[#191919] rounded-xl border border-slate-700 p-4 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <span class="text-xs font-bold text-slate-300"><i class="fa-regular fa-folder-open text-amber-400 mr-2"></i>Simulador Prático do Explorer</span>
+          <span id="status-guiado-alerta" class="text-xs font-bold text-amber-400">Passo 1: Crie o arquivo com o botão direito no painel abaixo.</span>
+        </div>
+
+        <div class="min-h-[220px] bg-[#141414] border border-slate-800 rounded-lg p-3 relative" oncontextmenu="abrirMenuGuiado(event)">
+          <div id="grid-arquivos-guiado" class="space-y-1">
+            <div class="p-1.5 rounded flex justify-between text-xs text-slate-400 border-b border-slate-800/30">
+              <span><i class="fa-solid fa-file-code text-amber-400 mr-2"></i>aula_exemplo.js</span>
+              <span>12 KB</span>
+            </div>
+          </div>
+
+          <!-- MENU DE CONTEXTO GUIADO -->
+          <div id="context-menu-guiado" class="hidden absolute bg-[#2b2b2b] border border-slate-700 rounded-lg shadow-2xl w-48 text-xs py-1 z-50">
+            <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300">Exibir</div>
+            <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300 border-b border-slate-800">Atualizar</div>
+            <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300 relative group flex justify-between items-center">
+              <span>Novo</span>
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              <div class="hidden group-hover:block absolute left-full top-0 bg-[#2b2b2b] border border-slate-700 rounded-lg shadow-2xl w-48 py-1">
+                <div onclick="executarCriacaoGuiada()" class="px-3 py-1.5 hover:bg-indigo-600 font-bold cursor-pointer text-white flex items-center gap-2">
+                  <i class="fa-regular fa-file-lines text-cyan-400"></i> Documento de Texto
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- JANELA SIMULADA DO BLOCO DE NOTAS DA PRÁTICA -->
+        <div id="bloco-guiado-janela" class="hidden bg-[#1f1f1f] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div class="flex justify-between text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
+            <span>MeuArquivoGuiado.txt - Bloco de Notas</span>
+          </div>
+          <textarea id="txt-guiado" oninput="validarNomeGuiado()" onkeydown="validarAtalhosGuiados(event)" rows="3" placeholder="Digite seu nome completo aqui e depois duplique com Ctrl+C e Ctrl+V..." class="w-full p-2 bg-[#141414] border border-slate-700 rounded text-xs font-mono text-white focus:outline-none focus:border-indigo-500"></textarea>
+          <div id="feedback-bloco-guiado" class="text-xs font-bold text-slate-400">Aguardando digitação do nome...</div>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center">
+        <button onclick="testarAltTabGuiado()" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 font-bold text-xs px-4 py-2 rounded-lg border border-slate-700 transition">
+          ⌨️ Simular Pressionar Alt+Tab
+        </button>
+        <button id="btn-avancar-etapa5" onclick="avancarEtapaFinal()" disabled class="bg-slate-800 text-slate-500 font-bold text-xs px-5 py-2.5 rounded-xl cursor-not-allowed transition">
+          Ir para o Desafio Final (Combo 30s) 🔒
+        </button>
+      </div>
+    </section>
+
+    <!-- ETAPA 5: COMBO DE AGILIDADE (30 SEGUNDOS) -->
+    <section id="etapa-5" class="hidden space-y-4">
+      <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
+        <div>
+          <h2 class="text-base font-bold text-indigo-400">5. Desafio Final: Combo de Agilidade (30s)</h2>
+          <p class="text-xs text-slate-400">Clique com Botão Direito no Explorer > Procure em Novo > Documento de Texto > Digite seu nome > Duplique com Ctrl+C e Ctrl+V.</p>
+        </div>
+        <button id="btn-iniciar-combo" onclick="iniciarDesafioCombo()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+          🚀 Iniciar Desafio (30s)
+        </button>
+      </div>
+
+      <!-- SIMULADOR WINDOWS EXPLORER AMPLIADO -->
+      <div class="bg-[#191919] rounded-xl border border-slate-700 shadow-2xl overflow-hidden text-xs text-slate-200 min-h-[500px] flex flex-col relative w-full" oncontextmenu="abrirContextMenu(event)">
+        <!-- BARRA DE TÍTULO -->
+        <div class="bg-[#202020] px-3 py-2 flex justify-between items-center border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <i class="fa-regular fa-folder-open text-amber-400"></i>
+            <span class="font-sans text-xs">aulainterativa</span>
+          </div>
+          <div class="flex items-center gap-3 text-slate-400 text-xs">
+            <span>─</span> <span>🗖</span> <span>✕</span>
+          </div>
+        </div>
+
+        <!-- BARRA DE ENDEREÇO -->
+        <div class="bg-[#2b2b2b] p-2 flex items-center gap-2 border-b border-slate-800">
+          <div class="flex-1 bg-[#191919] border border-slate-700 rounded px-3 py-1 font-mono text-xs text-slate-300">
+            <i class="fa-regular fa-folder text-amber-400 mr-2"></i>Este Computador > Documentos > portal aluno > aulainterativa
+          </div>
+        </div>
+
+        <!-- ÁREA INTERNA -->
+        <div class="flex-1 flex" id="explorer-body">
+          <div class="w-56 bg-[#1f1f1f] border-r border-slate-800 p-3 space-y-2 text-xs">
+            <div class="explorer-tree-item p-1.5 rounded flex items-center gap-2 text-slate-300"><i class="fa-solid fa-star text-amber-400"></i> Acesso rápido</div>
+            <div class="explorer-tree-item p-1.5 rounded flex items-center gap-2 text-slate-300"><i class="fa-solid fa-desktop text-blue-400"></i> Área de Trabalho</div>
+            <div class="explorer-tree-item p-1.5 rounded flex items-center gap-2 text-slate-300"><i class="fa-solid fa-download text-blue-400"></i> Downloads</div>
+            <div class="explorer-tree-item p-1.5 rounded flex items-center gap-2 text-slate-200 font-bold bg-slate-800/60"><i class="fa-solid fa-folder text-amber-400"></i> Documentos</div>
+          </div>
+
+          <div class="flex-1 p-4 bg-[#191919] relative min-h-[380px]" id="grid-arquivos">
+            <div class="explorer-file-item p-2 rounded flex justify-between text-slate-300 border-b border-slate-800/40">
+              <span><i class="fa-solid fa-file-code text-amber-400 mr-2"></i>app.js</span>
+              <span class="text-slate-500 font-mono text-xs">18 KB</span>
+            </div>
+            <div class="explorer-file-item p-2 rounded flex justify-between text-slate-300 border-b border-slate-800/40">
+              <span><i class="fa-brands fa-chrome text-rose-400 mr-2"></i>index.html</span>
+              <span class="text-slate-500 font-mono text-xs">31 KB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MENU DE CONTEXTO FIEL -->
+        <div id="custom-context-menu" class="hidden absolute bg-[#2b2b2b] border border-slate-700 rounded-lg shadow-2xl w-56 text-xs py-1.5 z-50">
+          <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300">Exibir</div>
+          <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300">Classificar por</div>
+          <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300 border-b border-slate-800">Atualizar</div>
+          <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300 relative group flex justify-between items-center">
+            <span>Novo</span>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            <div class="hidden group-hover:block absolute left-full top-0 bg-[#2b2b2b] border border-slate-700 rounded-lg shadow-2xl w-52 py-1.5">
+              <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300 flex items-center gap-2"><i class="fa-regular fa-folder text-amber-400"></i> Pasta</div>
+              <div class="px-3 py-1.5 hover:bg-slate-700 cursor-pointer text-slate-300 flex items-center gap-2"><i class="fa-solid fa-arrow-up-right-from-square text-blue-400"></i> Atalho</div>
+              <div onclick="criarNovoArquivoTexto()" class="px-3 py-1.5 hover:bg-indigo-600 font-bold cursor-pointer text-white flex items-center gap-2">
+                <i class="fa-regular fa-file-lines text-cyan-400"></i> Documento de Texto
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- JANELA BLOCO DE NOTAS -->
+      <div id="janela-bloco-notas" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#1f1f1f] border border-slate-700 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+          <div class="bg-[#2d2d2d] px-3 py-2 flex justify-between items-center text-xs text-slate-300">
+            <span><i class="fa-regular fa-file-lines text-cyan-400 mr-1.5"></i> MeuNome.txt - Bloco de Notas</span>
+            <button onclick="falharEResetarCombo('Janela fechada antes de concluir!')" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+          <div class="p-4 bg-[#191919] space-y-3">
+            <p class="text-xs text-slate-300">Digite seu nome completo e depois copie e cole com <strong>Ctrl+C</strong> e <strong>Ctrl+V</strong>:</p>
+            <textarea id="txt-bloco-notas" onkeydown="detectarAtalhosCombo(event)" rows="5" class="w-full p-2.5 bg-[#1f1f1f] border border-slate-700 rounded text-xs font-mono text-white focus:outline-none focus:border-indigo-500" placeholder="Digite seu nome completo aqui..."></textarea>
+            <div class="flex justify-between items-center text-xs">
+              <span id="status-duplicacao" class="text-amber-400 font-bold">Aguardando Ctrl+C e Ctrl+V...</span>
+              <button onclick="concluirComboFinal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded transition">Salvar e Concluir</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let alunoAtualId = null;
+    let etapaMaxConcluida = 1;
+
+    let tempoInicioProva = null;
+    let comboTimer = null;
+    let tempoRestanteCombo = 30;
+    let desafioIniciado = false;
+    let ctrlCUsado = false;
+    let ctrlVUsado = false;
+    let exercicioCopiaAtual = 0;
+
+    // CONTROLES DA PRÁTICA GUIADA (ETAPA 4)
+    let guiado_t1 = false;
+    let guiado_t2 = false;
+    let guiado_t3_c = false;
+    let guiado_t3_v = false;
+    let guiado_t4 = false;
+
+    const LISTA_EXERCICIOS = [
+      "asdf jklç asdf jklç",
+      "café pátio você avião",
+      "o pão de açúcar é belo",
+      "às vezes a vovó prepara bolo",
+      "A prática constante traz perfeição!",
+      "Cultura Digital (Módulo 4): 2026",
+      "Ctrl+C para copiar e Ctrl+V para colar.",
+      "Alt+Tab alterna janelas no Windows 10.",
+      "Atenção, agilidade e precisão total!",
+      "Parabéns! Você concluiu os 10 testes!"
+    ];
+
+    const TEXTO_PROVA = "O domínio do teclado é uma habilidade fundamental no ambiente corporativo e educacional. A prática continuada desenvolve a memória muscular dos dedos, garantindo agilidade e precisão para criar documentos e resolver problemas no computador.";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      alunoAtualId = urlParams.get('id');
+      document.getElementById('aluno-identificacao').innerText = `Aluno: ${urlParams.get('nome') || 'Estudante'}`;
+      
+      renderizarTextoColorido('input-pos-teste', 'asdf jklç', 'target-pos-render');
+      carregarExercicioCopia();
+      renderizarTextoColorido('prova-input', TEXTO_PROVA, 'prova-target-render');
+    });
+
+    function tentarTrocarEtapa(n) {
+      if (n > etapaMaxConcluida) {
+        alert(`⚠️ Você precisa concluir a Etapa ${etapaMaxConcluida} primeiro!`);
+        return;
+      }
+      carregarEtapa(n);
+    }
+
+    function carregarEtapa(n) {
+      for (let i = 1; i <= 5; i++) {
+        const sec = document.getElementById(`etapa-${i}`);
+        const btn = document.getElementById(`btn-etapa-${i}`);
+        if (sec) sec.classList.toggle('hidden', i !== n);
+        if (btn) {
+          const liberado = i <= etapaMaxConcluida;
+          btn.className = i === n
+            ? 'px-3 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white flex items-center gap-1.5 transition'
+            : liberado
+              ? 'px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 flex items-center gap-1.5 transition'
+              : 'px-3 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed flex items-center gap-1.5 transition';
+        }
+      }
+    }
+
+    function renderizarTextoColorido(inputId, textoAlvo, containerId, callbackSucesso) {
+      const inputVal = document.getElementById(inputId).value;
+      const container = document.getElementById(containerId);
+      let html = '';
+
+      for (let i = 0; i < textoAlvo.length; i++) {
+        const charAlvo = textoAlvo[i];
+        const charInput = inputVal[i];
+
+        if (charInput === undefined) {
+          html += `<span class="char-pending">${charAlvo === ' ' ? '&nbsp;' : charAlvo}</span>`;
+        } else if (charInput === charAlvo) {
+          html += `<span class="char-correct">${charAlvo === ' ' ? '&nbsp;' : charAlvo}</span>`;
+        } else {
+          html += `<span class="char-incorrect">${charAlvo === ' ' ? '&nbsp;' : charAlvo}</span>`;
+        }
+      }
+
+      container.innerHTML = html;
+
+      if (inputVal === textoAlvo && callbackSucesso) {
+        callbackSucesso();
+      }
+    }
+
+    function concluirPosicionamento() {
+      const fb = document.getElementById('feedback-pos');
+      fb.innerText = "✓ Excelente! Posição correta. Avançando...";
+      fb.className = "text-xs font-bold text-emerald-400";
+      etapaMaxConcluida = Math.max(etapaMaxConcluida, 2);
+      setTimeout(() => carregarEtapa(2), 1000);
+    }
+
+    function carregarExercicioCopia() {
+      document.getElementById('num-exercicio-badge').innerText = `Exercício ${exercicioCopiaAtual + 1} / 10`;
+      document.getElementById('copia-input').value = '';
+      renderizarTextoColorido('copia-input', LISTA_EXERCICIOS[exercicioCopiaAtual], 'copia-target-render');
+    }
+
+    function processarCopiaInput() {
+      const target = LISTA_EXERCICIOS[exercicioCopiaAtual];
+      renderizarTextoColorido('copia-input', target, 'copia-target-render', () => {
+        exercicioCopiaAtual++;
+        if (exercicioCopiaAtual < LISTA_EXERCICIOS.length) {
+          document.getElementById('copia-feedback').innerText = "✓ Excelente! Próximo exercício...";
+          document.getElementById('copia-feedback').className = "text-xs font-bold text-emerald-400";
+          setTimeout(carregarExercicioCopia, 600);
+        } else {
+          document.getElementById('copia-feedback').innerText = "🎉 Todos os 10 exercícios concluídos! Avançando...";
+          document.getElementById('copia-feedback').className = "text-xs font-bold text-emerald-400";
+          etapaMaxConcluida = Math.max(etapaMaxConcluida, 3);
+          setTimeout(() => carregarEtapa(3), 1000);
+        }
+      });
+    }
+
+    function processarProvaInput() {
+      if (!tempoInicioProva) tempoInicioProva = new Date();
+      const inputVal = document.getElementById('prova-input').value;
+      const decorridoMin = (new Date() - tempoInicioProva) / 60000;
+      const palavras = inputVal.trim().split(/\s+/).filter(Boolean).length;
+      const ppm = decorridoMin > 0 ? Math.round(palavras / decorridoMin) : 0;
+      document.getElementById('ppm-val').innerText = `${ppm} PPM`;
+
+      renderizarTextoColorido('prova-input', TEXTO_PROVA, 'prova-target-render', () => {
+        const fb = document.getElementById('prova-feedback');
+        if (ppm >= 10) {
+          fb.innerText = `🎉 Prova Concluída com ${ppm} PPM! Liberando Prática Guiada...`;
+          fb.className = "text-xs font-bold text-emerald-400";
+          salvarProgressoSupabase(3, 5, Math.round(decorridoMin * 60));
+          etapaMaxConcluida = Math.max(etapaMaxConcluida, 4);
+          setTimeout(() => carregarEtapa(4), 1200);
+        } else {
+          fb.innerText = `Atingido ${ppm} PPM. Digite um pouco mais rápido para atingir ao menos 10 PPM.`;
+          fb.className = "text-xs font-bold text-amber-400";
+        }
+      });
+    }
+
+    // LÓGICA DA SIMULAÇÃO GUIADA DA ETAPA 4
+    function abrirMenuGuiado(e) {
+      e.preventDefault();
+      const menu = document.getElementById('context-menu-guiado');
+      menu.style.left = `${e.clientX - 100}px`;
+      menu.style.top = `${e.clientY - 100}px`;
+      menu.classList.remove('hidden');
+    }
+
+    function executarCriacaoGuiada() {
+      document.getElementById('context-menu-guiado').classList.add('hidden');
+      guiado_t1 = true;
+      document.getElementById('check-t1').className = "bg-emerald-950 p-3 rounded-xl border border-emerald-800 space-y-1 text-emerald-400";
+      document.getElementById('status-guiado-alerta').innerText = "Passo 2: Digite seu nome dentro do bloco de notas.";
+      
+      const grid = document.getElementById('grid-arquivos-guiado');
+      grid.innerHTML += `<div class="p-1.5 rounded flex justify-between text-xs text-emerald-400 font-bold border-b border-slate-800/30"><span><i class="fa-regular fa-file-lines text-cyan-400 mr-2"></i>MeuArquivoGuiado.txt</span><span>1 KB</span></div>`;
+      document.getElementById('bloco-guiado-janela').classList.remove('hidden');
+    }
+
+    function validarNomeGuiado() {
+      const val = document.getElementById('txt-guiado').value.trim();
+      if (val.length > 2 && !guiado_t2) {
+        guiado_t2 = true;
+        document.getElementById('check-t2').className = "bg-emerald-950 p-3 rounded-xl border border-emerald-800 space-y-1 text-emerald-400";
+        document.getElementById('status-guiado-alerta').innerText = "Passo 3: Selecione o texto e use Ctrl+C e Ctrl+V para duplicar.";
+      }
+    }
+
+    function validarAtalhosGuiados(e) {
+      if (e.ctrlKey && e.key.toLowerCase() === 'c') guiado_t3_c = true;
+      if (e.ctrlKey && e.key.toLowerCase() === 'v') guiado_t3_v = true;
+
+      if (guiado_t3_c && guiado_t3_v) {
+        document.getElementById('check-t3').className = "bg-emerald-950 p-3 rounded-xl border border-emerald-800 space-y-1 text-emerald-400";
+        document.getElementById('feedback-bloco-guiado').innerText = "✓ Excelente! Texto duplicado com Ctrl+C e Ctrl+V.";
+        document.getElementById('feedback-bloco-guiado').className = "text-xs font-bold text-emerald-400";
+        document.getElementById('status-guiado-alerta').innerText = "Passo 4: Pressione 'Simular Pressionar Alt+Tab' abaixo.";
+        verificarLiberacaoEtapa5();
+      }
+    }
+
+    function testarAltTabGuiado() {
+      guiado_t4 = true;
+      document.getElementById('check-t4').className = "bg-emerald-950 p-3 rounded-xl border border-emerald-800 space-y-1 text-emerald-400";
+      alert("Simulação de troca de janela (Alt+Tab) realizada com sucesso!");
+      verificarLiberacaoEtapa5();
+    }
+
+    function verificarLiberacaoEtapa5() {
+      if (guiado_t1 && guiado_t2 && guiado_t3_c && guiado_t3_v && guiado_t4) {
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 5);
+        const btn = document.getElementById('btn-avancar-etapa5');
+        btn.disabled = false;
+        btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-lg animate-pulse";
+        btn.innerText = "Ir para o Desafio Final (Combo 30s) 🚀";
+      }
+    }
+
+    function avancarEtapaFinal() {
+      carregarEtapa(5);
+    }
+
+    // LÓGICA DO COMBO E RESET DA ETAPA 5
+    function iniciarDesafioCombo() {
+      desafioIniciado = true;
+      tempoRestanteCombo = 30;
+      ctrlCUsado = false;
+      ctrlVUsado = false;
+      document.getElementById('cronometro-combo').classList.remove('hidden');
+      
+      clearInterval(comboTimer);
+      comboTimer = setInterval(() => {
+        tempoRestanteCombo--;
+        document.getElementById('cronometro-combo').innerText = `⏱️ 00:${tempoRestanteCombo < 10 ? '0' : ''}${tempoRestanteCombo}`;
+        if (tempoRestanteCombo <= 0) {
+          falharEResetarCombo("⏰ Tempo esgotado! O desafio foi reiniciado.");
+        }
+      }, 1000);
+    }
+
+    function falharEResetarCombo(msg) {
+      clearInterval(comboTimer);
+      desafioIniciado = false;
+      ctrlCUsado = false;
+      ctrlVUsado = false;
+      document.getElementById('janela-bloco-notas').classList.add('hidden');
+      document.getElementById('txt-bloco-notas').value = '';
+      document.getElementById('status-duplicacao').innerText = "Aguardando Ctrl+C e Ctrl+V...";
+      document.getElementById('status-duplicacao').className = "text-amber-400 font-bold";
+      document.getElementById('cronometro-combo').classList.add('hidden');
+      
+      const arquivoCriado = document.getElementById('arquivo-criado-temp');
+      if (arquivoCriado) arquivoCriado.remove();
+
+      alert(msg);
+    }
+
+    function abrirContextMenu(e) {
+      e.preventDefault();
+      const menu = document.getElementById('custom-context-menu');
+      menu.style.left = `${Math.min(e.clientX - 100, window.innerWidth - 240)}px`;
+      menu.style.top = `${Math.min(e.clientY - 100, window.innerHeight - 300)}px`;
+      menu.classList.remove('hidden');
+    }
+
+    document.addEventListener('click', () => { 
+      const menu = document.getElementById('custom-context-menu');
+      if (menu) menu.classList.add('hidden'); 
+      const menuG = document.getElementById('context-menu-guiado');
+      if (menuG) menuG.classList.add('hidden');
+    });
+
+    function criarNovoArquivoTexto() {
+      if (!desafioIniciado) {
+        alert("Clique primeiro em '🚀 Iniciar Desafio (30s)' antes de criar o arquivo!");
+        return;
+      }
+
+      document.getElementById('custom-context-menu').classList.add('hidden');
+      const grid = document.getElementById('grid-arquivos');
+      
+      if (!document.getElementById('arquivo-criado-temp')) {
+        const novo = document.createElement('div');
+        novo.id = 'arquivo-criado-temp';
+        novo.className = "explorer-file-item selected p-2 rounded flex justify-between text-indigo-300 font-bold border-b border-slate-800/40";
+        novo.innerHTML = `<span><i class="fa-regular fa-file-lines text-cyan-400 mr-2"></i>MeuNome.txt</span> <span class="text-slate-500 font-mono text-xs">1 KB</span>`;
+        grid.appendChild(novo);
+      }
+
+      setTimeout(() => document.getElementById('janela-bloco-notas').classList.remove('hidden'), 300);
+    }
+
+    function detectarAtalhosCombo(e) {
+      if (e.ctrlKey && e.key.toLowerCase() === 'c') ctrlCUsado = true;
+      if (e.ctrlKey && e.key.toLowerCase() === 'v') ctrlVUsado = true;
+
+      if (ctrlCUsado && ctrlVUsado) {
+        document.getElementById('status-duplicacao').innerText = "✓ Texto duplicado com Ctrl+C e Ctrl+V!";
+        document.getElementById('status-duplicacao').className = "text-emerald-400 font-bold";
+      }
+    }
+
+    async function concluirComboFinal() {
+      const txt = document.getElementById('txt-bloco-notas').value.trim();
+      if (!txt) {
+        falharEResetarCombo("Você não digitou seu nome no arquivo! O desafio foi reiniciado.");
+        return;
+      }
+      if (!ctrlCUsado || !ctrlVUsado) {
+        falharEResetarCombo("Você não usou os atalhos Ctrl+C e Ctrl+V para duplicar o texto! O desafio foi reiniciado.");
+        return;
+      }
+
+      clearInterval(comboTimer);
+      alert("🏆 INCRÍVEL! Você concluiu o Desafio Mestre das Teclas com sucesso!");
+      salvarProgressoSupabase(5, 5, 30 - tempoRestanteCombo, 'concluido');
+      document.getElementById('janela-bloco-notas').classList.add('hidden');
+    }
+
+    async function salvarProgressoSupabase(etapa, totalEtapas, tempoSegundos, status = 'em_andamento') {
+      if (!alunoAtualId) return;
+      await _supabase.from('se_progresso').upsert([{
+        aluno_id: alunoAtualId,
+        modulo_id: 'Modulo4-mestre_teclas',
+        etapa_atual: etapa,
+        total_etapas: totalEtapas,
+        tempo_segundos: tempoSegundos,
+        status: status,
+        updated_at: new Date().toISOString()
+      }], { onConflict: 'aluno_id, modulo_id' });
+    }
+  </script>
+</body>
+</html>
