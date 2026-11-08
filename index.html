@@ -23,17 +23,15 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
 
-  <!-- CABEÇALHO SUPERIOR COM AVATAR DESTACADO DA IDENTIDADE VISUAL -->
+  <!-- CABEÇALHO SUPERIOR -->
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-lg">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
       
-      <!-- BRANDING DO PORTAL -->
       <div class="flex items-center gap-3">
         <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></div>
         <h1 class="text-lg font-bold text-emerald-400 tracking-wide">Portal do Aluno</h1>
       </div>
 
-      <!-- IDENTIDADE VISUAL & AVATAR DO ALUNO SELECIONADO -->
       <div class="flex items-center gap-4">
         <div id="user-info-bar" class="flex items-center gap-3 bg-slate-950/80 px-3.5 py-1.5 rounded-full border border-emerald-500/30 shadow-inner">
           <div class="relative shrink-0">
@@ -45,7 +43,7 @@
             <div class="font-bold text-white leading-tight" id="student-display-name">Carregando...</div>
             <div class="text-[10px] text-emerald-400 font-medium leading-tight flex items-center gap-1 mt-0.5">
               <i class="fa-solid fa-users text-[9px]"></i>
-              <span id="student-display-class">--</span>
+              <span id="student-display-class">A carregar...</span>
             </div>
           </div>
         </div>
@@ -58,7 +56,7 @@
     </div>
   </header>
 
-  <!-- NAVEGAÇÃO PRINCIPAL DO PORTAL -->
+  <!-- NAVEGAÇÃO -->
   <div class="bg-slate-900/60 border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 flex gap-2 py-2 overflow-x-auto">
       <button id="btn-nav-inicio" onclick="mudarAbaPortal('inicio')" class="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 shadow transition flex items-center gap-2">
@@ -79,7 +77,7 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
 
-    <!-- SEÇÃO 1: INÍCIO (MURAL DE AVISOS) -->
+    <!-- SEÇÃO 1: INÍCIO -->
     <section id="secao-inicio" class="space-y-6">
       <div>
         <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
@@ -90,22 +88,13 @@
       </div>
 
       <div id="lista-avisos" class="space-y-4">
-        <div class="bg-slate-900 border-l-4 border-emerald-500 border-y border-r border-slate-800 rounded-r-2xl p-5 shadow-lg space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-circle-info"></i> Informativo
-            </span>
-            <span class="text-[10px] text-slate-500 font-mono">Geral</span>
-          </div>
-          <h3 class="text-sm font-bold text-white">Bem-vindo ao Portal de Cultura Digital</h3>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            Navegue até a aba <strong>Disciplinas</strong> e selecione o botão <strong>Aulas</strong> para realizar os módulos práticos.
-          </p>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-slate-500 text-xs">
+          A carregar avisos do mural...
         </div>
       </div>
     </section>
 
-    <!-- SEÇÃO 2: DISCIPLINAS (BNCC) -->
+    <!-- SEÇÃO 2: DISCIPLINAS -->
     <section id="secao-disciplinas" class="hidden space-y-6">
       <div>
         <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
@@ -149,7 +138,7 @@
           <div id="grid-aulas-automaticas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="col-span-full p-8 text-center text-slate-500 bg-slate-900 border border-slate-800 rounded-2xl">
               <i class="fa-solid fa-spinner fa-spin text-2xl text-emerald-400 mb-2"></i>
-              <p class="text-xs">Carregando atividades...</p>
+              <p class="text-xs">A carregar atividades...</p>
             </div>
           </div>
         </div>
@@ -255,11 +244,12 @@
     const DEFAULT_UUID_TESTE = "659ebb95-7f24-4e4f-91ec-2248ae3a4bc0";
 
     document.addEventListener('DOMContentLoaded', async () => {
+      // Força a limpeza de cache local antigo para obter os dados do Supabase
+      sessionStorage.removeItem('active_student');
       await carregarSessaoReal();
       await varrerEExibirAulasGitHub();
       await carregarAvisosMuralAluno();
 
-      // Form Perfil (sem enviar updated_at para evitar erro 400)
       document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!activeStudent || !activeStudent.id) return;
@@ -287,7 +277,6 @@
             activeStudent.nome = updates.nome_completo;
             activeStudent.apelido = updates.apelido;
             activeStudent.foto_url = updates.avatar_url;
-            sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
             await carregarSessaoReal();
           }
         } catch (err) {
@@ -295,7 +284,6 @@
         }
       });
 
-      // Form Senha
       document.getElementById('form-update-password')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const novaSenha = document.getElementById('profile-new-password').value;
@@ -311,99 +299,105 @@
     });
 
     async function carregarSessaoReal() {
-  let studentId = null;
-  let studentEmail = null;
+      let studentId = null;
+      let studentEmail = null;
 
-  try {
-    const { data: { session } } = await _supabase.auth.getSession();
-    if (session && session.user) {
-      studentId = session.user.id;
-      studentEmail = session.user.email;
+      try {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (session && session.user) {
+          studentId = session.user.id;
+          studentEmail = session.user.email;
+        }
+      } catch (e) {}
+
+      if (!studentId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('id')) {
+          studentId = urlParams.get('id');
+        }
+      }
+
+      if (!studentId) {
+        studentId = DEFAULT_UUID_TESTE;
+      }
+
+      // BUSCA O PERFIL E A TURMA DIRETAMENTE DO SUPABASE
+      try {
+        const { data: profile, error } = await _supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', studentId)
+          .maybeSingle();
+
+        if (profile && !error) {
+          let nomeTurma = "Sem Turma";
+          
+          if (profile.turma_id) {
+            const { data: turmaData } = await _supabase
+              .from('turmas')
+              .select('nome')
+              .eq('id', profile.turma_id)
+              .maybeSingle();
+            if (turmaData) {
+              nomeTurma = turmaData.nome;
+            }
+          } else {
+            // Se o perfil não tem turma_id associada, atribui a primeira disponível
+            const { data: turmasDisponiveis } = await _supabase.from('turmas').select('id, nome').limit(1);
+            if (turmasDisponiveis && turmasDisponiveis.length > 0) {
+              profile.turma_id = turmasDisponiveis[0].id;
+              nomeTurma = turmasDisponiveis[0].nome;
+              await _supabase.from('profiles').update({ turma_id: turmasDisponiveis[0].id }).eq('id', profile.id);
+            }
+          }
+
+          activeStudent = {
+            id: profile.id,
+            nome: profile.nome_completo || 'Aluno',
+            apelido: profile.apelido || '',
+            email: studentEmail || 'aluno@escola.com',
+            turma_id: profile.turma_id,
+            turma: nomeTurma,
+            foto_url: profile.avatar_url || ''
+          };
+        }
+      } catch (err) {
+        console.warn("Erro ao carregar perfil do Supabase:", err);
+      }
+
+      if (!activeStudent) {
+        activeStudent = {
+          id: DEFAULT_UUID_TESTE,
+          nome: "teste teste",
+          turma: "Sem Turma",
+          email: "aluno@escola.com",
+          apelido: "",
+          foto_url: "https://i.pinimg.com/736x/ce/4c/ab/ce4cab3df20d39e248f3b259d6402ecf.jpg"
+        };
+      }
+
+      const nomeExibicao = activeStudent.nome || "Aluno";
+      const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
+
+      if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
+      if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Sem Turma";
+
+      const avatarSrc = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
+        ? activeStudent.foto_url 
+        : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
+
+      if (document.getElementById('header-student-avatar')) document.getElementById('header-student-avatar').src = avatarSrc;
+      if (document.getElementById('profile-avatar-preview')) document.getElementById('profile-avatar-preview').src = avatarSrc;
+
+      if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
+      if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
+      if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
+
+      if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
+      if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
+      if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
+      if (document.getElementById('profile-avatar-url')) document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
     }
-  } catch (e) {}
-
-  if (!studentId) {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('id')) {
-      studentId = urlParams.get('id');
-    }
-  }
-
-  // Se não houver ID na URL nem na sessão auth, usa o ID padrão de teste
-  if (!studentId) {
-    studentId = DEFAULT_UUID_TESTE;
-  }
-
-  // BUSCA DIRETAMENTE DO SUPABASE A TURMA MAIS RECENTE REGISTRADA
-  try {
-    const { data: profile, error } = await _supabase
-      .from('profiles')
-      .select('*, turmas(id, nome)')
-      .eq('id', studentId)
-      .maybeSingle();
-
-    if (profile && !error) {
-      activeStudent = {
-        id: profile.id,
-        nome: profile.nome_completo || 'Aluno',
-        apelido: profile.apelido || '',
-        email: studentEmail || 'aluno@escola.com',
-        turma_id: profile.turma_id,
-        turma: profile.turmas?.nome || 'Sem Turma',
-        foto_url: profile.avatar_url || ''
-      };
-    }
-  } catch (err) {
-    console.warn("Erro ao carregar perfil do Supabase:", err);
-  }
-
-  // Se o aluno ainda não tiver turma no banco, vincula a primeira turma cadastrada
-  if (activeStudent && (!activeStudent.turma_id || activeStudent.turma === 'Sem Turma')) {
-    const { data: turmasDisponiveis } = await _supabase.from('turmas').select('id, nome').limit(1);
-    if (turmasDisponiveis && turmasDisponiveis.length > 0) {
-      activeStudent.turma_id = turmasDisponiveis[0].id;
-      activeStudent.turma = turmasDisponiveis[0].nome;
-      await _supabase.from('profiles').update({ turma_id: turmasDisponiveis[0].id }).eq('id', activeStudent.id);
-    }
-  }
-
-  if (!activeStudent) {
-    activeStudent = {
-      id: DEFAULT_UUID_TESTE,
-      nome: "teste teste",
-      turma: "Sem Turma",
-      email: "aluno@escola.com",
-      apelido: "",
-      foto_url: "https://i.pinimg.com/736x/ce/4c/ab/ce4cab3df20d39e248f3b259d6402ecf.jpg"
-    };
-  }
-
-  // Salva no sessionStorage o estado atualizado retornado pelo Supabase
-  sessionStorage.setItem('active_student', JSON.stringify(activeStudent));
-
-  const nomeExibicao = activeStudent.nome || "Aluno";
-  const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
-
-  // Atualiza os elementos da interface do Aluno
-  if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
-  if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Sem Turma";
-
-  const avatarSrc = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
-    ? activeStudent.foto_url 
-    : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
-
-  if (document.getElementById('header-student-avatar')) document.getElementById('header-student-avatar').src = avatarSrc;
-  if (document.getElementById('profile-avatar-preview')) document.getElementById('profile-avatar-preview').src = avatarSrc;
-
-  if (document.getElementById('profile-header-name')) document.getElementById('profile-header-name').innerText = nomeExibicao;
-  if (document.getElementById('profile-header-nickname')) document.getElementById('profile-header-nickname').innerText = apelidoExibicao;
-  if (document.getElementById('profile-header-email')) document.getElementById('profile-header-email').innerText = activeStudent.email || 'Não informado';
-
-  if (document.getElementById('profile-name-input')) document.getElementById('profile-name-input').value = nomeExibicao;
-  if (document.getElementById('profile-nickname-input')) document.getElementById('profile-nickname-input').value = activeStudent.apelido || '';
-  if (document.getElementById('profile-email-input')) document.getElementById('profile-email-input').value = activeStudent.email || '';
-  if (document.getElementById('profile-avatar-url')) document.getElementById('profile-avatar-url').value = activeStudent.foto_url || '';
-}
 
     function previewAvatarUrl(url) {
       if (url && url.startsWith('http')) {
