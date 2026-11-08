@@ -146,7 +146,7 @@
     <!-- ABA 3: GESTÃO GERAL E ALUNOS -->
     <div id="aba-gestao" class="hidden space-y-8">
       
-      <!-- GESTÃO DE TURMAS -->
+      <!-- GESTÃO DE TURMAS COM BOTÃO DE EXCLUIR -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🏫 Gerenciar Turmas</h2>
         <form id="form-criar-turma" class="flex gap-3">
@@ -156,7 +156,7 @@
         <div id="lista-turmas" class="flex flex-wrap gap-2 pt-2"></div>
       </section>
 
-      <!-- GERENCIAMENTO DE ALUNOS COM APROVAÇÃO E EXCLUSÃO -->
+      <!-- GERENCIAMENTO DE ALUNOS COM E-MAIL, APROVAÇÃO E EXCLUSÃO -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🎓 Cadastro & Gestão de Alunos</h2>
@@ -170,6 +170,7 @@
               <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
                 <th class="p-3">Avatar</th>
                 <th class="p-3">Nome Completo</th>
+                <th class="p-3">E-mail</th>
                 <th class="p-3">Apelido</th>
                 <th class="p-3">Turma Atual</th>
                 <th class="p-3 text-center">Status da Conta</th>
@@ -391,18 +392,39 @@
       if (modalTurmas) modalTurmas.innerHTML = listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
 
       if (document.getElementById('lista-turmas')) {
-        document.getElementById('lista-turmas').innerHTML = listaTurmasGlobal.map(t => `<span class="text-xs bg-slate-950 border border-slate-800 text-indigo-300 px-3 py-1.5 rounded-lg font-bold">${t.nome}</span>`).join('');
+        document.getElementById('lista-turmas').innerHTML = listaTurmasGlobal.map(t => `
+          <div class="inline-flex items-center gap-1.5 bg-slate-950 border border-slate-800 text-indigo-300 px-3 py-1.5 rounded-lg text-xs font-bold">
+            <span>${t.nome}</span>
+            <button onclick="excluirTurma('${t.id}', '${t.nome.replace(/'/g, "\\'")}') text-slate-400 hover:text-rose-400 transition ml-1" title="Excluir turma">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+    }
+
+    async function excluirTurma(id, nome) {
+      if (!confirm(`Tem certeza que deseja excluir a turma "${nome}"? Alunos vinculados a esta turma ficarão sem turma atribuída.`)) return;
+
+      const { error } = await supabase.from('turmas').delete().eq('id', id);
+
+      if (error) {
+        alert('Erro ao excluir turma: ' + error.message);
+      } else {
+        alert('Turma excluída com sucesso!');
+        inicializarDados();
       }
     }
 
     async function carregarMapeamentoAlunos() {
-      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, apelido, turma_id, avatar_url, status');
+      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, email, apelido, turma_id, avatar_url, status');
       if (alunos) {
         listaAlunosCompleta = alunos;
         mapaAlunosGlobal = {};
         alunos.forEach(a => {
           mapaAlunosGlobal[a.id] = {
             nome: a.nome_completo || a.apelido || 'Aluno Registrado',
+            email: a.email || '—',
             turma_id: a.turma_id,
             avatar_url: a.avatar_url,
             status: a.status
@@ -418,12 +440,13 @@
       const { data: alunos, error } = await supabase.from('profiles').select('*').order('nome_completo');
 
       if (error || !alunos || alunos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">Nenhum aluno registrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-500">Nenhum aluno registrado.</td></tr>';
         return;
       }
 
       tbody.innerHTML = alunos.map(a => {
         const nome = a.nome_completo || 'Aluno';
+        const email = a.email || '—';
         const avatar = a.avatar_url && a.avatar_url.startsWith('http') 
           ? a.avatar_url 
           : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nome)}`;
@@ -446,6 +469,7 @@
               <img src="${avatar}" alt="Avatar" class="w-8 h-8 rounded-full border border-indigo-400/40 bg-slate-950 object-cover">
             </td>
             <td class="p-3 font-semibold text-slate-200">${nome}</td>
+            <td class="p-3 text-indigo-300 font-mono text-[11px]">${email}</td>
             <td class="p-3 text-slate-400">${a.apelido ? '@' + a.apelido : '—'}</td>
             <td class="p-3">
               <span class="px-2.5 py-1 rounded bg-slate-950 text-indigo-300 font-bold border border-slate-800">${turmaNome}</span>
@@ -480,10 +504,7 @@
     async function excluirAluno(id, nome) {
       if (!confirm(`Tem certeza que deseja excluir o aluno "${nome}"? Esta ação removerá o perfil e seu histórico de progresso!`)) return;
 
-      // 1. Apaga os dados de progresso vinculados
       await supabase.from('se_progresso').delete().eq('aluno_id', id);
-
-      // 2. Apaga o perfil do aluno
       const { error } = await supabase.from('profiles').delete().eq('id', id);
 
       if (error) {
