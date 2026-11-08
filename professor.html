@@ -27,7 +27,7 @@
 
   <main class="container mx-auto p-4 sm:p-6 space-y-6">
 
-    <!-- BARRA PRINCIPAL DE NAVEGAÇÃO DE ABAS -->
+    <!-- BARRA PRINCIPAL DE ABAS -->
     <div class="flex border-b border-slate-800 gap-2 pb-2 overflow-x-auto">
       <button id="btn-tab-ultimas" onclick="mudarAbaPrincipal('ultimas')" class="px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2">
         ⚡ Últimas 10 Atualizações
@@ -36,7 +36,7 @@
         🎯 Acompanhamento por Turma e Aluno
       </button>
       <button id="btn-tab-gestao" onclick="mudarAbaPrincipal('gestao')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2">
-        ⚙️ Gestão Geral do Sistema
+        ⚙️ Gestão Geral & Alunos
       </button>
     </div>
 
@@ -47,9 +47,8 @@
           <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
             📊 Feed de Atividades Recentes (10 Últimas)
           </h2>
-          <p class="text-xs text-slate-400 mt-1">Acompanhe em tempo real as tarefas iniciadas, em andamento e concluídas pelos estudantes.</p>
+          <p class="text-xs text-slate-400 mt-1">Acompanhe em tempo real as tarefas dos estudantes.</p>
         </div>
-        
         <button onclick="carregarRelatorioProgresso()" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg text-slate-200 transition flex items-center gap-1.5">
           🔄 Atualizar Dados
         </button>
@@ -59,7 +58,7 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
-              <th class="p-3">Aluno / ID</th>
+              <th class="p-3">Aluno</th>
               <th class="p-3">Módulo / Lição</th>
               <th class="p-3">Progresso / Etapas</th>
               <th class="p-3">Data do Acesso</th>
@@ -67,23 +66,20 @@
               <th class="p-3 text-center">Status</th>
             </tr>
           </thead>
-          <tbody id="tabela-relatorio-progresso" class="divide-y divide-slate-800 text-xs">
-            <!-- 10 Últimas atualizações -->
-          </tbody>
+          <tbody id="tabela-relatorio-progresso" class="divide-y divide-slate-800 text-xs"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- ABA 2: ACOMPANHAMENTO DEDICADO POR TURMA E ALUNO -->
+    <!-- ABA 2: ACOMPANHAMENTO -->
     <section id="aba-aluno" class="hidden bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
       <div>
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
           🔍 Painel Pedagógico de Turmas e Alunos
         </h2>
-        <p class="text-xs text-slate-400 mt-1">Selecione uma turma para ver a visão geral do grupo ou selecione um aluno para ver todas as suas atividades.</p>
+        <p class="text-xs text-slate-400 mt-1">Selecione uma turma para ver a visão geral do grupo ou um aluno específico.</p>
       </div>
 
-      <!-- FILTROS -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">1. Selecione a Turma</label>
@@ -91,7 +87,6 @@
             <option value="">Selecione a Turma...</option>
           </select>
         </div>
-
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">2. Selecione o Aluno (Opcional)</label>
           <select id="filtro-aluno-especifico" onchange="carregarHistoricoAlunoEspecifico()" class="w-full p-2.5 bg-slate-900 border border-slate-800 rounded text-sm text-white focus:outline-none focus:border-indigo-500" disabled>
@@ -100,13 +95,11 @@
         </div>
       </div>
 
-      <!-- VISÃO GERAL DA TURMA -->
       <div id="container-visao-turma" class="hidden space-y-4">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
           <h3 class="font-bold text-indigo-400 text-sm" id="titulo-turma-visao">--</h3>
           <span class="text-xs text-slate-400" id="total-alunos-turma">0 Alunos</span>
         </div>
-
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -124,7 +117,6 @@
         </div>
       </div>
 
-      <!-- VISÃO COMPLETA DO ALUNO -->
       <div id="container-historico-detalhado" class="hidden space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-3 gap-2">
           <div>
@@ -151,41 +143,59 @@
       </div>
     </section>
 
-    <!-- ABA 3: GESTÃO GERAL DO SISTEMA -->
+    <!-- ABA 3: GESTÃO GERAL E ALUNOS -->
     <div id="aba-gestao" class="hidden space-y-8">
       
       <!-- GESTÃO DE TURMAS -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
-        <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
-          🏫 Gerenciar Turmas
-        </h2>
-        
+        <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🏫 Gerenciar Turmas</h2>
         <form id="form-criar-turma" class="flex gap-3">
           <input type="text" id="nome-turma" class="flex-1 p-3 bg-slate-950 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" placeholder="Ex: Turma 81, Geral..." required>
           <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-lg transition text-xs">Criar Turma</button>
         </form>
-
         <div id="lista-turmas" class="flex flex-wrap gap-2 pt-2"></div>
+      </section>
+
+      <!-- GERENCIAMENTO DE ALUNOS (NOVO) -->
+      <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">🎓 Cadastro & Gestão de Alunos</h2>
+          <button onclick="carregarListaGestaoAlunos()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition">Atualizar Alunos</button>
+        </div>
+        <p class="text-xs text-slate-400">Edite nomes, reatribua turmas e efetue o reset de senha de acesso dos estudantes.</p>
+
+        <div class="overflow-x-auto pt-2">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/50">
+                <th class="p-3">Avatar</th>
+                <th class="p-3">Nome Completo</th>
+                <th class="p-3">Apelido</th>
+                <th class="p-3">Turma Atual</th>
+                <th class="p-3 text-right">Ações de Gestão</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-gestao-alunos" class="divide-y divide-slate-800 text-xs"></tbody>
+          </table>
+        </div>
       </section>
 
       <!-- MURAL DE AVISOS -->
       <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
         <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">📢 Mural de Avisos</h2>
-        
         <form id="form-aviso" class="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
           <input type="hidden" id="aviso-id-edicao" value="">
           <h3 id="titulo-form-aviso" class="text-xs font-bold text-indigo-300 uppercase">Publicar Novo Aviso</h3>
-          
           <div>
             <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Título</label>
             <input type="text" id="aviso-titulo" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white focus:outline-none focus:border-indigo-500 text-sm" required>
           </div>
-          
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Destino</label>
               <select id="aviso-tipo" class="w-full p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-white text-sm">
-                <option value="turma">Toda a Turma</option>
+                <option value="turma">Turma Especificada</option>
+                <option value="geral">Todas as Turmas (Global)</option>
               </select>
             </div>
             <div>
@@ -202,7 +212,6 @@
             <button type="button" id="btn-cancelar-edicao" onclick="cancelarEdicaoAviso()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-lg transition text-xs">Cancelar Edição</button>
           </div>
         </form>
-
         <div>
           <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Avisos Publicados</h3>
           <div id="lista-avisos-publicados" class="space-y-3"></div>
@@ -213,7 +222,51 @@
 
   </main>
 
-  <!-- LÓGICA COMPLETA DO PAINEL DO PROFESSOR -->
+  <!-- MODAL DE EDIÇÃO DO ALUNO -->
+  <div id="modal-editar-aluno" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-user-pen text-indigo-400"></i> Editar Dados do Aluno
+        </h3>
+        <button onclick="fecharModalEditarAluno()" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="form-modal-editar-aluno" class="space-y-3">
+        <input type="hidden" id="modal-aluno-id">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Nome Completo</label>
+          <input type="text" id="modal-aluno-nome" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-indigo-500" required>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Apelido</label>
+          <input type="text" id="modal-aluno-apelido" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Turma Atribuída</label>
+          <select id="modal-aluno-turma" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-indigo-500" required></select>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-xs transition">Salvar Alterações</button>
+          <button type="button" onclick="fecharModalEditarAluno()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2.5 rounded-lg text-xs transition">Cancelar</button>
+        </div>
+      </form>
+
+      <hr class="border-slate-800">
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Redefinição de Senha</h4>
+        <p class="text-[11px] text-slate-400">Envia um e-mail com instrução de redefinição para a conta do aluno ou redefine via admin.</p>
+        <button onclick="executarResetSenhaAluno()" class="w-full bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 font-bold py-2 rounded-lg text-xs transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-key"></i> Solicitar Reset de Senha
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
@@ -226,20 +279,60 @@
     let listaTurmasGlobal = [];
     let listaAvisosGlobal = [];
     let mapaAlunosGlobal = {};
+    let listaAlunosCompleta = [];
+
+    const CATALOGO_MODULOS = {
+      'intro_hw_sw': 'Módulo 1: Hardware & Software',
+      'teclado_atalhos': 'Módulo 2: Domínio do Teclado',
+      'desafio_nuvem': 'Módulo 3: Agente de Nuvem'
+    };
+
+    function formatarNomeModuloDinamico(slug) {
+      if (!slug) return 'Módulo Indefinido';
+      if (CATALOGO_MODULOS[slug]) return CATALOGO_MODULOS[slug];
+      return slug.replace(/^Modulo\d*[-_]?/i, 'Módulo ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       inicializarDados();
+
+      document.getElementById('aviso-tipo').addEventListener('change', (e) => {
+        document.getElementById('aviso-turma').disabled = e.target.value === 'geral';
+      });
 
       // Form Criar Turma
       document.getElementById('form-criar-turma').addEventListener('submit', async (e) => {
         e.preventDefault();
         const nome = document.getElementById('nome-turma').value.trim();
         if (!nome) return;
-
         const { error } = await supabase.from('turmas').insert([{ nome: nome }]);
         if (error) alert('Erro ao criar turma: ' + error.message);
         else {
           document.getElementById('nome-turma').value = '';
+          inicializarDados();
+        }
+      });
+
+      // Form Modal Editar Aluno
+      document.getElementById('form-modal-editar-aluno').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('modal-aluno-id').value;
+        const nome = document.getElementById('modal-aluno-nome').value.trim();
+        const apelido = document.getElementById('modal-aluno-apelido').value.trim();
+        const turmaId = document.getElementById('modal-aluno-turma').value;
+
+        const { error } = await supabase.from('profiles').update({
+          nome_completo: nome,
+          apelido: apelido,
+          turma_id: turmaId,
+          updated_at: new Date().toISOString()
+        }).eq('id', id);
+
+        if (error) {
+          alert('Erro ao atualizar aluno: ' + error.message);
+        } else {
+          alert('Aluno atualizado com sucesso!');
+          fecharModalEditarAluno();
           inicializarDados();
         }
       });
@@ -250,35 +343,21 @@
         const idAviso = document.getElementById('aviso-id-edicao').value;
         const titulo = document.getElementById('aviso-titulo').value;
         const mensagem = document.getElementById('aviso-mensagem').value;
-        const turmaId = document.getElementById('aviso-turma').value;
+        const tipoDestino = document.getElementById('aviso-tipo').value;
+        const turmaId = tipoDestino === 'geral' ? null : document.getElementById('aviso-turma').value;
 
         if (idAviso) {
           const { error } = await supabase.from('avisos').update({
-            titulo: titulo,
-            mensagem: mensagem,
-            turma_id: turmaId
+            titulo: titulo, mensagem: mensagem, tipo: tipoDestino, turma_id: turmaId
           }).eq('id', idAviso);
-
           if (error) alert('Erro ao atualizar aviso: ' + error.message);
-          else {
-            alert('Aviso atualizado com sucesso!');
-            cancelarEdicaoAviso();
-            carregarAvisosMural();
-          }
+          else { alert('Aviso atualizado!'); cancelarEdicaoAviso(); carregarAvisosMural(); }
         } else {
           const { error } = await supabase.from('avisos').insert([{
-            titulo: titulo,
-            mensagem: mensagem,
-            tipo: 'turma',
-            turma_id: turmaId
+            titulo: titulo, mensagem: mensagem, tipo: tipoDestino, turma_id: turmaId
           }]);
-
           if (error) alert('Erro ao publicar aviso: ' + error.message);
-          else {
-            alert('Aviso publicado com sucesso!');
-            document.getElementById('form-aviso').reset();
-            carregarAvisosMural();
-          }
+          else { alert('Aviso publicado!'); document.getElementById('form-aviso').reset(); carregarAvisosMural(); }
         }
       });
     });
@@ -287,6 +366,7 @@
       await carregarTurmas();
       await carregarMapeamentoAlunos();
       await carregarRelatorioProgresso();
+      await carregarListaGestaoAlunos();
       await carregarAvisosMural();
     }
 
@@ -295,82 +375,134 @@
       document.getElementById('aba-aluno').classList.toggle('hidden', aba !== 'aluno');
       document.getElementById('aba-gestao').classList.toggle('hidden', aba !== 'gestao');
 
-      document.getElementById('btn-tab-ultimas').className = aba === 'ultimas'
-        ? 'px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2'
-        : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2';
-
-      document.getElementById('btn-tab-aluno').className = aba === 'aluno'
-        ? 'px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2'
-        : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2';
-
-      document.getElementById('btn-tab-gestao').className = aba === 'gestao'
-        ? 'px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2'
-        : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2';
+      document.getElementById('btn-tab-ultimas').className = aba === 'ultimas' ? 'px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2' : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2';
+      document.getElementById('btn-tab-aluno').className = aba === 'aluno' ? 'px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2' : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2';
+      document.getElementById('btn-tab-gestao').className = aba === 'gestao' ? 'px-4 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white shadow transition flex items-center gap-2' : 'px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition flex items-center gap-2';
     }
 
     async function carregarTurmas() {
       const { data: turmas } = await supabase.from('turmas').select('*').order('nome');
       listaTurmasGlobal = turmas || [];
 
-      const selectFiltro = document.getElementById('filtro-turma-aluno');
-      const selectAviso = document.getElementById('aviso-turma');
-      const containerTurmas = document.getElementById('lista-turmas');
+      document.getElementById('filtro-turma-aluno').innerHTML = '<option value="">Selecione a Turma...</option>' + listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+      document.getElementById('aviso-turma').innerHTML = listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+      
+      const modalTurmas = document.getElementById('modal-aluno-turma');
+      if (modalTurmas) modalTurmas.innerHTML = listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
 
-      selectFiltro.innerHTML = '<option value="">Selecione a Turma...</option>' +
-        listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
-
-      selectAviso.innerHTML = listaTurmasGlobal.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
-
-      if (containerTurmas) {
-        containerTurmas.innerHTML = listaTurmasGlobal.map(t => `
-          <span class="text-xs bg-slate-950 border border-slate-800 text-indigo-300 px-3 py-1.5 rounded-lg font-bold">${t.nome}</span>
-        `).join('');
+      if (document.getElementById('lista-turmas')) {
+        document.getElementById('lista-turmas').innerHTML = listaTurmasGlobal.map(t => `<span class="text-xs bg-slate-950 border border-slate-800 text-indigo-300 px-3 py-1.5 rounded-lg font-bold">${t.nome}</span>`).join('');
       }
     }
 
     async function carregarMapeamentoAlunos() {
-      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, apelido');
+      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, apelido, turma_id, avatar_url');
       if (alunos) {
+        listaAlunosCompleta = alunos;
+        mapaAlunosGlobal = {};
         alunos.forEach(a => {
-          mapaAlunosGlobal[a.id] = a.nome_completo || a.apelido || 'Aluno Registrado';
+          mapaAlunosGlobal[a.id] = {
+            nome: a.nome_completo || a.apelido || 'Aluno Registrado',
+            turma_id: a.turma_id,
+            avatar_url: a.avatar_url
+          };
         });
       }
     }
 
-    // 1. CARREGAR AS 10 ÚLTIMAS ATUALIZAÇÕES (SEM ERRO DE FOREIGN KEY)
+    // CARREGAR LISTA COMPLETA DE ALUNOS COM BOTÕES DE GESTÃO E EDITAR
+    async function carregarListaGestaoAlunos() {
+      const tbody = document.getElementById('tabela-gestao-alunos');
+      if (!tbody) return;
+
+      const { data: alunos, error } = await supabase.from('profiles').select('*, turmas(nome)').order('nome_completo');
+
+      if (error || !alunos || alunos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Nenhum aluno registrado.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = alunos.map(a => {
+        const nome = a.nome_completo || 'Aluno';
+        const avatar = a.avatar_url && a.avatar_url.startsWith('http') 
+          ? a.avatar_url 
+          : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nome)}`;
+        const turma = a.turmas ? a.turmas.nome : 'Sem Turma';
+
+        return `
+          <tr class="hover:bg-slate-950/40 transition">
+            <td class="p-3">
+              <img src="${avatar}" alt="Avatar" class="w-8 h-8 rounded-full border border-indigo-400/40 bg-slate-950 object-cover">
+            </td>
+            <td class="p-3 font-semibold text-slate-200">${nome}</td>
+            <td class="p-3 text-slate-400">${a.apelido ? '@' + a.apelido : '—'}</td>
+            <td class="p-3"><span class="px-2.5 py-1 rounded bg-slate-950 text-indigo-300 font-bold border border-slate-800">${turma}</span></td>
+            <td class="p-3 text-right">
+              <button onclick="abrirModalEditarAluno('${a.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ml-auto">
+                <i class="fa-solid fa-user-pen text-xs"></i> Editar / Alterar Turma
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function abrirModalEditarAluno(id) {
+      const aluno = listaAlunosCompleta.find(a => a.id === id);
+      if (!aluno) return;
+
+      document.getElementById('modal-aluno-id').value = aluno.id;
+      document.getElementById('modal-aluno-nome').value = aluno.nome_completo || '';
+      document.getElementById('modal-aluno-apelido').value = aluno.apelido || '';
+      if (aluno.turma_id) document.getElementById('modal-aluno-turma').value = aluno.turma_id;
+
+      document.getElementById('modal-editar-aluno').classList.remove('hidden');
+    }
+
+    function fecharModalEditarAluno() {
+      document.getElementById('modal-editar-aluno').classList.add('hidden');
+    }
+
+    async function executarResetSenhaAluno() {
+      const alunoId = document.getElementById('modal-aluno-id').value;
+      const aluno = listaAlunosCompleta.find(a => a.id === alunoId);
+      
+      if (!confirm(`Confirmar envio de reset de senha para ${aluno?.nome_completo || 'este aluno'}?`)) return;
+
+      // Dispara e-mail de reset via Supabase Auth
+      if (aluno && aluno.email) {
+        const { error } = await supabase.auth.resetPasswordForEmail(aluno.email);
+        if (error) alert('Erro ao solicitar reset: ' + error.message);
+        else alert('E-mail de redefinição de senha enviado com sucesso para: ' + aluno.email);
+      } else {
+        alert('Este aluno não possui um e-mail válido associado no login para receber o link automático.');
+      }
+    }
+
     async function carregarRelatorioProgresso() {
       const tabela = document.getElementById('tabela-relatorio-progresso');
       if (!tabela) return;
-
       tabela.innerHTML = '<tr><td colspan="6" class="p-4 text-slate-500 text-center">Buscando atualizações recentes...</td></tr>';
 
-      const { data: registos, error } = await supabase
-        .from('se_progresso')
-        .select('*')
-        .order('updated_at', { ascending: false })
-        .limit(10);
-
+      const { data: registos, error } = await supabase.from('se_progresso').select('*').order('updated_at', { ascending: false }).limit(10);
       if (error || !registos || registos.length === 0) {
         tabela.innerHTML = '<tr><td colspan="6" class="p-4 text-slate-500 text-center">Nenhum registro de atividade encontrado.</td></tr>';
         return;
       }
 
       tabela.innerHTML = registos.map(r => {
-        let nomeAluno = mapaAlunosGlobal[r.aluno_id] || (r.aluno_id === '00000000-0000-0000-0000-000000000001' ? 'Aluno Demo' : `Aluno (${r.aluno_id.substring(0, 8)}...)`);
-        
-        let moduloNome = r.modulo_id;
-        if (r.modulo_id === 'intro_hw_sw') moduloNome = 'Módulo 1: Hardware & Software';
-        else if (r.modulo_id === 'teclado_atalhos') moduloNome = 'Módulo 2: Domínio do Teclado';
-        else if (r.modulo_id === 'desafio_nuvem') moduloNome = 'Módulo 3: Agente de Nuvem';
-
-        const dataAcesso = r.updated_at ? new Date(r.updated_at).toLocaleString('pt-BR') : 'Recente';
-        const porcentagem = Math.round(((r.etapa_atual || 1) / (r.total_etapas || 4)) * 100);
-        
+        const info = mapaAlunosGlobal[r.aluno_id];
+        const nomeAluno = info ? info.nome : `Aluno (${r.aluno_id ? r.aluno_id.substring(0, 8) : '—'}...)`;
+        const moduloNome = formatarNomeModuloDinamico(r.modulo_id);
+        const totalEtapas = Number(r.total_etapas) || 4;
+        const etapaAtual = Number(r.etapa_atual) || 1;
+        const porcentagem = Math.min(100, Math.round((etapaAtual / totalEtapas) * 100));
         const min = Math.floor((r.tempo_segundos || 0) / 60);
         const seg = (r.tempo_segundos || 0) % 60;
         const tempoStr = `${min}m ${seg < 10 ? '0' : ''}${seg}s`;
 
-        const statusLabel = r.status === 'concluido' || porcentagem >= 100
+        const isConcluido = r.status === 'concluido' || porcentagem >= 100;
+        const statusLabel = isConcluido
           ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">✓ Concluído</span>`
           : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">⏳ Em Andamento</span>`;
 
@@ -378,10 +510,8 @@
           <tr class="hover:bg-slate-950/40 transition">
             <td class="p-3 font-semibold text-slate-200">${nomeAluno}</td>
             <td class="p-3 text-indigo-300 font-medium font-mono">${moduloNome}</td>
-            <td class="p-3">
-              <span class="text-xs text-slate-300 font-bold">Etapa ${r.etapa_atual || 1}/${r.total_etapas || 4} (${porcentagem}%)</span>
-            </td>
-            <td class="p-3 text-slate-400">${dataAcesso}</td>
+            <td class="p-3"><span class="text-xs text-slate-300 font-bold">Etapa ${etapaAtual}/${totalEtapas} (${porcentagem}%)</span></td>
+            <td class="p-3 text-slate-400">${r.updated_at ? new Date(r.updated_at).toLocaleString('pt-BR') : 'Recente'}</td>
             <td class="p-3 font-mono text-cyan-400">${tempoStr}</td>
             <td class="p-3 text-center">${statusLabel}</td>
           </tr>
@@ -389,39 +519,22 @@
       }).join('');
     }
 
-    // 2. PROCESSAR SELEÇÃO DA TURMA
     async function processarSelecaoTurma() {
       const turmaId = document.getElementById('filtro-turma-aluno').value;
       const selectAluno = document.getElementById('filtro-aluno-especifico');
-      const containerTurma = document.getElementById('container-visao-turma');
-      const containerAluno = document.getElementById('container-historico-detalhado');
+      document.getElementById('container-historico-detalhado').classList.add('hidden');
+      document.getElementById('container-visao-turma').classList.add('hidden');
 
-      containerAluno.classList.add('hidden');
-      containerTurma.classList.add('hidden');
+      if (!turmaId) { selectAluno.disabled = true; return; }
 
-      if (!turmaId) {
-        selectAluno.disabled = true;
-        selectAluno.innerHTML = '<option value="">Selecione uma turma primeiro...</option>';
-        return;
-      }
-
-      const { data: alunos } = await supabase
-        .from('profiles')
-        .select('id, nome_completo, apelido')
-        .eq('turma_id', turmaId)
-        .order('nome_completo');
-
+      const { data: alunos } = await supabase.from('profiles').select('id, nome_completo, apelido').eq('turma_id', turmaId).order('nome_completo');
       if (!alunos || alunos.length === 0) {
         selectAluno.disabled = true;
-        selectAluno.innerHTML = '<option value="">Nenhum aluno cadastrado nesta turma</option>';
         exibirVisaoGeralTurma(turmaId, []);
         return;
       }
-
       selectAluno.disabled = false;
-      selectAluno.innerHTML = '<option value="">Todos os alunos (Visão Geral da Turma)</option>' + 
-        alunos.map(a => `<option value="${a.id}">${a.nome_completo || a.apelido}</option>`).join('');
-
+      selectAluno.innerHTML = '<option value="">Todos os alunos (Visão Geral da Turma)</option>' + alunos.map(a => `<option value="${a.id}">${a.nome_completo || a.apelido}</option>`).join('');
       exibirVisaoGeralTurma(turmaId, alunos);
     }
 
@@ -429,9 +542,7 @@
       const containerTurma = document.getElementById('container-visao-turma');
       const tbody = document.getElementById('tabela-visao-turma');
       const turmaObj = listaTurmasGlobal.find(t => t.id === turmaId);
-      const turmaNome = turmaObj ? turmaObj.nome : 'Turma';
-
-      document.getElementById('titulo-turma-visao').innerText = `Visão Geral: ${turmaNome}`;
+      document.getElementById('titulo-turma-visao').innerText = `Visão Geral: ${turmaObj ? turmaObj.nome : 'Turma'}`;
       document.getElementById('total-alunos-turma').innerText = `${alunos.length} Alunos Registrados`;
       containerTurma.classList.remove('hidden');
 
@@ -440,31 +551,21 @@
         return;
       }
 
-      tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">Compilando dados da turma...</td></tr>';
-
-      const idsAlunos = alunos.map(a => a.id);
-      const { data: progressos } = await supabase
-        .from('se_progresso')
-        .select('*')
-        .in('aluno_id', idsAlunos);
+      const { data: progressos } = await supabase.from('se_progresso').select('*').in('aluno_id', alunos.map(a => a.id));
 
       tbody.innerHTML = alunos.map(aluno => {
-        const progAluno = progressos ? progressos.filter(p => p.aluno_id === aluno.id) : [];
-        const iniciadas = progAluno.length;
-        const concluidas = progAluno.filter(p => p.status === 'concluido' || (p.etapa_atual >= p.total_etapas)).length;
-        
-        const tempoTotalSeg = progAluno.reduce((acc, p) => acc + (p.tempo_segundos || 0), 0);
-        const min = Math.floor(tempoTotalSeg / 60);
-        const seg = tempoTotalSeg % 60;
-        const tempoFormatado = `${min}m ${seg < 10 ? '0' : ''}${seg}s`;
+        const prog = progressos ? progressos.filter(p => p.aluno_id === aluno.id) : [];
+        const concluidas = prog.filter(p => p.status === 'concluido' || (p.etapa_atual >= p.total_etapas)).length;
+        const tempoSeg = prog.reduce((acc, p) => acc + (p.tempo_segundos || 0), 0);
+        const tempoStr = `${Math.floor(tempoSeg / 60)}m ${tempoSeg % 60 < 10 ? '0' : ''}${tempoSeg % 60}s`;
 
         return `
           <tr class="hover:bg-slate-950/40 transition">
             <td class="p-3 font-semibold text-slate-200">${aluno.nome_completo || 'Aluno'}</td>
             <td class="p-3 text-slate-400">${aluno.apelido || '—'}</td>
-            <td class="p-3 font-bold text-indigo-300">${iniciadas} Atividades</td>
+            <td class="p-3 font-bold text-indigo-300">${prog.length} Atividades</td>
             <td class="p-3 font-bold text-emerald-400">${concluidas} Concluídas</td>
-            <td class="p-3 font-mono text-cyan-400">${tempoFormatado}</td>
+            <td class="p-3 font-mono text-cyan-400">${tempoStr}</td>
             <td class="p-3 text-right">
               <button onclick="selecionarAlunoPorId('${aluno.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-2.5 py-1 rounded transition">Ver Detalhes</button>
             </td>
@@ -478,93 +579,69 @@
       carregarHistoricoAlunoEspecifico();
     }
 
-    // 3. CARREGAR HISTÓRICO COMPLETO DO ALUNO
     async function carregarHistoricoAlunoEspecifico() {
       const alunoId = document.getElementById('filtro-aluno-especifico').value;
-      const containerTurma = document.getElementById('container-visao-turma');
-      const containerAluno = document.getElementById('container-historico-detalhado');
       const tbody = document.getElementById('tabela-historico-individual');
+      if (!alunoId) return;
 
-      if (!alunoId) {
-        const turmaId = document.getElementById('filtro-turma-aluno').value;
-        if (turmaId) processarSelecaoTurma();
-        return;
-      }
-
-      containerTurma.classList.add('hidden');
-      const selectAluno = document.getElementById('filtro-aluno-especifico');
-      document.getElementById('nome-aluno-detalhe').innerText = selectAluno.options[selectAluno.selectedIndex].text;
-      containerAluno.classList.remove('hidden');
+      document.getElementById('container-visao-turma').classList.add('hidden');
+      document.getElementById('container-historico-detalhado').classList.remove('hidden');
       tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Buscando tarefas do aluno...</td></tr>';
 
-      const { data: historico, error } = await supabase
-        .from('se_progresso')
-        .select('*')
-        .eq('aluno_id', alunoId)
-        .order('updated_at', { ascending: false });
-
-      if (error || !historico || historico.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Nenhuma tarefa registrada para este aluno.</td></tr>';
-        document.getElementById('resumo-stats-aluno').innerHTML = '';
+      const { data: historico } = await supabase.from('se_progresso').select('*').eq('aluno_id', alunoId).order('updated_at', { ascending: false });
+      if (!historico || historico.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Nenhuma tarefa registrada.</td></tr>';
         return;
       }
 
-      let totalConcluidas = 0;
-
+      let concluidas = 0;
       tbody.innerHTML = historico.map(item => {
-        const porcentagem = Math.round(((item.etapa_atual || 1) / (item.total_etapas || 4)) * 100);
-        if (item.status === 'concluido' || porcentagem >= 100) totalConcluidas++;
-
-        const dataAcesso = item.updated_at ? new Date(item.updated_at).toLocaleString('pt-BR') : 'Recente';
-        const min = Math.floor((item.tempo_segundos || 0) / 60);
-        const seg = (item.tempo_segundos || 0) % 60;
-        const duracaoStr = `${min}m ${seg < 10 ? '0' : ''}${seg}s`;
-
-        const statusBadge = item.status === 'concluido' || porcentagem >= 100
+        const total = Number(item.total_etapas) || 4;
+        const atual = Number(item.etapa_atual) || 1;
+        const pct = Math.min(100, Math.round((atual / total) * 100));
+        if (item.status === 'concluido' || pct >= 100) concluidas++;
+        const statusBadge = item.status === 'concluido' || pct >= 100
           ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">✓ Concluído</span>`
           : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">⏳ Em Andamento</span>`;
 
         return `
           <tr class="hover:bg-slate-950/40 transition">
-            <td class="p-3 font-bold text-white font-mono">${item.modulo_id}</td>
-            <td class="p-3 text-slate-400">${dataAcesso}</td>
-            <td class="p-3 font-mono text-cyan-400">${duracaoStr}</td>
-            <td class="p-3 text-slate-300 font-bold">Etapa ${item.etapa_atual || 1}/${item.total_etapas || 4} (${porcentagem}%)</td>
+            <td class="p-3 font-bold text-white font-mono">${formatarNomeModuloDinamico(item.modulo_id)}</td>
+            <td class="p-3 text-slate-400">${item.updated_at ? new Date(item.updated_at).toLocaleString('pt-BR') : 'Recente'}</td>
+            <td class="p-3 font-mono text-cyan-400">${Math.floor((item.tempo_segundos || 0)/60)}m ${(item.tempo_segundos || 0)%60}s</td>
+            <td class="p-3 text-slate-300 font-bold">Etapa ${atual}/${total} (${pct}%)</td>
             <td class="p-3 text-center">${statusBadge}</td>
           </tr>
         `;
       }).join('');
 
       document.getElementById('resumo-stats-aluno').innerHTML = `
-        <span class="bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-indigo-300 font-bold">${historico.length} Tarefas Iniciadas</span>
-        <span class="bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-emerald-400 font-bold">${totalConcluidas} Concluídas</span>
+        <span class="bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-indigo-300 font-bold">${historico.length} Tarefas</span>
+        <span class="bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-emerald-400 font-bold">${concluidas} Concluídas</span>
       `;
     }
 
-    // 4. GESTÃO DE AVISOS
     async function carregarAvisosMural() {
       const container = document.getElementById('lista-avisos-publicados');
       const { data: avisos } = await supabase.from('avisos').select('*, turmas(nome)').order('created_at', { ascending: false });
-
       listaAvisosGlobal = avisos || [];
 
       if (!avisos || avisos.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-500">Nenhum aviso publicado no mural.</p>';
+        container.innerHTML = '<p class="text-xs text-slate-500">Nenhum aviso publicado.</p>';
         return;
       }
-
       container.innerHTML = avisos.map(a => `
         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-start">
           <div class="space-y-1">
             <div class="flex items-center gap-2">
               <span class="font-bold text-indigo-400 text-sm">${a.titulo}</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">${a.turmas ? a.turmas.nome : 'Todas as Turmas'}</span>
+              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">${a.turmas ? a.turmas.nome : 'Todas as Turmas (Global)'}</span>
             </div>
             <p class="text-xs text-slate-300">${a.mensagem}</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="prepararEdicaoAviso('${a.id}')" class="text-xs bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2.5 py-1 rounded transition">Editar</button>
-            <button onclick="excluirAviso('${a.id}')" class="text-xs bg-rose-950 hover:bg-rose-900 text-rose-400 border border-rose-800 px-2.5 py-1 rounded transition">Excluir</button>
+            <button onclick="prepararEdicaoAviso('${a.id}')" class="text-xs bg-slate-800 text-indigo-300 px-2.5 py-1 rounded">Editar</button>
+            <button onclick="excluirAviso('${a.id}')" class="text-xs bg-rose-950 text-rose-400 px-2.5 py-1 rounded">Excluir</button>
           </div>
         </div>
       `).join('');
@@ -573,30 +650,25 @@
     function prepararEdicaoAviso(id) {
       const aviso = listaAvisosGlobal.find(a => a.id === id);
       if (!aviso) return;
-
       document.getElementById('aviso-id-edicao').value = aviso.id;
       document.getElementById('aviso-titulo').value = aviso.titulo;
       document.getElementById('aviso-mensagem').value = aviso.mensagem;
+      document.getElementById('aviso-tipo').value = (!aviso.turma_id || aviso.tipo === 'geral') ? 'geral' : 'turma';
+      document.getElementById('aviso-turma').disabled = (!aviso.turma_id || aviso.tipo === 'geral');
       if (aviso.turma_id) document.getElementById('aviso-turma').value = aviso.turma_id;
-
-      document.getElementById('titulo-form-aviso').innerText = "Editar Aviso Exigido";
-      document.getElementById('btn-salvar-aviso').innerText = "Salvar Alterações";
       document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
     }
 
     function cancelarEdicaoAviso() {
       document.getElementById('aviso-id-edicao').value = '';
       document.getElementById('form-aviso').reset();
-      document.getElementById('titulo-form-aviso').innerText = "Publicar Novo Aviso";
-      document.getElementById('btn-salvar-aviso').innerText = "Publicar Aviso";
       document.getElementById('btn-cancelar-edicao').classList.add('hidden');
     }
 
     async function excluirAviso(id) {
-      if (!confirm('Excluir este aviso do mural?')) return;
+      if (!confirm('Excluir este aviso?')) return;
       const { error } = await supabase.from('avisos').delete().eq('id', id);
-      if (error) alert('Erro ao excluir aviso: ' + error.message);
-      else carregarAvisosMural();
+      if (!error) carregarAvisosMural();
     }
   </script>
 </body>
