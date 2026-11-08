@@ -116,6 +116,7 @@
       renderDriveTable();
     }
 
+    // CORREÇÃO CRÍTICA: REMOÇÃO DO UPSERT / ON_CONFLICT
     async function salvarProgressoAoVivo(etapaAtual, status = 'em_andamento') {
       if (!currentStudent || !currentStudent.id) return;
 
@@ -133,24 +134,23 @@
       localStorage.setItem(`progresso_Modulo3-${MODULE_ID}`, JSON.stringify(payload));
 
       try {
-        const { error } = await _supabase
+        // 1. Tenta atualizar primeiro
+        const { data: updated, error: updateError } = await _supabase
           .from('se_progresso')
-          .upsert(payload, { onConflict: 'aluno_id,modulo_id' });
+          .update(payload)
+          .eq('aluno_id', payload.aluno_id)
+          .eq('modulo_id', MODULE_ID)
+          .select();
 
-        if (error && (error.code === '23505' || error.status === 409)) {
+        // 2. Se nenhuma linha foi alterada (primeiro acesso), insere o novo registro
+        if (!updateError && (!updated || updated.length === 0)) {
           await _supabase
             .from('se_progresso')
-            .update({
-              etapa_atual: Number(etapaAtual),
-              total_etapas: 3,
-              tempo_segundos: Number(secondsElapsed),
-              status: status,
-              updated_at: new Date().toISOString()
-            })
-            .eq('aluno_id', payload.aluno_id)
-            .eq('modulo_id', MODULE_ID);
+            .insert([payload]);
         }
-      } catch (err) {}
+      } catch (err) {
+        console.log("Progresso salvo localmente.");
+      }
     }
   </script>
 
