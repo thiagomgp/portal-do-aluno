@@ -33,7 +33,7 @@
         <h1 class="text-lg font-bold text-emerald-400 tracking-wide">Portal do Aluno</h1>
       </div>
 
-      <!-- AVATAR & INFOS -->
+      <!-- AVATAR & INFOS DO ALUNO AUTENTICADO -->
       <div class="flex items-center gap-4">
         <div id="user-info-bar" class="flex items-center gap-3 bg-slate-950/80 px-3.5 py-1.5 rounded-full border border-emerald-500/30 shadow-inner">
           <div class="relative shrink-0">
@@ -50,8 +50,7 @@
           </div>
         </div>
 
-        <!-- BOTÃO DE SAIR CORRIGIDO -->
-        <button onclick="fazerLogout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
+        <button onclick="fazerLogout(event)" class="text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer">
           <i class="fa-solid fa-right-from-bracket text-xs"></i>
           <span>Sair</span>
         </button>
@@ -244,7 +243,6 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let activeStudent = null;
-    const DEFAULT_UUID_TESTE = "659ebb95-7f24-4e4f-91ec-2248ae3a4bc0";
 
     document.addEventListener('DOMContentLoaded', async () => {
       await carregarSessaoReal();
@@ -303,6 +301,7 @@
       let studentId = null;
       let studentEmail = null;
 
+      // 1. Tenta obter a sessão de autenticação do Supabase
       try {
         const { data: { session } } = await _supabase.auth.getSession();
         if (session && session.user) {
@@ -311,6 +310,7 @@
         }
       } catch (e) {}
 
+      // 2. Se não houver sessão ativa, tenta obter do ID repassado na URL
       if (!studentId) {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('id')) {
@@ -318,11 +318,14 @@
         }
       }
 
+      // 3. Se ainda assim não houver ID válido, encerra sem exibir dados de teste fictícios
       if (!studentId) {
-        studentId = DEFAULT_UUID_TESTE;
+        if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = "Não autenticado";
+        if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = "Realize o login";
+        return;
       }
 
-      // BUSCA O ALUNO E RESOLVE A TURMA DIRETAMENTE
+      // 4. Busca os dados reais do perfil e turma do Supabase
       try {
         const { data: profile, error } = await _supabase
           .from('profiles')
@@ -333,20 +336,9 @@
         if (profile && !error) {
           let nomeTurma = "Sem Turma";
 
-          // Se tiver turma_id preenchido, busca a string do nome da turma
           if (profile.turma_id) {
             const { data: tData } = await _supabase.from('turmas').select('nome').eq('id', profile.turma_id).maybeSingle();
             if (tData) nomeTurma = tData.nome;
-          }
-
-          // Se não houver turma atribuída, busca qualquer turma existente para alocar
-          if (!profile.turma_id || nomeTurma === "Sem Turma") {
-            const { data: turmasDisponiveis } = await _supabase.from('turmas').select('id, nome').limit(1);
-            if (turmasDisponiveis && turmasDisponiveis.length > 0) {
-              profile.turma_id = turmasDisponiveis[0].id;
-              nomeTurma = turmasDisponiveis[0].nome;
-              await _supabase.from('profiles').update({ turma_id: turmasDisponiveis[0].id }).eq('id', profile.id);
-            }
           }
 
           activeStudent = {
@@ -363,16 +355,7 @@
         console.warn("Erro ao carregar perfil do Supabase:", err);
       }
 
-      if (!activeStudent) {
-        activeStudent = {
-          id: DEFAULT_UUID_TESTE,
-          nome: "teste teste",
-          turma: "Turma 81",
-          email: "aluno@escola.com",
-          apelido: "",
-          foto_url: "https://i.pinimg.com/736x/ce/4c/ab/ce4cab3df20d39e248f3b259d6402ecf.jpg"
-        };
-      }
+      if (!activeStudent) return;
 
       const nomeExibicao = activeStudent.nome || "Aluno";
       const apelidoExibicao = activeStudent.apelido ? `@${activeStudent.apelido}` : `@${nomeExibicao.toLowerCase().replace(/\s+/g, '_')}`;
@@ -404,6 +387,7 @@
       }
     }
 
+    // CARREGAMENTO E FILTRO DO MURAL DE AVISOS
     async function carregarAvisosMuralAluno() {
       const lista = document.getElementById('lista-avisos');
       if (!lista || !activeStudent) return;
@@ -417,22 +401,23 @@
         if (error || !avisos || avisos.length === 0) {
           lista.innerHTML = `
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-slate-500 text-xs">
-              Nenhum recado ou aviso pendente no momento.
+              Nenhum recado ou aviso publicado no momento.
             </div>
           `;
           return;
         }
 
         const avisosFiltrados = avisos.filter(a => {
-          const isGeral = a.tipo === 'geral' || !a.turma_id;
-          const isMinhaTurma = activeStudent.turma_id && String(a.turma_id) === String(activeStudent.turma_id);
-          return isGeral || isMinhaTurma;
+          const tipoNormalizado = (a.tipo || '').toLowerCase();
+          const isGeral = tipoNormalizado === 'geral' || !a.turma_id;
+          const isMinhaTurmaId = activeStudent.turma_id && String(a.turma_id).trim() === String(activeStudent.turma_id).trim();
+          return isGeral || isMinhaTurmaId;
         });
 
         if (avisosFiltrados.length === 0) {
           lista.innerHTML = `
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-slate-500 text-xs">
-              Nenhum recado para a sua turma no momento.
+              Nenhum recado cadastrado para a sua turma (${activeStudent.turma}) no momento.
             </div>
           `;
           return;
@@ -605,16 +590,14 @@
       }
     }
 
-    // LOGOUT PROTEGIDO (NÃO TRAVA CASO A SESSÃO SUPABASE ESTEJA AUSENTE)
-    async function fazerLogout() {
+    function fazerLogout(e) {
+      if (e) e.preventDefault();
       try {
-        await _supabase.auth.signOut();
-      } catch (err) {
-        console.warn("Erro silencioso ao deslogar do Supabase:", err);
-      }
+        _supabase.auth.signOut();
+      } catch (err) {}
       sessionStorage.clear();
       localStorage.clear();
-      window.location.reload();
+      window.location.href = window.location.pathname;
     }
   </script>
 </body>
