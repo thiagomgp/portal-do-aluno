@@ -36,13 +36,11 @@
       <!-- IDENTIDADE VISUAL & AVATAR DO ALUNO SELECIONADO -->
       <div class="flex items-center gap-4">
         <div id="user-info-bar" class="flex items-center gap-3 bg-slate-950/80 px-3.5 py-1.5 rounded-full border border-emerald-500/30 shadow-inner">
-          <!-- AVATAR VISÍVEL COM ANEL EM EMERALD NEON -->
           <div class="relative shrink-0">
             <img id="header-student-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Aluno" alt="Avatar do Aluno" class="w-9 h-9 rounded-full bg-slate-900 border-2 border-emerald-400 object-cover shadow-[0_0_10px_rgba(52,211,153,0.3)]">
             <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950" title="Online"></div>
           </div>
 
-          <!-- INFORMAÇÕES DE NOME E TURMA -->
           <div class="text-xs">
             <div class="font-bold text-white leading-tight" id="student-display-name">Carregando...</div>
             <div class="text-[10px] text-emerald-400 font-medium leading-tight flex items-center gap-1 mt-0.5">
@@ -313,7 +311,6 @@
       });
     });
 
-    // CARREGA DADOS DO ALUNO REAL COM VINCULAÇÃO ESTRITA DE TURMA
     async function carregarSessaoReal() {
       let studentId = null;
       let studentEmail = null;
@@ -367,7 +364,6 @@
         console.warn("Erro ao carregar perfil do Supabase:", err);
       }
 
-      // Se o aluno não tiver turma no perfil, atribui uma turma padrão válida
       if (activeStudent && (!activeStudent.turma_id || activeStudent.turma === 'Sem Turma')) {
         const { data: turmasDisponiveis } = await _supabase.from('turmas').select('id, nome').limit(1);
         if (turmasDisponiveis && turmasDisponiveis.length > 0) {
@@ -396,7 +392,6 @@
       if (document.getElementById('student-display-name')) document.getElementById('student-display-name').innerText = nomeExibicao;
       if (document.getElementById('student-display-class')) document.getElementById('student-display-class').innerText = activeStudent.turma || "Turma Geral";
 
-      // Atualiza os avatares (Cabeçalho e Perfil)
       const avatarSrc = activeStudent.foto_url && activeStudent.foto_url.startsWith('http') 
         ? activeStudent.foto_url 
         : `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nomeExibicao)}`;
@@ -421,21 +416,16 @@
       }
     }
 
-    // CARREGA AVISOS ESPECÍFICOS DA TURMA OU GLOBAIS
+    // CARREGA AVISOS DE FORMA SEGURA (SEM ERRO HTTP 400)
     async function carregarAvisosMuralAluno() {
       const lista = document.getElementById('lista-avisos');
       if (!lista || !activeStudent) return;
 
       try {
-        let query = _supabase.from('avisos').select('*, turmas(nome)').order('created_at', { ascending: false });
-
-        if (activeStudent.turma_id) {
-          query = query.or(`turma_id.eq.${activeStudent.turma_id},tipo.eq.geral,turma_id.is.null`);
-        } else {
-          query = query.or(`tipo.eq.geral,turma_id.is.null`);
-        }
-
-        const { data: avisos, error } = await query;
+        const { data: avisos, error } = await _supabase
+          .from('avisos')
+          .select('*, turmas(nome)')
+          .order('created_at', { ascending: false });
 
         if (error || !avisos || avisos.length === 0) {
           lista.innerHTML = `
@@ -446,7 +436,22 @@
           return;
         }
 
-        lista.innerHTML = avisos.map(a => `
+        const avisosFiltrados = avisos.filter(a => {
+          const isGeral = a.tipo === 'geral' || !a.turma_id;
+          const isMinhaTurma = activeStudent.turma_id && String(a.turma_id) === String(activeStudent.turma_id);
+          return isGeral || isMinhaTurma;
+        });
+
+        if (avisosFiltrados.length === 0) {
+          lista.innerHTML = `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center text-slate-500 text-xs">
+              Nenhum recado para a sua turma no momento.
+            </div>
+          `;
+          return;
+        }
+
+        lista.innerHTML = avisosFiltrados.map(a => `
           <div class="bg-slate-900 border-l-4 border-emerald-500 border-y border-r border-slate-800 rounded-r-2xl p-5 shadow-lg space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
