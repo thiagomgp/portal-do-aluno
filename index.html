@@ -259,7 +259,7 @@
       await varrerEExibirAulasGitHub();
       await carregarAvisosMuralAluno();
 
-      // Form Perfil
+      // Form Perfil (sem enviar updated_at para evitar erro 400)
       document.getElementById('form-update-profile')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!activeStudent || !activeStudent.id) return;
@@ -271,8 +271,7 @@
         const updates = {
           nome_completo: novoNome || activeStudent.nome,
           apelido: novoApelido,
-          avatar_url: novaFoto,
-          updated_at: new Date().toISOString()
+          avatar_url: novaFoto
         };
 
         try {
@@ -416,7 +415,6 @@
       }
     }
 
-    // CARREGA AVISOS DE FORMA SEGURA (SEM ERRO HTTP 400)
     async function carregarAvisosMuralAluno() {
       const lista = document.getElementById('lista-avisos');
       if (!lista || !activeStudent) return;
