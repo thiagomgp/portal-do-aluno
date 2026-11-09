@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 13: O Encantador de IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      suppressWarning: true,
+      theme: { extend: { colors: { gemini: { purple: '#a855f7', dark: '#131314' } } } }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
+
+  <!-- CABEÇALHO DA AULA -->
+  <header class="bg-slate-900 border-b border-purple-500/30 p-4 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="bg-purple-600 text-white font-bold text-xs px-2.5 py-1 rounded-md">MÓDULO 13</span>
+        <h1 class="text-lg font-bold text-purple-400 flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> O Encantador de IA & Fact-Checking
+        </h1>
+      </div>
+      <span id="aluno-identificacao" class="text-xs text-slate-400 font-mono">Aluno: Carregando...</span>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
+
+    <!-- SELETOR DE ETAPAS -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center gap-2 overflow-x-auto">
+      <button id="btn-etapa-1" onclick="tentarTrocarEtapa(1)" class="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white transition">1. Engenharia de Prompt (R-C-T-F)</button>
+      <div class="w-8 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-2" onclick="tentarTrocarEtapa(2)" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">2. Checagem de Fatos (Alucinações)</button>
+    </div>
+
+    <!-- GUIA DIDÁTICO -->
+    <div class="bg-purple-950/30 border border-purple-500/30 p-4 rounded-2xl flex gap-4 items-start">
+      <div class="p-3 bg-purple-600/20 rounded-xl text-purple-400 text-xl"><i class="fa-solid fa-brain"></i></div>
+      <div class="space-y-1 text-xs">
+        <h3 id="instrucao-titulo" class="font-bold text-purple-300 text-sm">Framework R-C-T-F para Prompts Perfeitos</h3>
+        <p id="instrucao-desc" class="text-slate-300">Para obter respostas de alta qualidade das IAs, defina sempre: <strong>R</strong>ol (Papel) + <strong>C</strong>ontexto + <strong>T</strong>arefa + <strong>F</strong>ormato de Saída.</p>
+      </div>
+    </div>
+
+    <!-- ETAPA 1 -->
+    <section id="etapa-1" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-[#1e1f21] p-5 rounded-2xl border border-slate-700 space-y-3 text-xs">
+          <h3 class="font-bold text-purple-400">Montagem de Comando Estruturado</h3>
+          <div><label class="block text-slate-400 font-bold mb-1">1. Papel (Role):</label><input type="text" id="prompt-role" placeholder="Ex: Aja como um professor especialista de história..." class="w-full bg-[#131314] border border-slate-700 p-2 rounded text-white"></div>
+          <div><label class="block text-slate-400 font-bold mb-1">2. Contexto:</label><input type="text" id="prompt-context" placeholder="Ex: Estou preparando uma aula para alunos do ensino fundamental..." class="w-full bg-[#131314] border border-slate-700 p-2 rounded text-white"></div>
+          <div><label class="block text-slate-400 font-bold mb-1">3. Tarefa:</label><input type="text" id="prompt-task" placeholder="Ex: Resuma os 3 marcos principais da informática no Brasil..." class="w-full bg-[#131314] border border-slate-700 p-2 rounded text-white"></div>
+          <div><label class="block text-slate-400 font-bold mb-1">4. Formato:</label><input type="text" id="prompt-format" placeholder="Ex: Em tópicos curtos e numerados..." class="w-full bg-[#131314] border border-slate-700 p-2 rounded text-white"></div>
+          
+          <button onclick="enviarPromptSimuladoIA()" class="w-full bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-xl text-white transition">
+            ✨ Processar e Enviar para o Gemini/ChatGPT
+          </button>
+        </div>
+
+        <div class="bg-[#131314] p-5 rounded-2xl border border-slate-800 flex flex-col justify-between min-h-[300px]">
+          <div class="flex items-center gap-2 text-xs font-bold text-purple-400 border-b border-slate-800 pb-2">
+            <i class="fa-solid fa-sparkles"></i> Resposta do Modelo de IA
+          </div>
+          <div id="output-chat-ia" class="text-xs text-slate-300 py-4 italic font-sans">
+            Aguardando envio do prompt estruturado...
+          </div>
+          <div id="feedback-e1" class="text-xs font-bold text-center h-4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETAPA 2 -->
+    <section id="etapa-2" class="hidden space-y-4">
+      <div class="bg-[#1e1f21] p-6 rounded-2xl border border-slate-700 space-y-4 text-xs">
+        <h3 class="text-sm font-bold text-purple-400">Identificação de Alucinações de IA (Fact-Checking)</h3>
+        
+        <div class="bg-[#131314] p-4 rounded-xl border border-purple-500/30 text-purple-200 space-y-2">
+          🤖 <strong>Resposta gerada pela IA sobre a cidade de Santa Maria (RS):</strong>
+          <ol class="list-decimal pl-5 space-y-1 text-slate-300">
+            <li>Santa Maria é conhecida como a Cidade Universitária devido à UFSM.</li>
+            <li>É um importante polo ferroviário e de defesa militar do sul do Brasil.</li>
+            <li>Foi a capital nacional do Brasil durante todo o século XIX.</li>
+          </ol>
+        </div>
+
+        <div class="space-y-2">
+          <p class="font-bold text-slate-300">Qual afirmativa acima é uma ALUCINAÇÃO (Falsa/Inventada pela IA)?</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button onclick="validarFactChecking(1)" class="p-3 bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-800">Afirmativa 1 é Falsa</button>
+            <button onclick="validarFactChecking(2)" class="p-3 bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-800">Afirmativa 2 é Falsa</button>
+            <button onclick="validarFactChecking(3)" class="p-3 bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-800 text-emerald-400 font-bold">Afirmativa 3 é Falsa (Alucinação)</button>
+          </div>
+        </div>
+
+        <div id="feedback-e2" class="text-xs font-bold text-center h-4"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let alunoAtualId = null;
+    let etapaMaxConcluida = 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      alunoAtualId = urlParams.get('id');
+      document.getElementById('aluno-identificacao').innerText = `Aluno: ${urlParams.get('nome') || 'Estudante'}`;
+    });
+
+    function tentarTrocarEtapa(n) {
+      if (n > etapaMaxConcluida) return alert(`⚠️ Conclua a Etapa ${etapaMaxConcluida} primeiro!`);
+      carregarEtapa(n);
+    }
+
+    function carregarEtapa(n) {
+      for (let i = 1; i <= 2; i++) {
+        const sec = document.getElementById(`etapa-${i}`);
+        const btn = document.getElementById(`btn-etapa-${i}`);
+        if (sec) sec.classList.toggle('hidden', i !== n);
+        if (btn) {
+          const liberado = i <= etapaMaxConcluida;
+          btn.className = i === n ? 'px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white transition' : liberado ? 'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition' : 'px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition';
+        }
+      }
+    }
+
+    function enviarPromptSimuladoIA() {
+      const r = document.getElementById('prompt-role').value.trim();
+      const c = document.getElementById('prompt-context').value.trim();
+      const t = document.getElementById('prompt-task').value.trim();
+      const f = document.getElementById('prompt-format').value.trim();
+      const fb = document.getElementById('feedback-e1');
+      const out = document.getElementById('output-chat-ia');
+
+      if (r && c && t && f) {
+        out.innerHTML = `✓ <strong>Modelo IA:</strong> Entendido! Atuando como <i>${r}</i>, analisei seu contexto e elaborei a resposta solicitada em <i>${f}</i>.`;
+        out.className = 'text-xs text-purple-300 py-2 font-sans';
+
+        fb.innerText = '✓ Prompt perfeito! Os 4 pilares foram atendidos.';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 2);
+        setTimeout(() => carregarEtapa(2), 1200);
+      } else {
+        fb.innerText = '⚠️ Preencha os 4 campos do Prompt (Papel, Contexto, Tarefa e Formato)!';
+        fb.className = 'text-xs font-bold text-amber-400 text-center';
+      }
+    }
+
+    function validarFactChecking(opcao) {
+      const fb = document.getElementById('feedback-e2');
+      if (opcao === 3) {
+        fb.innerText = '🏆 PARABÉNS! Você detectou a alucinação da IA e concluiu o Módulo 13!';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        salvarProgressoSupabase('Modulo13-encantador_ia', 2, 2, 100, 'concluido');
+      } else {
+        fb.innerText = '❌ Incorreto! Investigue a afirmativa 3 sobre a capital do Brasil.';
+        fb.className = 'text-xs font-bold text-rose-400 text-center';
+      }
+    }
+
+    async function salvarProgressoSupabase(mod, etapa, total, tempo, status) {
+      if (!alunoAtualId) return;
+      await _supabase.from('se_progresso').upsert([{ aluno_id: alunoAtualId, modulo_id: mod, etapa_atual: etapa, total_etapas: total, tempo_segundos: tempo, status: status, updated_at: new Date().toISOString() }], { onConflict: 'aluno_id, modulo_id' });
+    }
+  </script>
+</body>
+</html>

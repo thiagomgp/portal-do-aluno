@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 12: Gestor de Dados (Google Sheets)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      suppressWarning: true,
+      theme: { extend: { colors: { sheets: { green: '#107c41', dark: '#141414' } } } }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
+
+  <!-- CABEÇALHO DA AULA -->
+  <header class="bg-slate-900 border-b border-emerald-500/30 p-4 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-600 text-white font-bold text-xs px-2.5 py-1 rounded-md">MÓDULO 12</span>
+        <h1 class="text-lg font-bold text-emerald-400 flex items-center gap-2">
+          <i class="fa-solid fa-table"></i> Gestor de Dados (Google Sheets)
+        </h1>
+      </div>
+      <span id="aluno-identificacao" class="text-xs text-slate-400 font-mono">Aluno: Carregando...</span>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
+
+    <!-- SELETOR DE ETAPAS -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center gap-2 overflow-x-auto">
+      <button id="btn-etapa-1" onclick="tentarTrocarEtapa(1)" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition">1. Fórmulas (=SOMA, =MÉDIA)</button>
+      <div class="w-8 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-2" onclick="tentarTrocarEtapa(2)" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">2. Formatação Condicional</button>
+      <div class="w-8 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-3" onclick="tentarTrocarEtapa(3)" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">3. Gráfico de Colunas</button>
+    </div>
+
+    <!-- GUIA DIDÁTICO -->
+    <div class="bg-emerald-950/30 border border-emerald-500/30 p-4 rounded-2xl flex gap-4 items-start">
+      <div class="p-3 bg-emerald-600/20 rounded-xl text-emerald-400 text-xl"><i class="fa-solid fa-calculator"></i></div>
+      <div class="space-y-1 text-xs">
+        <h3 id="instrucao-titulo" class="font-bold text-emerald-300 text-sm">Treino de Fórmulas Dinâmicas</h3>
+        <p id="instrucao-desc" class="text-slate-300">Toda fórmula no Google Sheets deve iniciar obrigatoriamente com o sinal de igual (<code class="text-emerald-400 font-bold">=</code>). Para somar valores do intervalo C2 até C4, use <code class="text-emerald-400 font-bold">=SOMA(C2:C4)</code>.</p>
+      </div>
+    </div>
+
+    <!-- ETAPA 1 -->
+    <section id="etapa-1" class="space-y-4">
+      <div class="bg-[#1c1d1f] rounded-2xl border border-slate-700 p-4 space-y-3 shadow-2xl">
+        <div class="flex items-center gap-2 bg-[#141414] p-2 rounded-lg border border-slate-700 text-xs font-mono">
+          <span class="text-emerald-400 font-bold px-2 py-0.5 bg-emerald-950 rounded border border-emerald-800">fx</span>
+          <input type="text" id="input-formula-bar" placeholder="Selecione a célula C5 e digite =SOMA(C2:C4)..." class="w-full bg-transparent text-white focus:outline-none">
+          <button onclick="executarFormulaPlanilha()" class="bg-emerald-600 hover:bg-emerald-500 font-bold px-4 py-1 rounded text-white font-sans">
+            Calcular ↵
+          </button>
+        </div>
+
+        <div class="border border-slate-700 rounded-lg overflow-hidden text-xs font-mono">
+          <div class="grid grid-cols-5 bg-[#28292c] text-slate-400 font-bold text-center border-b border-slate-700 p-1.5">
+            <div></div><div>A (Item)</div><div>B (Preço)</div><div>C (Qtd)</div><div>D (Total R$)</div>
+          </div>
+          <div class="grid grid-cols-5 border-b border-slate-800/60 p-2 items-center bg-[#18191b]">
+            <div class="text-center font-bold text-slate-500">2</div><div>Suco Laranja</div><div>R$ 6,00</div><div>2</div><div>R$ 12,00</div>
+          </div>
+          <div class="grid grid-cols-5 border-b border-slate-800/60 p-2 items-center bg-[#18191b]">
+            <div class="text-center font-bold text-slate-500">3</div><div>Sanduíche</div><div>R$ 14,00</div><div>1</div><div>R$ 14,00</div>
+          </div>
+          <div class="grid grid-cols-5 border-b border-slate-800/60 p-2 items-center bg-[#18191b]">
+            <div class="text-center font-bold text-slate-500">4</div><div>Fruta</div><div>R$ 4,00</div><div>3</div><div>R$ 12,00</div>
+          </div>
+          <div class="grid grid-cols-5 bg-[#141517] p-2 items-center font-bold text-emerald-400">
+            <div class="text-center text-slate-500">5</div><div>TOTAL GERAL</div><div>-</div>
+            <div id="celula-c5" class="bg-slate-900 border border-emerald-500/60 text-center rounded py-1">?</div>
+            <div id="celula-d5">R$ 38,00</div>
+          </div>
+        </div>
+      </div>
+      <div id="feedback-e1" class="text-xs font-bold text-center h-4"></div>
+    </section>
+
+    <!-- ETAPA 2 -->
+    <section id="etapa-2" class="hidden space-y-4">
+      <div class="bg-[#1c1d1f] p-6 rounded-2xl border border-slate-700 space-y-4">
+        <h3 class="text-sm font-bold text-emerald-400">Regras de Formatação Condicional Visual</h3>
+        <p class="text-xs text-slate-400">Aplique o alerta visual: Gastos maiores que R$ 13,00 ficam <strong class="text-rose-400">Vermelhos</strong> e menores ficam <strong class="text-emerald-400">Verdes</strong>.</p>
+
+        <button onclick="aplicarRegrasCondicionais()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition">
+          ✨ Aplicar Regras da Planilha
+        </button>
+
+        <div class="grid grid-cols-3 gap-4 text-xs font-mono pt-2">
+          <div id="card-val-1" class="p-4 bg-slate-900 rounded-xl border border-slate-700 text-center">Item 1: R$ 12,00</div>
+          <div id="card-val-2" class="p-4 bg-slate-900 rounded-xl border border-slate-700 text-center">Item 2: R$ 14,00</div>
+          <div id="card-val-3" class="p-4 bg-slate-900 rounded-xl border border-slate-700 text-center">Item 3: R$ 12,00</div>
+        </div>
+      </div>
+      <div id="feedback-e2" class="text-xs font-bold text-center h-4"></div>
+    </section>
+
+    <!-- ETAPA 3 -->
+    <section id="etapa-3" class="hidden space-y-4">
+      <div class="bg-[#1c1d1f] p-6 rounded-2xl border border-slate-700 text-center space-y-4">
+        <h3 class="text-sm font-bold text-emerald-400">Painel Dashboard: Gráfico de Colunas</h3>
+        <button onclick="renderizarGraficoSimulado()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl text-xs transition">
+          📊 Inserir Gráfico de Gastos (Google Sheets)
+        </button>
+
+        <div id="box-grafico-resultado" class="hidden bg-[#141414] p-6 rounded-xl border border-slate-800 max-w-lg mx-auto space-y-4">
+          <h4 class="text-xs font-bold text-slate-300">Distribuição de Gastos com Lanche (R$)</h4>
+          <div class="flex items-end justify-center gap-8 h-40 pt-4">
+            <div class="w-14 bg-emerald-500 rounded-t h-[60%] flex items-center justify-center text-[10px] text-slate-950 font-bold">12</div>
+            <div class="w-14 bg-rose-500 rounded-t h-[85%] flex items-center justify-center text-[10px] text-white font-bold">14</div>
+            <div class="w-14 bg-emerald-500 rounded-t h-[60%] flex items-center justify-center text-[10px] text-slate-950 font-bold">12</div>
+          </div>
+          <div class="flex justify-around text-[10px] text-slate-400 font-mono">
+            <span>Suco</span><span>Sanduíche</span><span>Fruta</span>
+          </div>
+        </div>
+      </div>
+      <div id="feedback-e3" class="text-xs font-bold text-center h-4"></div>
+    </section>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let alunoAtualId = null;
+    let etapaMaxConcluida = 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      alunoAtualId = urlParams.get('id');
+      document.getElementById('aluno-identificacao').innerText = `Aluno: ${urlParams.get('nome') || 'Estudante'}`;
+    });
+
+    function tentarTrocarEtapa(n) {
+      if (n > etapaMaxConcluida) return alert(`⚠️ Conclua a Etapa ${etapaMaxConcluida} primeiro!`);
+      carregarEtapa(n);
+    }
+
+    function carregarEtapa(n) {
+      for (let i = 1; i <= 3; i++) {
+        const sec = document.getElementById(`etapa-${i}`);
+        const btn = document.getElementById(`btn-etapa-${i}`);
+        if (sec) sec.classList.toggle('hidden', i !== n);
+        if (btn) {
+          const liberado = i <= etapaMaxConcluida;
+          btn.className = i === n ? 'px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition' : liberado ? 'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition' : 'px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition';
+        }
+      }
+    }
+
+    function executarFormulaPlanilha() {
+      const val = document.getElementById('input-formula-bar').value.trim().toUpperCase();
+      const fb = document.getElementById('feedback-e1');
+
+      if (val === '=SOMA(C2:C4)') {
+        document.getElementById('celula-c5').innerText = '6';
+        fb.innerText = '✓ Fórmula correta! Soma dos 6 itens calculada.';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 2);
+        setTimeout(() => carregarEtapa(2), 1000);
+      } else {
+        fb.innerText = '⚠️ Digite exatamente: =SOMA(C2:C4)';
+        fb.className = 'text-xs font-bold text-rose-400 text-center';
+      }
+    }
+
+    function aplicarRegrasCondicionais() {
+      document.getElementById('card-val-1').className = 'p-4 bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold text-center rounded-xl';
+      document.getElementById('card-val-2').className = 'p-4 bg-rose-950 border border-rose-700 text-rose-300 font-bold text-center rounded-xl';
+      document.getElementById('card-val-3').className = 'p-4 bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold text-center rounded-xl';
+
+      const fb = document.getElementById('feedback-e2');
+      fb.innerText = '✓ Regras visuais de alerta aplicadas com sucesso!';
+      fb.className = 'text-xs font-bold text-emerald-400 text-center';
+      etapaMaxConcluida = Math.max(etapaMaxConcluida, 3);
+      setTimeout(() => carregarEtapa(3), 1200);
+    }
+
+    function renderizarGraficoSimulado() {
+      document.getElementById('box-grafico-resultado').classList.remove('hidden');
+      const fb = document.getElementById('feedback-e3');
+      fb.innerText = '🏆 PARABÉNS! Você dominou o Google Sheets!';
+      fb.className = 'text-xs font-bold text-emerald-400 text-center';
+      salvarProgressoSupabase('Modulo12-gestor_planilhas', 3, 3, 150, 'concluido');
+    }
+
+    async function salvarProgressoSupabase(mod, etapa, total, tempo, status) {
+      if (!alunoAtualId) return;
+      await _supabase.from('se_progresso').upsert([{ aluno_id: alunoAtualId, modulo_id: mod, etapa_atual: etapa, total_etapas: total, tempo_segundos: tempo, status: status, updated_at: new Date().toISOString() }], { onConflict: 'aluno_id, modulo_id' });
+    }
+  </script>
+</body>
+</html>

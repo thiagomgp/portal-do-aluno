@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 10: O Escritor Profissional (ABNT)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      suppressWarning: true,
+      theme: { extend: { colors: { docs: { blue: '#2684fc', dark: '#1e1f21', canvas: '#f8f9fa' } } } }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between select-none">
+
+  <!-- CABEÇALHO DA AULA -->
+  <header class="bg-slate-900 border-b border-blue-500/30 p-4 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded-md">MÓDULO 10</span>
+        <h1 class="text-lg font-bold text-blue-400 flex items-center gap-2">
+          <i class="fa-solid fa-file-word"></i> Escritor Profissional & Normas ABNT (Google Docs)
+        </h1>
+      </div>
+      <span id="aluno-identificacao" class="text-xs text-slate-400 font-mono">Aluno: Carregando...</span>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 sm:p-6 w-full flex-1 space-y-6">
+
+    <!-- SELETOR DE ETAPAS -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center gap-2 overflow-x-auto">
+      <button id="btn-etapa-1" onclick="tentarTrocarEtapa(1)" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white transition">1. Margens & Tipografia ABNT</button>
+      <div class="w-8 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-2" onclick="tentarTrocarEtapa(2)" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">2. Estilos & Sumário Automático</button>
+      <div class="w-8 h-0.5 bg-slate-800"></div>
+      <button id="btn-etapa-3" onclick="tentarTrocarEtapa(3)" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition">3. Citações & Rodapé NBR 10520</button>
+    </div>
+
+    <!-- GUIA ORIENTATIVO DIDÁTICO -->
+    <div class="bg-blue-950/40 border border-blue-500/30 p-4 rounded-2xl flex gap-4 items-start">
+      <div class="p-3 bg-blue-600/20 rounded-xl text-blue-400 text-xl"><i class="fa-solid fa-graduation-cap"></i></div>
+      <div class="space-y-1 text-xs">
+        <h3 id="instrucao-titulo" class="font-bold text-blue-300 text-sm">Instruções Práticas da Etapa 1</h3>
+        <p id="instrucao-desc" class="text-slate-300">A ABNT exige padronização rigorosa: Margem Superior 3cm, Esquerda 3cm, Inferior 2cm e Direita 2cm. A fonte deve ser Arial ou Times New Roman tamanho 12 com espaçamento 1.5.</p>
+      </div>
+    </div>
+
+    <!-- ETAPA 1 -->
+    <section id="etapa-1" class="space-y-4">
+      <div class="bg-[#1e1f21] rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+        <div class="bg-[#2b2c2e] p-3 border-b border-slate-700 flex flex-wrap justify-between items-center gap-3">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-file-lines text-blue-400 text-2xl"></i>
+            <div>
+              <div class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                Trabalho_Academico_ABNT.docx <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Salvo na nuvem</span>
+              </div>
+              <div class="flex gap-3 text-[11px] text-slate-400 mt-0.5">
+                <span onclick="abrirModalMargens()" class="hover:text-blue-400 cursor-pointer underline">Arquivo ➔ Configuração de Página</span>
+                <span class="hover:text-slate-200 cursor-pointer">Editar</span>
+                <span class="hover:text-slate-200 cursor-pointer">Inserir</span>
+                <span class="hover:text-slate-200 cursor-pointer">Formatar</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="abrirModalMargens()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-2">
+            ⚙️ Ajustar Margens ABNT
+          </button>
+        </div>
+
+        <div class="bg-[#202124] p-2 border-b border-slate-700 flex flex-wrap items-center gap-2 text-xs">
+          <select id="sel-fonte" class="bg-[#2d2e31] border border-slate-600 text-white p-1 rounded">
+            <option value="Calibri">Calibri (Incorreto)</option>
+            <option value="Arial">Arial (ABNT)</option>
+            <option value="Times New Roman">Times New Roman (ABNT)</option>
+          </select>
+
+          <select id="sel-tam" class="bg-[#2d2e31] border border-slate-600 text-white p-1 rounded">
+            <option value="10">10 pt</option>
+            <option value="11">11 pt</option>
+            <option value="12">12 pt (ABNT)</option>
+            <option value="14">14 pt</option>
+          </select>
+
+          <select id="sel-espacamento" class="bg-[#2d2e31] border border-slate-600 text-white p-1 rounded">
+            <option value="1.0">Espaçamento Simples 1.0</option>
+            <option value="1.5">Espaçamento 1.5 (ABNT)</option>
+            <option value="2.0">Espaçamento Duplo 2.0</option>
+          </select>
+
+          <button onclick="validarEtapa1()" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-lg">
+            Aplicar Formatação no Documento
+          </button>
+        </div>
+
+        <div class="bg-[#121314] p-8 flex justify-center min-h-[380px]">
+          <div id="folha-a4-simulada" class="bg-white text-slate-900 w-full max-w-2xl p-10 shadow-2xl transition-all space-y-4 rounded-sm" style="font-family: Calibri; font-size: 14px;">
+            <div id="indicador-margens" class="text-[10px] font-mono text-slate-400 border-b border-dashed border-slate-300 pb-1 mb-2">
+              Margens Atuais: Superior 2.5cm | Esquerda 2.5cm | Inferior 2.5cm | Direita 2.5cm
+            </div>
+            <h1 class="text-center font-bold text-lg">A INFLUÊNCIA DA TECNOLOGIA NA EDUCAÇÃO</h1>
+            <p class="text-justify leading-relaxed">
+              O uso de ferramentas digitais no ambiente escolar exige a aplicação de metodologias ativas que desenvolvam a autonomia do estudante. A normatização ABNT garante a padronização e o rigor científico necessário para a publicação de trabalhos acadêmicos.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div id="feedback-e1" class="text-xs font-bold text-center h-4"></div>
+    </section>
+
+    <!-- ETAPA 2 -->
+    <section id="etapa-2" class="hidden space-y-4">
+      <div class="bg-[#1e1f21] rounded-2xl border border-slate-700 p-6 space-y-4">
+        <h3 class="text-sm font-bold text-blue-400">Painel de Estilos e Automação de Índice</h3>
+        <div class="flex flex-wrap gap-3 bg-[#252629] p-3 rounded-xl border border-slate-700">
+          <button onclick="aplicarEstiloTitulo('titulo1')" class="bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500 text-blue-200 px-3 py-1.5 rounded text-xs font-bold">
+            Aplicar Estilo: Título 1 (Seção Principal)
+          </button>
+          <button onclick="aplicarEstiloTitulo('titulo2')" class="bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500 text-indigo-200 px-3 py-1.5 rounded text-xs font-bold">
+            Aplicar Estilo: Título 2 (Subseção)
+          </button>
+          <button onclick="gerarSumarioAutomatico()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded text-xs font-bold ml-auto">
+            📖 Inserir Sumário Automático
+          </button>
+        </div>
+
+        <div class="bg-white text-slate-900 p-6 rounded-lg font-sans space-y-4">
+          <div id="area-sumario-dinamico" class="hidden border-b-2 border-slate-300 pb-4 mb-4">
+            <h3 class="font-bold text-xs uppercase tracking-wider text-slate-600">SUMÁRIO AUTOMÁTICO</h3>
+            <div class="text-xs font-mono space-y-1 mt-2">
+              <div class="flex justify-between border-b border-dots"><span>1. INTRODUÇÃO À CULTURA DIGITAL</span><span>1</span></div>
+              <div id="sumario-sub-item" class="flex justify-between border-b border-dots pl-4 text-slate-600"><span>1.1 Impacto das Redes na Aprendizagem</span><span>2</span></div>
+            </div>
+          </div>
+          <div id="bloco-t1" class="font-sans text-slate-700">1. INTRODUÇÃO À CULTURA DIGITAL</div>
+          <p class="text-xs text-slate-600">Este capítulo aborda as transformações pedagógicas causadas pelo uso da web.</p>
+          <div id="bloco-t2" class="font-sans text-slate-700">1.1 Impacto das Redes na Aprendizagem</div>
+          <p class="text-xs text-slate-600">Análise do comportamento dos estudantes em ambientes virtuais interativos.</p>
+        </div>
+      </div>
+      <div id="feedback-e2" class="text-xs font-bold text-center h-4"></div>
+    </section>
+
+    <!-- ETAPA 3 -->
+    <section id="etapa-3" class="hidden space-y-4">
+      <div class="bg-[#1e1f21] rounded-2xl border border-slate-700 p-6 space-y-4">
+        <h3 class="text-sm font-bold text-blue-400">Formatando Citação Longa (NBR 10520) e Nota de Rodapé</h3>
+        <div class="flex gap-3">
+          <button onclick="aplicarRecuoCitacao()" class="bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-600 px-3 py-2 rounded text-xs font-bold">
+            📐 Aplicar Recuo de 4cm (Citação Longa > 3 linhas)
+          </button>
+          <button onclick="inserirNotaRodape()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-xs font-bold">
+            📌 Inserir Nota de Rodapé Dinâmica
+          </button>
+        </div>
+
+        <div class="bg-white text-slate-900 p-6 rounded-lg space-y-4 text-xs font-sans">
+          <p class="leading-relaxed">
+            Segundo estudiosos da área de tecnologia educacional<sup id="ref-num-rodape" class="text-blue-600 font-bold hidden">1</sup>, a mediação tecnológica redefine a prática pedagógica:
+          </p>
+          <div id="bloco-citacao-longa" class="p-3 bg-slate-50 text-slate-700 border-l-2 border-slate-300 text-[11px] transition-all">
+            "A inclusão digital não consiste apenas em fornecer equipamentos computacionais aos estudantes, mas sim em promover o pensamento crítico e a capacidade autônoma de pesquisa em ambiente de rede." (SILVA, 2026, p. 88).
+          </div>
+          <div id="area-nota-rodape" class="hidden border-t border-slate-300 pt-2 text-[10px] text-slate-500 font-mono">
+            1. SILVA, João Paulo. <i>Tecnologia e Educação Ativa</i>. Santa Maria: Editora Acadêmica, 2026.
+          </div>
+        </div>
+
+        <button onclick="finalizarModulo10()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs transition">
+          🚀 Finalizar Módulo 10 (Salvar no Supabase)
+        </button>
+      </div>
+      <div id="feedback-e3" class="text-xs font-bold text-center h-4"></div>
+    </section>
+
+  </main>
+
+  <div id="modal-margens" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-[#28292c] border border-slate-700 rounded-xl w-full max-w-sm p-5 space-y-4 text-xs">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <h3 class="font-bold text-slate-200">Configuração de Página (Margens)</h3>
+        <button onclick="fecharModalMargens()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="text-slate-400 block mb-1">Superior (cm):</label><input type="number" id="m-sup" value="2.5" class="w-full bg-[#18191b] border border-slate-700 p-2 rounded text-white font-mono"></div>
+        <div><label class="text-slate-400 block mb-1">Esquerda (cm):</label><input type="number" id="m-esq" value="2.5" class="w-full bg-[#18191b] border border-slate-700 p-2 rounded text-white font-mono"></div>
+        <div><label class="text-slate-400 block mb-1">Inferior (cm):</label><input type="number" id="m-inf" value="2.5" class="w-full bg-[#18191b] border border-slate-700 p-2 rounded text-white font-mono"></div>
+        <div><label class="text-slate-400 block mb-1">Direita (cm):</label><input type="number" id="m-dir" value="2.5" class="w-full bg-[#18191b] border border-slate-700 p-2 rounded text-white font-mono"></div>
+      </div>
+      <button onclick="salvarMargensModal()" class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-2 rounded text-white">OK (Aplicar Margens)</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://iivgusjzerzqrdgctcvo.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpdmd1c2p6ZXJ6cXJkZ2N0Y3ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0Nzg5NzksImV4cCI6MjEwOTA1NDk3OX0.ewJXSEfaCRGOT9SKiggf6pbrieDNOPgdG39pEoRa5Qc';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let alunoAtualId = null;
+    let etapaMaxConcluida = 1;
+    let margensConfiguradas = false;
+    let estilosTitulosProntos = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      alunoAtualId = urlParams.get('id');
+      document.getElementById('aluno-identificacao').innerText = `Aluno: ${urlParams.get('nome') || 'Estudante'}`;
+    });
+
+    function tentarTrocarEtapa(n) {
+      if (n > etapaMaxConcluida) return alert(`⚠️ Conclua a Etapa ${etapaMaxConcluida} primeiro!`);
+      carregarEtapa(n);
+    }
+
+    function carregarEtapa(n) {
+      for (let i = 1; i <= 3; i++) {
+        const sec = document.getElementById(`etapa-${i}`);
+        const btn = document.getElementById(`btn-etapa-${i}`);
+        if (sec) sec.classList.toggle('hidden', i !== n);
+        if (btn) {
+          const liberado = i <= etapaMaxConcluida;
+          btn.className = i === n ? 'px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white transition' : liberado ? 'px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-slate-800 transition' : 'px-4 py-2 rounded-xl text-xs font-bold text-slate-400 opacity-50 cursor-not-allowed transition';
+        }
+      }
+    }
+
+    function abrirModalMargens() { document.getElementById('modal-margens').classList.remove('hidden'); }
+    function fecharModalMargens() { document.getElementById('modal-margens').classList.add('hidden'); }
+
+    function salvarMargensModal() {
+      const s = document.getElementById('m-sup').value;
+      const e = document.getElementById('m-esq').value;
+      const i = document.getElementById('m-inf').value;
+      const d = document.getElementById('m-dir').value;
+
+      if (s == 3 && e == 3 && i == 2 && d == 2) {
+        margensConfiguradas = true;
+        document.getElementById('indicador-margens').innerText = '✓ Margens ABNT Válidas: Superior 3cm | Esquerda 3cm | Inferior 2cm | Direita 2cm';
+        document.getElementById('indicador-margens').className = 'text-[10px] font-mono text-emerald-600 border-b border-emerald-300 pb-1 mb-2 font-bold';
+      } else {
+        alert('As margens ABNT devem ser: Superior 3cm, Esquerda 3cm, Inferior 2cm, Direita 2cm.');
+      }
+      fecharModalMargens();
+    }
+
+    function validarEtapa1() {
+      const fonte = document.getElementById('sel-fonte').value;
+      const tam = document.getElementById('sel-tam').value;
+      const esp = document.getElementById('sel-espacamento').value;
+      const doc = document.getElementById('folha-a4-simulada');
+      const fb = document.getElementById('feedback-e1');
+
+      doc.style.fontFamily = fonte;
+      doc.style.fontSize = tam + 'px';
+
+      if ((fonte === 'Arial' || fonte === 'Times New Roman') && tam == 12 && esp === '1.5' && margensConfiguradas) {
+        fb.innerText = '✓ Excelente! Documento formatado nas normas ABNT de margens e tipografia.';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 2);
+        setTimeout(() => carregarEtapa(2), 1200);
+      } else {
+        fb.innerText = '⚠️ Verifique se as margens estão (3-3-2-2), fonte Arial/Times 12pt e espaçamento 1.5!';
+        fb.className = 'text-xs font-bold text-amber-400 text-center';
+      }
+    }
+
+    function aplicarEstiloTitulo(tipo) {
+      if (tipo === 'titulo1') {
+        document.getElementById('bloco-t1').className = 'font-bold text-sm text-blue-700 uppercase tracking-wide border-b border-blue-200 pb-1';
+      } else {
+        document.getElementById('bloco-t2').className = 'font-bold text-xs text-indigo-700 pl-3 border-l-2 border-indigo-500';
+      }
+      estilosTitulosProntos = true;
+    }
+
+    function gerarSumarioAutomatico() {
+      const fb = document.getElementById('feedback-e2');
+      if (estilosTitulosProntos) {
+        document.getElementById('area-sumario-dinamico').classList.remove('hidden');
+        fb.innerText = '✓ Sumário Automático gerado a partir dos estilos de título!';
+        fb.className = 'text-xs font-bold text-emerald-400 text-center';
+        etapaMaxConcluida = Math.max(etapaMaxConcluida, 3);
+        setTimeout(() => carregarEtapa(3), 1200);
+      } else {
+        fb.innerText = '⚠️ Aplique os estilos de Título 1 e Título 2 antes de gerar o sumário!';
+        fb.className = 'text-xs font-bold text-amber-400 text-center';
+      }
+    }
+
+    function aplicarRecuoCitacao() {
+      const c = document.getElementById('bloco-citacao-longa');
+      c.className = 'ml-12 p-3 bg-slate-100 text-slate-800 border-l-4 border-blue-600 text-[10px] leading-tight italic font-mono';
+    }
+
+    function inserirNotaRodape() {
+      document.getElementById('ref-num-rodape').classList.remove('hidden');
+      document.getElementById('area-nota-rodape').classList.remove('hidden');
+    }
+
+    function finalizarModulo10() {
+      const fb = document.getElementById('feedback-e3');
+      fb.innerText = '🏆 PARABÉNS! Você dominou o Google Docs e a formatação ABNT!';
+      fb.className = 'text-xs font-bold text-emerald-400 text-center';
+      salvarProgressoSupabase('Modulo10-escritor_abnt', 3, 3, 120, 'concluido');
+    }
+
+    async function salvarProgressoSupabase(mod, etapa, total, tempo, status) {
+      if (!alunoAtualId) return;
+      await _supabase.from('se_progresso').upsert([{ aluno_id: alunoAtualId, modulo_id: mod, etapa_atual: etapa, total_etapas: total, tempo_segundos: tempo, status: status, updated_at: new Date().toISOString() }], { onConflict: 'aluno_id, modulo_id' });
+    }
+  </script>
+</body>
+</html>
